@@ -123,25 +123,37 @@ void applyErosion() {
 
 void computeFlows()
 {
+	int L;
+	int R;
+	int B;
+	int T;
+
+	int hL;
+	int hR;
+	int hB;
+	int hT;
+
+	float K = 1;
+
 	for (int i : xVec) {
 		for (int j : yVec) {
 
-			int L = j * SCREEN_WIDTH + i;
-			int R = j * SCREEN_WIDTH + i + 1;
-			int B = j * SCREEN_WIDTH + i + 2;
-			int T = j * SCREEN_WIDTH + i + 3;
+			L = j * SCREEN_WIDTH + i;
+			R = j * SCREEN_WIDTH + i + 1;
+			B = j * SCREEN_WIDTH + i + 2;
+			T = j * SCREEN_WIDTH + i + 3;
 
-			int hL = (i != 0) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i - 1, j] - waterLvls[i - 1, j] : 0;
-			int hR = (i != SCREEN_WIDTH - 1) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i + 1, j] - waterLvls[i + 1, j] : 0;
-			int hB = (j != 0) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i, j - 1] - waterLvls[i, j - 1] : 0;
-			int hT = (i != SCREEN_HEIGHT - 1) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i, j + 1] - waterLvls[i, j + 1] : 0;
+			hL = (i != 0) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i - 1, j] - waterLvls[i - 1, j] : 0;
+			hR = (i != SCREEN_WIDTH - 1) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i + 1, j] - waterLvls[i + 1, j] : 0;
+			hB = (j != 0) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i, j - 1] - waterLvls[i, j - 1] : 0;
+			hT = (i != SCREEN_HEIGHT - 1) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i, j + 1] - waterLvls[i, j + 1] : 0;
 
 			waterFlows[L] = std::max(0.f, waterFlows[L]) + pipeConst * hL;
 			waterFlows[R] = std::max(0.f, waterFlows[R]) + pipeConst * hR;
 			waterFlows[B] = std::max(0.f, waterFlows[B]) + pipeConst * hB;
 			waterFlows[T] = std::max(0.f, waterFlows[T]) + pipeConst * hT;
 
-			float K = std::min(1.f, waterLvls[i, j] / (waterFlows[L] + waterFlows[R] + waterFlows[B] + waterFlows[T]));
+			K = std::min(1.f, waterLvls[i, j] / (waterFlows[L] + waterFlows[R] + waterFlows[B] + waterFlows[T]));
 
 			waterFlows[L] *= K;
 			waterFlows[R] *= K;
