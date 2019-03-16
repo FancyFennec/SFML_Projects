@@ -1,0 +1,8 @@
+﻿  PerlinNoise.cpp
+c:\users\jonasallemann\desktop\learnings\cpp\sfmlbasic\perlinnoise\perlinnoise.cpp(51): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+  Generating code
+  2 of 198 functions ( 1.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  PerlinNoise.vcxproj -> C:\Users\JonasAllemann\Desktop\Learnings\CPP\SFMLBasic\x64\Release\PerlinNoise.exe
