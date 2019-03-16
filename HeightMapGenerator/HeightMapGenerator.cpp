@@ -49,6 +49,8 @@ void paintPixelsWithMouse();
 void averagePixels();
 bool isPowerOf2Plus1(int a);
 
+
+
 int noise = 1;
 
 

@@ -1,10 +1,11 @@
 ﻿  HeightMapGenerator.cpp
-c:\users\jonasallemann\desktop\learnings\cpp\sfmlbasic\heightmapgenerator\heightmapgenerator.cpp(26): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\jonasallemann\desktop\learnings\cpp\sfmlbasic\heightmapgenerator\heightmapgenerator.cpp(65): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-c:\users\jonasallemann\desktop\learnings\cpp\sfmlbasic\heightmapgenerator\heightmapgenerator.cpp(149): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+c:\users\jonas\desktop\cpp\terraingenerator\heightmapgenerator\heightmapgenerator.cpp(26): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\users\jonas\desktop\cpp\terraingenerator\heightmapgenerator\heightmapgenerator.cpp(65): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\jonas\desktop\cpp\terraingenerator\heightmapgenerator\heightmapgenerator.cpp(149): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
   Generating code
-  2 of 117 functions ( 1.7%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
+c:\users\jonas\desktop\cpp\terraingenerator\heightmapgenerator\heightmapgenerator.cpp(457): warning C4715: 'isPowerOf2Plus1': not all control paths return a value
+  112 of 117 functions (95.7%) were compiled, the rest were copied from previous compilation.
+    9 functions were new in current compilation
     0 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  HeightMapGenerator.vcxproj -> C:\Users\JonasAllemann\Desktop\Learnings\CPP\SFMLBasic\x64\Release\HeightMapGenerator.exe
+  HeightMapGenerator.vcxproj -> C:\Users\Jonas\Desktop\CPP\TerrainGenerator\x64\Release\HeightMapGenerator.exe

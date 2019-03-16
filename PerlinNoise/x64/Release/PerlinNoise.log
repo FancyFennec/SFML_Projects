@@ -1,8 +1,12 @@
 ﻿  PerlinNoise.cpp
-c:\users\jonasallemann\desktop\learnings\cpp\sfmlbasic\perlinnoise\perlinnoise.cpp(51): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\jonas\desktop\cpp\terraingenerator\perlinnoise\perlinnoise.cpp(76): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\jonas\desktop\cpp\terraingenerator\perlinnoise\perlinnoise.cpp(135): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\jonas\desktop\cpp\terraingenerator\perlinnoise\perlinnoise.cpp(136): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\jonas\desktop\cpp\terraingenerator\perlinnoise\perlinnoise.cpp(137): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+c:\users\jonas\desktop\cpp\terraingenerator\perlinnoise\perlinnoise.cpp(138): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
   Generating code
-  2 of 198 functions ( 1.0%) were compiled, the rest were copied from previous compilation.
+  2 of 235 functions ( 0.9%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
-  PerlinNoise.vcxproj -> C:\Users\JonasAllemann\Desktop\Learnings\CPP\SFMLBasic\x64\Release\PerlinNoise.exe
+  PerlinNoise.vcxproj -> C:\Users\Jonas\Desktop\CPP\TerrainGenerator\x64\Release\PerlinNoise.exe
