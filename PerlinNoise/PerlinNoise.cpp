@@ -51,6 +51,7 @@ float seds[SCREEN_WIDTH * SCREEN_HEIGHT] = { 0 };
 // Functions
 void applyPerlinNoise();
 void applyErosion();
+void computeVelos();
 void computeFlows();
 void addRain();
 bool isPowerOf2Plus1(int a);
@@ -113,10 +114,66 @@ void applyErosion() {
 			addRain();
 			std::cout << "Adding Rain.\n";
 			computeFlows();
+			std::cout << "Computing velocity vectors.\n";
+
+			computeVelos();
+
+
 			
 			std::cout << "Erosion computed.\n";
 			qWasPressed = false;
 			sWasPressed = true;
+		}
+	}
+}
+
+void computeVelos()
+{
+	float V;
+	float Wx;
+	float Wy;
+	float newWaterlvl;
+
+	int L;
+	int R;
+	int B;
+	int T;
+
+	int fL;
+	int fR;
+	int fB;
+	int fT;
+
+	for (int i : xVec) {
+		for (int j : yVec) {
+			V = 0;
+
+			L = 4 * (j * SCREEN_WIDTH + i);
+			R = 4 * (j * SCREEN_WIDTH + i) + 1;
+			B = 4 * (j * SCREEN_WIDTH + i) + 2;
+			T = 4 * (j * SCREEN_WIDTH + i) + 3;
+
+			fL = 4 * (j * SCREEN_WIDTH + i + 1);;
+			fR = 4 * (j * SCREEN_WIDTH + i - 1) + 1;
+			fB = 4 * (j * SCREEN_WIDTH + i + 1) + 2;
+			fT = 4 * (j * SCREEN_WIDTH + i - 1) + 3;
+
+			V += (i != 0) ? waterFlows[fL] : 0;
+			V += (i != SCREEN_WIDTH - 1) ? waterFlows[fR] : 0;
+			V += (j != 0) ? waterFlows[fT] : 0;
+			V += (i != SCREEN_HEIGHT - 1) ? waterFlows[fB] : 0;
+
+			V -= waterFlows[L] + waterFlows[R] + waterFlows[B] + waterFlows[T];
+
+			newWaterlvl = waterLvls[j * SCREEN_WIDTH + i] + V;
+
+			velFields[j * SCREEN_WIDTH + i] = ((i != SCREEN_WIDTH - 1) ? waterFlows[fR] : 0) - waterFlows[L] + waterFlows[R] - ((i != 0) ? waterFlows[fL] : 0);
+			velFields[j * SCREEN_WIDTH + i + 1] = ((i != SCREEN_HEIGHT - 1) ? waterFlows[fB] : 0) - waterFlows[T] + waterFlows[B] - ((j != 0) ? waterFlows[fT] : 0);
+
+			velFields[j * SCREEN_WIDTH + i] /= (newWaterlvl + waterLvls[j * SCREEN_WIDTH + i]) / 2;
+			velFields[j * SCREEN_WIDTH + i + 1] /= (newWaterlvl + waterLvls[j * SCREEN_WIDTH + i]) / 2;
+
+			waterLvls[j * SCREEN_WIDTH + i] = newWaterlvl;
 		}
 	}
 }
@@ -138,15 +195,15 @@ void computeFlows()
 	for (int i : xVec) {
 		for (int j : yVec) {
 
-			L = j * SCREEN_WIDTH + i;
-			R = j * SCREEN_WIDTH + i + 1;
-			B = j * SCREEN_WIDTH + i + 2;
-			T = j * SCREEN_WIDTH + i + 3;
+			L = 4 * (j * SCREEN_WIDTH + i);
+			R = 4 * (j * SCREEN_WIDTH + i) + 1;
+			B = 4 * (j * SCREEN_WIDTH + i) + 2;
+			T = 4 * (j * SCREEN_WIDTH + i) + 3;
 
-			hL = (i != 0) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i - 1, j] - waterLvls[i - 1, j] : 0;
-			hR = (i != SCREEN_WIDTH - 1) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i + 1, j] - waterLvls[i + 1, j] : 0;
-			hB = (j != 0) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i, j - 1] - waterLvls[i, j - 1] : 0;
-			hT = (i != SCREEN_HEIGHT - 1) ? pNoiseValues[i, j] + waterLvls[i, j] - pNoiseValues[i, j + 1] - waterLvls[i, j + 1] : 0;
+			hL = (i != 0) ? pNoiseValues[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - pNoiseValues[j * SCREEN_WIDTH + i -1] - waterLvls[j * SCREEN_WIDTH + i -1] : 0;
+			hR = (i != SCREEN_WIDTH - 1) ? pNoiseValues[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - pNoiseValues[j * SCREEN_WIDTH + i + 1] - waterLvls[j * SCREEN_WIDTH + i + 1] : 0;
+			hB = (j != 0) ? pNoiseValues[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - pNoiseValues[(j - 1) * SCREEN_WIDTH + i] - waterLvls[(j - 1) * SCREEN_WIDTH + i] : 0;
+			hT = (i != SCREEN_HEIGHT - 1) ? pNoiseValues[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - pNoiseValues[(j + 1) * SCREEN_WIDTH + i] - waterLvls[(j + 1) * SCREEN_WIDTH + i] : 0;
 
 			waterFlows[L] = std::max(0.f, waterFlows[L]) + pipeConst * hL;
 			waterFlows[R] = std::max(0.f, waterFlows[R]) + pipeConst * hR;
@@ -168,7 +225,7 @@ void addRain()
 	for (int i : xVec) {
 		for (int j : yVec) {
 			if (uniformDist(engine) < 5) {
-				waterLvls[i, j]++;
+				waterLvls[j * SCREEN_WIDTH + i]++;
 			}
 		}
 	}
