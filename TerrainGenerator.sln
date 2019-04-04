@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RandomNumberGenerator", "Ra
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PerlinNoise", "PerlinNoise\PerlinNoise.vcxproj", "{7E021F7F-B847-42EE-ABA6-1D1B1308D95F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mandelbrot", "Mandelbrot\Mandelbrot.vcxproj", "{EFCBFAF2-6F74-481A-8962-F346556CB30B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{7E021F7F-B847-42EE-ABA6-1D1B1308D95F}.Release|x64.Build.0 = Release|x64
 		{7E021F7F-B847-42EE-ABA6-1D1B1308D95F}.Release|x86.ActiveCfg = Release|Win32
 		{7E021F7F-B847-42EE-ABA6-1D1B1308D95F}.Release|x86.Build.0 = Release|Win32
+		{EFCBFAF2-6F74-481A-8962-F346556CB30B}.Debug|x64.ActiveCfg = Debug|x64
+		{EFCBFAF2-6F74-481A-8962-F346556CB30B}.Debug|x64.Build.0 = Debug|x64
+		{EFCBFAF2-6F74-481A-8962-F346556CB30B}.Debug|x86.ActiveCfg = Debug|Win32
+		{EFCBFAF2-6F74-481A-8962-F346556CB30B}.Debug|x86.Build.0 = Debug|Win32
+		{EFCBFAF2-6F74-481A-8962-F346556CB30B}.Release|x64.ActiveCfg = Release|x64
+		{EFCBFAF2-6F74-481A-8962-F346556CB30B}.Release|x64.Build.0 = Release|x64
+		{EFCBFAF2-6F74-481A-8962-F346556CB30B}.Release|x86.ActiveCfg = Release|Win32
+		{EFCBFAF2-6F74-481A-8962-F346556CB30B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

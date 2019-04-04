@@ -46,14 +46,19 @@ float waterLvls[SCREEN_WIDTH * SCREEN_HEIGHT] = { 0 };
 float waterFlows[SCREEN_WIDTH * SCREEN_HEIGHT * 4] = { 0 };
 float velFields[SCREEN_WIDTH * SCREEN_HEIGHT * 2] = { 0 };
 float transpCap[SCREEN_WIDTH * SCREEN_HEIGHT] = { 0 };
+float terrain[SCREEN_WIDTH * SCREEN_HEIGHT] = { 0 };
 float seds[SCREEN_WIDTH * SCREEN_HEIGHT] = { 0 };
 
 // Functions
 void applyPerlinNoise();
 void applyErosion();
+void computeErosion();
+void initialiseTerrain();
 void computeVelos();
 void computeFlows();
 void addRain();
+float tilt(int &i, int &j);
+float abs(float &a, float &b);
 bool isPowerOf2Plus1(int a);
 void initialisePixels();
 void saveImage();
@@ -62,7 +67,7 @@ void drawImage(sf::Sprite &sprite);
 
 int main()
 {
-	
+
 	//initialize loop vectors
 	std::iota(xVec.begin(), xVec.end(), 0);
 	std::iota(yVec.begin(), yVec.end(), 0);
@@ -105,24 +110,143 @@ int main()
 }
 
 void applyErosion() {
+
 	if (event.type == sf::Event::KeyReleased) {
 		if (event.key.code == sf::Keyboard::E && !eWasPressed) {
+
 			std::cout << "Computing Erosion.\n";
 			eWasPressed = true;
 
-			std::cout << "Adding Rain.\n";
-			addRain();
-			std::cout << "Adding Rain.\n";
-			computeFlows();
-			std::cout << "Computing velocity vectors.\n";
-
-			computeVelos();
-
-
+			std::cout << "Initialising Terrain.\n";
+			initialiseTerrain();
+			for (int i = 0; i < 1; i++) {
+				//std::cout << "Adding Rain.\n";
+				addRain();
+				//std::cout << "Computing Flow.\n";
+				computeFlows();
+				//std::cout << "Computing velocity vectors.\n";
+				computeVelos();
+				//std::cout << "Computing Erosion and Decomposition.\n";
+				computeErosion();
+			}
+			for (int i = 0; i < 1; i++) {
+				computeFlows();
+				//std::cout << "Computing velocity vectors.\n";
+				computeVelos();
+				//std::cout << "Computing Erosion and Decomposition.\n";
+				computeErosion();
+			}
 			
 			std::cout << "Erosion computed.\n";
+			std::cout << "Updating pixel values.\n";
+
+			int max = -25500;
+			int min = 25500;
+			float newValue;
+
+			for (int i : xVec) {
+				for (int j : yVec) {
+					newValue = (int)std::floor(terrain[j * SCREEN_WIDTH + i] + seds[j * SCREEN_WIDTH + i]);
+
+					if (newValue > max) {
+						max = pNoiseValues[i * SCREEN_WIDTH + j];
+					}
+					if (newValue < min) {
+						min = pNoiseValues[i * SCREEN_WIDTH + j];
+					}
+
+					pNoiseValues[j * SCREEN_WIDTH + i] = newValue;
+				}
+			}
+
+			
+			int value;
+			sf::Uint8 pixelValue;
+
+			for (int i = 0; i < SCREEN_HEIGHT; ++i) {
+				for (int j = 0; j < SCREEN_WIDTH; ++j) {
+
+					value = 255 * ((pNoiseValues[i * SCREEN_WIDTH + j] - min) / (max - min));
+					value = floor(value);
+					pixelValue = (sf::Uint8) std::min(255, std::max(0, (int)value));
+
+					pixels[(i * SCREEN_WIDTH + j) * 4] = pixelValue;
+					pixels[(i * SCREEN_WIDTH + j) * 4 + 1] = pixelValue;
+					pixels[(i * SCREEN_WIDTH + j) * 4 + 2] = pixelValue;
+				}
+			}
+
+			std::cout << "Pixels updated.\n";
+
 			qWasPressed = false;
 			sWasPressed = true;
+		}
+	}
+}
+
+void computeErosion()
+{
+	float C;
+	float Kc = 1.f;
+	float Ks = 1.f;
+	float Kd = 0.5f;
+
+	for (int i : xVec) {
+		for (int j : yVec) {
+			
+			// Only desolve terrain if there is water
+			if (waterLvls[j*SCREEN_WIDTH + i] > 0.1) {
+				C = Kc * tilt(i, j) * abs(velFields[j * SCREEN_WIDTH + i], velFields[j * SCREEN_WIDTH + i + 1]);
+
+				terrain[j*SCREEN_WIDTH + i] = terrain[j*SCREEN_WIDTH + i] - Kc * (C - seds[j*SCREEN_WIDTH + i]);
+				seds[j*SCREEN_WIDTH + i] = seds[j*SCREEN_WIDTH + i] + Kc * (C - seds[j*SCREEN_WIDTH + i]);
+
+				int newY = (j - (int)velFields[j*SCREEN_WIDTH + i + 1]);
+				int newX = (i - (int)velFields[j*SCREEN_WIDTH + i]);
+
+				if ((0 <= newY && newY < SCREEN_HEIGHT) && (0 <=  newX && newX < SCREEN_WIDTH)) {
+
+					/*std::cout << newY << " " << newX << "\n";*/
+					seds[j * SCREEN_WIDTH + i] = seds[newY * SCREEN_WIDTH + newX];
+				}
+			}
+
+			waterLvls[j*SCREEN_WIDTH + i] = j * SCREEN_WIDTH + i * (1 - Kd);
+		}
+	}
+}
+
+float tilt(int &i, int &j) {
+	float tL = (i != 0) ? terrain[j * SCREEN_WIDTH + (i - 1)] - terrain[j * SCREEN_WIDTH + i] : 0;
+	float tR = (i != SCREEN_WIDTH) ? terrain[j * SCREEN_WIDTH + (i + 1)] - terrain[j * SCREEN_WIDTH + i] : 0;
+	float tB = (j != 0) ? terrain[(j - 1) * SCREEN_WIDTH + i] - terrain[j * SCREEN_WIDTH + i] : 0;
+	float tT = (j != SCREEN_HEIGHT) ? terrain[(j + 1) * SCREEN_WIDTH + i] - terrain[j * SCREEN_WIDTH + i] : 0;
+
+	return std::max({ sqrt(1. / (1. + tL * tL)), sqrt(1. / (1. + tL * tR)), sqrt(1. / (1. + tL * tB)), sqrt(1. / (1. + tL * tT)) });
+}
+
+float abs(float &a, float &b) {
+	return sqrt(a * a + b * b);
+}
+
+void initialiseTerrain()
+{
+	float min = 255;
+	float max = 0;
+
+	for (int i : xVec) {
+		for (int j : yVec) {
+			if (pNoiseValues[j * SCREEN_WIDTH + i] < min) {
+				min = (float)pNoiseValues[j * SCREEN_WIDTH + i];
+			}if (pNoiseValues[j * SCREEN_WIDTH + i] > max) {
+				max = (float)pNoiseValues[j * SCREEN_WIDTH + i];
+			}
+		}
+	}
+
+	for (int i : xVec) {
+		for (int j : yVec) {
+			terrain[j * SCREEN_WIDTH + i] = 255 * ((float)pNoiseValues[j * SCREEN_WIDTH + i] - min) / (max-min);
 		}
 	}
 }
@@ -200,10 +324,10 @@ void computeFlows()
 			B = 4 * (j * SCREEN_WIDTH + i) + 2;
 			T = 4 * (j * SCREEN_WIDTH + i) + 3;
 
-			hL = (i != 0) ? pNoiseValues[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - pNoiseValues[j * SCREEN_WIDTH + i -1] - waterLvls[j * SCREEN_WIDTH + i -1] : 0;
-			hR = (i != SCREEN_WIDTH - 1) ? pNoiseValues[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - pNoiseValues[j * SCREEN_WIDTH + i + 1] - waterLvls[j * SCREEN_WIDTH + i + 1] : 0;
-			hB = (j != 0) ? pNoiseValues[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - pNoiseValues[(j - 1) * SCREEN_WIDTH + i] - waterLvls[(j - 1) * SCREEN_WIDTH + i] : 0;
-			hT = (i != SCREEN_HEIGHT - 1) ? pNoiseValues[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - pNoiseValues[(j + 1) * SCREEN_WIDTH + i] - waterLvls[(j + 1) * SCREEN_WIDTH + i] : 0;
+			hL = (i != 0) ? terrain[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - terrain[j * SCREEN_WIDTH + i -1] - waterLvls[j * SCREEN_WIDTH + i -1] : 0;
+			hR = (i != SCREEN_WIDTH - 1) ? terrain[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - terrain[j * SCREEN_WIDTH + i + 1] - waterLvls[j * SCREEN_WIDTH + i + 1] : 0;
+			hB = (j != 0) ? terrain[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - terrain[(j - 1) * SCREEN_WIDTH + i] - waterLvls[(j - 1) * SCREEN_WIDTH + i] : 0;
+			hT = (i != SCREEN_HEIGHT - 1) ? terrain[j * SCREEN_WIDTH + i] + waterLvls[j * SCREEN_WIDTH + i] - terrain[(j + 1) * SCREEN_WIDTH + i] - waterLvls[(j + 1) * SCREEN_WIDTH + i] : 0;
 
 			waterFlows[L] = std::max(0.f, waterFlows[L]) + pipeConst * hL;
 			waterFlows[R] = std::max(0.f, waterFlows[R]) + pipeConst * hR;
