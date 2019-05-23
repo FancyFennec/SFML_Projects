@@ -8,8 +8,8 @@ const int sideLength = 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 * 2 + 1;
 const int SCREEN_WIDTH = sideLength;
 const int SCREEN_HEIGHT = sideLength;
 
-sf::Texture texture = sf::Texture();
-sf::Sprite sprite = sf::Sprite(texture);
+sf::Texture background = sf::Texture();
+sf::Sprite backgroundImage = sf::Sprite(background);
 
 sf::Uint8 pixels[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
 sf::Uint8 newPixels[SCREEN_HEIGHT * SCREEN_WIDTH] = { 0 };
@@ -65,8 +65,8 @@ int main()
 	}
 
 	srand(time(NULL));
-	texture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
-	sf::Sprite sprite(texture);
+	background.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	sf::Sprite sprite(background);
 	
 
 	for (int i = 0; i < SCREEN_HEIGHT * SCREEN_WIDTH * 4; i += 4) {
@@ -128,13 +128,13 @@ int main()
 			if (event.key.code == sf::Keyboard::P && !pWasPressed) {
 				pWasPressed = true;
 				std::cout << "Saving Image. \n";
-				texture.copyToImage().saveToFile("C:/Users/JonasAllemann/Desktop/Learnings/Blender/RandomTests/smoothNoise.png");
+				background.copyToImage().saveToFile("C:/Users/JonasAllemann/Desktop/Learnings/Blender/RandomTests/smoothNoise.png");
 				qWasPressed = false;
 			}
 		}
 
-		texture.update(pixels);
-		sprite.setTexture(texture);
+		background.update(pixels);
+		sprite.setTexture(background);
 		window.draw(sprite);
 
 		window.display();

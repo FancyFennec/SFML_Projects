@@ -31,8 +31,8 @@ std::uniform_int_distribution<int> uniformDist(0, 9);
 // Perlin Noise 
 double pNoiseValues[SCREEN_WIDTH * SCREEN_HEIGHT];
 sf::Uint8 pixels[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
-sf::Texture texture = sf::Texture();
-sf::Sprite sprite = sf::Sprite(texture);
+sf::Texture background = sf::Texture();
+sf::Sprite backgroundImage = sf::Sprite(background);
 
 // Erosion Simulation
 std::vector<int> xVec(SCREEN_WIDTH, 0);
@@ -80,8 +80,8 @@ int main()
 	}
 
 	srand(time(NULL));
-	texture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
-	sf::Sprite sprite(texture);
+	background.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	sf::Sprite sprite(background);
 
 
 	initialisePixels();
@@ -412,8 +412,8 @@ void applyPerlinNoise()
 
 void drawImage(sf::Sprite &sprite)
 {
-	texture.update(pixels);
-	sprite.setTexture(texture);
+	background.update(pixels);
+	sprite.setTexture(background);
 	window.draw(sprite);
 }
 
@@ -423,7 +423,7 @@ void saveImage()
 		if (event.key.code == sf::Keyboard::S && !sWasPressed) {
 			sWasPressed = true;
 			std::cout << "Saving Image. \n";
-			texture.copyToImage().saveToFile("C:/Users/JonasAllemann/Desktop/Learnings/Blender/RandomTests/perliNoiseTest.png");
+			background.copyToImage().saveToFile("C:/Users/JonasAllemann/Desktop/Learnings/Blender/RandomTests/perliNoiseTest.png");
 
 			qWasPressed = false;
 			eWasPressed = false;

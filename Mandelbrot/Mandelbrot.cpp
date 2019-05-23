@@ -12,8 +12,8 @@ double x = -0.5, y = 0;
 int nZoom = 0;
 int iterations = 1000;
 
-sf::Texture texture = sf::Texture();
-sf::Sprite sprite = sf::Sprite(texture);
+sf::Texture background = sf::Texture();
+sf::Sprite backgroundImage = sf::Sprite(background);
 
 sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot");
 sf::Event event;
@@ -27,8 +27,8 @@ void eventHandling();
 int main()
 {
 	window.setFramerateLimit(60);
-	texture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
-	sf::Sprite sprite(texture);
+	background.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	sf::Sprite sprite(background);
 
 	initialisePixels();
 
@@ -70,7 +70,7 @@ void eventHandling()
 	if (event.type == sf::Event::KeyPressed) {
 		if (event.key.code == sf::Keyboard::S) {
 			std::cout << "Saving Image. \n";
-			texture.copyToImage().saveToFile("C:/Users/JonasAllemann/MandelBrot.png");
+			background.copyToImage().saveToFile("C:/Users/JonasAllemann/MandelBrot.png");
 
 		}
 	}
@@ -119,8 +119,8 @@ int getCoords(int i, int j) {
 
 void drawImage(sf::Sprite &sprite)
 {
-	texture.update(pixels);
-	sprite.setTexture(texture);
+	background.update(pixels);
+	sprite.setTexture(background);
 	window.draw(sprite);
 }
 
