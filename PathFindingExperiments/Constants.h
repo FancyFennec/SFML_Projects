@@ -1,9 +1,10 @@
 #pragma once
+
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <fstream>
 
-const int FRAMERATE = 40;
+const int FRAMERATE = 120;
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;

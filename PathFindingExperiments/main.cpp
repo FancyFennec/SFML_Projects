@@ -1,4 +1,4 @@
-#include "GameObject.h"
+#include "DrawableObject.h"
 
 sf::Uint8 pixels[PIXELS];
 char tiles[TILES_WIDTH][TILES_HEIGHT];
@@ -16,12 +16,12 @@ sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot"
 sf::Event event;
 
 bool lMousePressed = false;
-std::vector <GameObject> gameObjects;
+std::vector <DrawableObject> drawables;
 
 void initialiseTiles();
 void initialisePixels();
 void initializeButton();
-void initializeText(); // Not used right now
+void initializeText();
 void eventHandling();
 void setTilePixels(const int &tileIndex, const sf::Color &color);
 void setPixelColor(const int &pixelIndex, const sf::Color &color);
@@ -57,9 +57,9 @@ int main() {
 		window.draw(buttonImage);
 		window.draw(buttonText);
 
-		/*for (GameObject go : gameObjects) {
-			go.drawGameObject(window);
-		}*/
+		for (DrawableObject drawable : drawables) {
+			drawable.draw(window);
+		}
 
 		window.display();
 	}
@@ -192,8 +192,9 @@ void eventHandling()
 		}
 		else if (event.mouseButton.button == sf::Mouse::Right)
 		{
-			gameObjects.push_back(GameObject(mousePos));
-			std::cout << gameObjects.size() << "\n";
+			DrawableObject drawable(sf::Vector2i((int)(mousePos.x / 10), (int)(mousePos.y / 10)));
+			drawables.push_back(drawable);
+			std::cout << drawable.pos.x << " " << drawable.pos.y << "\n";
 		}
 	}
 	break;
