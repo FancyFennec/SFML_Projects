@@ -4,7 +4,7 @@
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
 
-sf::Uint8 pixels[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
+sf::Uint8 pixls[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
 int coords[SCREEN_HEIGHT * SCREEN_WIDTH];
 sf::Vector2i mousePos;
 
@@ -96,10 +96,10 @@ void computeMandelbrot()
 			}
 
 			if (nIter <= iterations) {
-				pixels[getCoords(i, j)] = (int)(255 * nIter) / iterations;
+				pixls[getCoords(i, j)] = (int)(255 * nIter) / iterations;
 			}
 			else {
-				pixels[getCoords(i, j)] = 0;
+				pixls[getCoords(i, j)] = 0;
 			}
 
 		}
@@ -119,7 +119,7 @@ int getCoords(int i, int j) {
 
 void drawImage(sf::Sprite &sprite)
 {
-	background.update(pixels);
+	background.update(pixls);
 	sprite.setTexture(background);
 	window.draw(sprite);
 }
@@ -127,9 +127,9 @@ void drawImage(sf::Sprite &sprite)
 void initialisePixels()
 {
 	for (int i = 0; i < SCREEN_HEIGHT * SCREEN_WIDTH * 4; i += 4) {
-		pixels[i] = 255;
-		pixels[i + 1] = 0;
-		pixels[i + 2] = 0;
-		pixels[i + 3] = 255;
+		pixls[i] = 255;
+		pixls[i + 1] = 0;
+		pixls[i + 2] = 0;
+		pixls[i + 3] = 255;
 	}
 }

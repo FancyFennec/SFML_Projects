@@ -1,17 +1,6 @@
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <SFML/Graphics.hpp>
 #include "GameObject.h"
 
-const int FRAMERATE = 40;
-
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 800;
-const int TILES_WIDTH = SCREEN_WIDTH/10;
-const int TILES_HEIGHT = SCREEN_HEIGHT/10;
-
-sf::Uint8 pixels[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
+sf::Uint8 pixels[PIXELS];
 char tiles[TILES_WIDTH][TILES_HEIGHT];
 int coords[SCREEN_HEIGHT * SCREEN_WIDTH];
 sf::Vector2i mousePos;
@@ -34,7 +23,7 @@ void initialisePixels();
 void initializeButton();
 void initializeText(); // Not used right now
 void eventHandling();
-void setTiles(const int &tileIndex, const sf::Color &color);
+void setTilePixels(const int &tileIndex, const sf::Color &color);
 void setPixelColor(const int &pixelIndex, const sf::Color &color);
 void drawImage(sf::Sprite &sprite);
 
@@ -67,6 +56,10 @@ int main() {
 		drawImage(sprite);
 		window.draw(buttonImage);
 		window.draw(buttonText);
+
+		/*for (GameObject go : gameObjects) {
+			go.drawGameObject(window);
+		}*/
 
 		window.display();
 	}
@@ -114,20 +107,20 @@ void initialisePixels()
 			switch (tiles[i][j])
 			{
 			case 'x':
-				setTiles(tileIndex, sf::Color::White);
+				setTilePixels(tileIndex, sf::Color::White);
 				break;
 			case 'r':
-				setTiles(tileIndex, sf::Color::Red);
+				setTilePixels(tileIndex, sf::Color::Red);
 				break;
 			default:
-				setTiles(tileIndex, sf::Color::Green);
+				setTilePixels(tileIndex, sf::Color::Green);
 				break;
 			}
 		}
 	}
 }
 
-void setTiles(const int &tileIndex, const sf::Color &color) {
+void setTilePixels(const int &tileIndex, const sf::Color &color) {
 	for (int k = 0; k < 10; k++) {
 		for (int l = 0; l < 10; l++) {
 			int pixelIndex = tileIndex + (k * SCREEN_WIDTH + l) * 4;
@@ -200,7 +193,7 @@ void eventHandling()
 		else if (event.mouseButton.button == sf::Mouse::Right)
 		{
 			gameObjects.push_back(GameObject(mousePos));
-			std::cout << gameObjects.size();
+			std::cout << gameObjects.size() << "\n";
 		}
 	}
 	break;
