@@ -1,9 +1,8 @@
-#include "DrawableObject.h"
+#include "EventHandler.h"
 
 sf::Uint8 pixels[PIXELS];
 char tiles[TILES_WIDTH][TILES_HEIGHT];
 int coords[SCREEN_HEIGHT * SCREEN_WIDTH];
-sf::Vector2i mousePos;
 
 sf::Texture background = sf::Texture();
 sf::Sprite backgroundImage = sf::Sprite(background);
@@ -13,9 +12,8 @@ sf::Text buttonText;
 sf::Font font;
 
 sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot");
-sf::Event event;
+EventHandler eventHandler;
 
-bool lMousePressed = false;
 std::vector <DrawableObject> drawables;
 
 void initialiseTiles();
@@ -40,20 +38,16 @@ int main() {
 
 	while (window.isOpen())
 	{
-		while (window.pollEvent(event))
+		while (window.pollEvent(eventHandler.event))
 		{
-			eventHandling();
-			if (lMousePressed) {
-				tiles[(int)(mousePos.x / 10)][(int)(mousePos.y / 10)] = 'r';
-			}
+			eventHandler.handleEvents(window, drawables, tiles, buttonImage);
 		}
 
 		window.clear();
 
-
 		initialisePixels();
-
 		drawImage(sprite);
+
 		window.draw(buttonImage);
 		window.draw(buttonText);
 
@@ -92,7 +86,7 @@ void initializeText() {
 
 	buttonText.setFont(font);
 	buttonText.setStyle(sf::Text::Bold);
-	buttonText.setString("Button");
+	buttonText.setString("Clear");
 	buttonText.setFillColor(sf::Color::Black);
 	buttonText.setCharacterSize(48);
 	buttonText.setPosition(7.0f, 10.0f);
@@ -153,65 +147,5 @@ void initialiseTiles()
 			i++;
 		}
 		myfile.close();
-	}
-}
-
-void eventHandling()
-{
-	switch (event.type)
-	{
-	case sf::Event::Closed:
-		window.close();
-		break;
-	case sf::Event::MouseMoved:
-	{
-		mousePos = sf::Mouse::getPosition(window);
-		sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-		if (buttonImage.getGlobalBounds().contains(mousePosF))
-		{
-			buttonImage.setColor(sf::Color(250, 50, 50));
-		}
-		else
-		{
-			buttonImage.setColor(sf::Color(255, 255, 255));
-		}
-	}
-	break;
-	case sf::Event::MouseButtonPressed:
-	{
-		mousePos = sf::Mouse::getPosition(window);
-		sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-		if (buttonImage.getGlobalBounds().contains(mousePosF))
-		{
-			std::cout << "Clicked, yay!" << std::endl;
-			
-		}
-		else if (event.mouseButton.button == sf::Mouse::Left) 
-		{
-			lMousePressed = true;
-		}
-		else if (event.mouseButton.button == sf::Mouse::Right)
-		{
-			DrawableObject drawable(sf::Vector2i((int)(mousePos.x / 10), (int)(mousePos.y / 10)));
-			drawables.push_back(drawable);
-			std::cout << drawable.pos.x << " " << drawable.pos.y << "\n";
-		}
-	}
-	break;
-	case sf::Event::MouseButtonReleased:
-	{
-		mousePos = sf::Mouse::getPosition(window);
-		sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
-		if (buttonImage.getGlobalBounds().contains(mousePosF))
-		{
-			std::cout << "Clicked, yay!" << std::endl;
-
-		}
-		else if (event.mouseButton.button == sf::Mouse::Left)
-		{
-			lMousePressed = false;
-		}
-	}
-	break;
 	}
 }

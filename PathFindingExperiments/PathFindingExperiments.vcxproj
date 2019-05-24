@@ -124,6 +124,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DrawableObject.cpp" />
+    <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +134,7 @@
   <ItemGroup>
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DrawableObject.h" />
+    <ClInclude Include="EventHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
