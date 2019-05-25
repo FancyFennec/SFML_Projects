@@ -142,6 +142,7 @@
     <Text Include="map.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="A_Star.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DrawableObject.h" />

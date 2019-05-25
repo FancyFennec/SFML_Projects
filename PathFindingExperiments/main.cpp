@@ -1,4 +1,5 @@
 #include "EventHandler.h"
+#include "A_Star.h"
 
 sf::Uint8 pixels[PIXELS];
 char tiles[TILES_WIDTH][TILES_HEIGHT];

@@ -119,6 +119,7 @@
     <ClCompile Include="TestClass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FunctionTest.h" />
     <ClInclude Include="TestClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
