@@ -48,4 +48,6 @@ DrawableObject::DrawableObject(sf::Vector2i pos)
 
 DrawableObject::~DrawableObject()
 {
+	delete[] pixels;
+	pixels = NULL;
 }

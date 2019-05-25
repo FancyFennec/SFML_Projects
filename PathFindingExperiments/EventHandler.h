@@ -2,6 +2,7 @@
 
 #include "Constants.h"
 #include "DrawableObject.h"
+#include "Button.h"
 
 class EventHandler
 {

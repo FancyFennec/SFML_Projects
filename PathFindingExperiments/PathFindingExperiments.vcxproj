@@ -132,6 +132,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Button.cpp" />
     <ClCompile Include="DrawableObject.cpp" />
     <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="main.cpp" />
@@ -141,6 +142,7 @@
     <Text Include="map.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Button.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="DrawableObject.h" />
     <ClInclude Include="EventHandler.h" />

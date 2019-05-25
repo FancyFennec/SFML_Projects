@@ -6,10 +6,8 @@ int coords[SCREEN_HEIGHT * SCREEN_WIDTH];
 
 sf::Texture background = sf::Texture();
 sf::Sprite backgroundImage = sf::Sprite(background);
-sf::Texture button;
-sf::Sprite buttonImage;
-sf::Text buttonText;
-sf::Font font;
+
+Button button("Button.png", "Clear");
 
 sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot");
 EventHandler eventHandler;
@@ -18,8 +16,7 @@ std::vector <DrawableObject> drawables;
 
 void initialiseTiles();
 void initialisePixels();
-void initializeButton();
-void initializeText();
+
 void eventHandling();
 void setTilePixels(const int &tileIndex, const sf::Color &color);
 void setPixelColor(const int &pixelIndex, const sf::Color &color);
@@ -33,23 +30,19 @@ int main() {
 
 	initialiseTiles();
 	initialisePixels();
-	initializeButton();
-	initializeText();
 
 	while (window.isOpen())
 	{
 		while (window.pollEvent(eventHandler.event))
 		{
-			eventHandler.handleEvents(window, drawables, tiles, buttonImage);
+			eventHandler.handleEvents(window, drawables, tiles, button.sprite);
 		}
 
 		window.clear();
 
 		initialisePixels();
 		drawImage(sprite);
-
-		window.draw(buttonImage);
-		window.draw(buttonText);
+		button.draw(window);
 
 		for (DrawableObject drawable : drawables) {
 			drawable.draw(window);
@@ -66,30 +59,6 @@ void drawImage(sf::Sprite &sprite)
 	background.update(pixels);
 	sprite.setTexture(background);
 	window.draw(sprite);
-}
-
-void initializeButton() {
-	if (!button.loadFromFile("Button.png"))
-		std::cout << "Can't find the image" << std::endl;
-	buttonImage.setPosition(0.0f, 0.0f);
-
-	float exitButtonWidth = buttonImage.getLocalBounds().width;
-	float exitButtonHeight = buttonImage.getLocalBounds().height;
-
-	buttonImage.setScale(0.2, 0.2);
-	buttonImage.setTexture(button);
-}
-
-void initializeText() {
-	if (!font.loadFromFile("arial.ttf"))
-		std::cout << "Can't find the font file" << std::endl;
-
-	buttonText.setFont(font);
-	buttonText.setStyle(sf::Text::Bold);
-	buttonText.setString("Clear");
-	buttonText.setFillColor(sf::Color::Black);
-	buttonText.setCharacterSize(48);
-	buttonText.setPosition(7.0f, 10.0f);
 }
 
 void initialisePixels()
