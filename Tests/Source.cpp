@@ -34,11 +34,16 @@ int main() {
 
 	std::cout << std::distance(vec.begin(), result) << "\n";
 
-	for(auto elem : filteredVec)
+	std::vector<TestClass>::iterator iter = std::find_if(vec.begin(), vec.end(), [](TestClass elem) {
+		return elem.number == 3; });
+
+	(*iter).number = 2;
+
+	for(auto elem : vec)
 		std::cout << "Logging filtered elements: " << "Count: " << elem.count << " Saved Number: " << elem.number << "\n";
 
-	/*std::cout << "Testing function call." << "\n";
-	std::cout << "Function returns:" << testFunction() << "\n";*/
+	std::cout << "Looking at returned iterator." << "\n";
+	std::cout << (*iter).number << "\n";
 
 	std::cin >> a;
 	return 0;
