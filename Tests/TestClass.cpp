@@ -8,6 +8,12 @@ TestClass::TestClass()
 	count++;
 }
 
+TestClass::TestClass(int i)
+{
+	number = i;
+	count++;
+}
+
 
 TestClass::~TestClass()
 {
