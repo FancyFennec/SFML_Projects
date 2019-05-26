@@ -56,6 +56,10 @@ void EventHandler::handleEvents(sf::Window &window, std::vector <DrawableObject>
 						tile = 'x';
 				}
 			}
+
+			//TODO: This is a stupid workaround for the memory leak -.-
+			for (DrawableObject drawable : drawables)
+				delete[] drawable.pixels;
 			drawables.clear();
 
 		}
@@ -65,8 +69,7 @@ void EventHandler::handleEvents(sf::Window &window, std::vector <DrawableObject>
 		}
 		else if (event.mouseButton.button == sf::Mouse::Right)
 		{
-			DrawableObject drawable(sf::Vector2i((int)(mousePos.x / 10), (int)(mousePos.y / 10)));
-			drawables.push_back(drawable);
+			drawables.push_back(DrawableObject(sf::Vector2i((int)(mousePos.x / 10), (int)(mousePos.y / 10))));
 		}
 	}
 	break;

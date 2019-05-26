@@ -33,12 +33,19 @@ void DrawableObject::setPixelColor(const int &pixelIndex) {
 
 DrawableObject::DrawableObject()
 {
+	this->pos = sf::Vector2i(0,0);
+	this->pixels = new sf::Uint8[PIXELS]();
+	this->color = sf::Color::Blue;
+
+	texture = sf::Texture();
+	texture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	sprite = sf::Sprite(texture);
 }
 
 DrawableObject::DrawableObject(sf::Vector2i pos)
 {
 	this->pos = pos;
-	this->pixels = new sf::Uint8[PIXELS];
+	this->pixels = new sf::Uint8[PIXELS]();
 	this->color = sf::Color::Blue;
 
 	texture = sf::Texture();
@@ -48,4 +55,5 @@ DrawableObject::DrawableObject(sf::Vector2i pos)
 
 DrawableObject::~DrawableObject()
 {
+	//free(pixels);
 }

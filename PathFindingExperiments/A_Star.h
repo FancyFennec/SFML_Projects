@@ -12,10 +12,12 @@ sf::Vector3i currentVertex;
 
 
 //Sceletons
-sf::Vector3i initialize(sf::Vector2i &start, sf::Vector2i &goal);
+void initialize(sf::Vector2i &start, sf::Vector2i &goal);
+sf::Vector3i step(sf::Vector2i &currentVertex);
 sf::Vector3i step(sf::Vector3i &currentVertex);
 void initializeH();
-sf::Vector3i nextSelectedVertex();
+sf::Vector3i findClosestVertex();
+sf::Vector3i nextVertex();
 void computeG(sf::Vector2i goal);
 void updateH(sf::Vector2i start);
 
@@ -23,10 +25,13 @@ void updateH(sf::Vector2i start);
 std::vector<sf::Vector2i> computePath(sf::Vector2i &start, sf::Vector2i &goal)
 {
 	int previousSize = activeVerteces.size();
-	sf::Vector3i currentVertex = initialize(start, goal);
 
-	while ((*path.end()).x != goal.x || (*path.end()).y != goal.y) {
+	initialize(start, goal);
+	sf::Vector3i currentVertex = step(start);
+
+	while (currentVertex.x != goal.x || currentVertex.y != goal.y) {
 		if (activeVerteces.size() == previousSize) {
+			std::cout << "Could not compute shortest path with A*.\n";
 			return std::vector<sf::Vector2i>();
 		}
 		else {
@@ -37,28 +42,26 @@ std::vector<sf::Vector2i> computePath(sf::Vector2i &start, sf::Vector2i &goal)
 	return path;
 }
 
-sf::Vector3i step(sf::Vector3i &currentVertex) {
-	//TODO Implement this function.
-
-	return sf::Vector3i();
+sf::Vector3i step(sf::Vector2i &currentVertex) {
+	updateH(currentVertex);
+	return  nextVertex();
 }
 
-sf::Vector3i initialize(sf::Vector2i &start, sf::Vector2i &goal) {
+sf::Vector3i step(sf::Vector3i &currentVertex) {
+	updateH(sf::Vector2i(currentVertex.x, currentVertex.y));
+	return  nextVertex();
+}
+
+void initialize(sf::Vector2i &start, sf::Vector2i &goal) {
 	computeG(goal);
-	updateH(start);
+	initializeH();
 	activeVerteces.push_back(sf::Vector3i(start.x, start.y, 1));
+}
 
-	for (int i = -1; i < 2; i++) 
-		for (int j = -1; j < 2; j++)
-			if(i != 0 && j != 0)
-				if(0 < start.x + i && start.x + i < TILES_WIDTH +1 &&
-					0 < start.y + j && start.y + j < TILES_HEIGHT + 1)
-				activeVerteces.push_back(sf::Vector3i(start.x + i, start.y + j, -1));
-
-	
+sf::Vector3i nextVertex() {
 	// Find the next value and set its z value to 1
-	sf::Vector3i next = nextSelectedVertex();
-	std::vector<sf::Vector3i>::iterator pos = std::find_if(activeVerteces.begin(), activeVerteces.end(), [next](sf::Vector3i vert) { 
+	sf::Vector3i next = findClosestVertex();
+	std::vector<sf::Vector3i>::iterator pos = std::find_if(activeVerteces.begin(), activeVerteces.end(), [next](sf::Vector3i vert) {
 		return vert.x == next.x && vert.y == next.y; });
 	(*pos).z = 1;
 
@@ -66,7 +69,7 @@ sf::Vector3i initialize(sf::Vector2i &start, sf::Vector2i &goal) {
 }
 
 // Finds the next selected vertex out of all active verteces
-sf::Vector3i nextSelectedVertex() {
+sf::Vector3i findClosestVertex() {
 	std::vector<sf::Vector3i> notVisited(activeVerteces.size());
 
 	// Find all active vertices that have not been visited yet
@@ -117,34 +120,51 @@ void updateH(sf::Vector2i vert) {
 	int x = vert.x;
 	int y = vert.y;
 
-	auto computeSquareNB = [x, y](int r, int u) { return h[x + r][y + u] == -1 ? h[x][y] + 10 : h[x + r][y + u] < h[x][y] + 10 ? h[x + r][y + u] : h[x][y] + 14; };
+	auto computeSquareNB = [x, y](int r, int u) { return h[x + r][y + u] == -1 ? h[x][y] + 10 : h[x + r][y + u] < h[x][y] + 10 ? h[x + r][y + u] : h[x][y] + 10;
+};
 	auto computeDiamondNB = [x, y](int r, int u) { return h[x + r][y + u] == -1 ? h[x][y] + 14 : h[x + r][y + u] < h[x][y] + 14 ? h[x + r][y + u] : h[x][y] + 14; };
 
 	//Square
 	if (x > 0) {
+		if(h[x - 1][y] == -1)
+			activeVerteces.push_back(sf::Vector3i(x - 1, y, -1));
 		h[x - 1][y] = computeSquareNB(-1, 0);
 	}
 	if (x < TILES_WIDTH - 1) {
+		if (h[x + 1][y] == -1)
+			activeVerteces.push_back(sf::Vector3i(x + 1, y, -1));
 		h[x + 1][y] = computeSquareNB(1, 0);
 	}
 	if (y > 0) {
+		if (h[x][y - 1] == -1)
+			activeVerteces.push_back(sf::Vector3i(x, y - 1, -1));
 		h[x][y - 1] = computeSquareNB(0, -1);
 	}
 	if (y < TILES_HEIGHT - 1) {
+		if (h[x][y + 1] == -1)
+			activeVerteces.push_back(sf::Vector3i(x, y + 1, -1));
 		h[x][y + 1] = computeSquareNB(0, 1);
 	}
 
 	//Diamond
 	if (x > 0 && y > 0) {
+		if (h[x - 1][y - 1] == -1)
+			activeVerteces.push_back(sf::Vector3i(x - 1, y - 1, -1));
 		h[x - 1][y - 1] = computeDiamondNB(-1, -1);
 	}
 	if (x < TILES_WIDTH - 1 && y < TILES_HEIGHT - 1) {
+		if (h[x + 1][y + 1] == -1)
+			activeVerteces.push_back(sf::Vector3i(x + 1, y + 1, -1));
 		h[x + 1][y + 1] = computeDiamondNB(1, 1);
 	}
 	if (x > 0 && y < TILES_HEIGHT - 1) {
+		if (h[x - 1][y + 1] == -1)
+			activeVerteces.push_back(sf::Vector3i(x - 1, y + 1, -1));
 		h[x -1][y + 1] = computeDiamondNB(-1, 1);
 	}
 	if (x < TILES_WIDTH - 1 && y > 0) {
+		if (h[x - 1][y - 1] == -1)
+			activeVerteces.push_back(sf::Vector3i(x - 1, y - 1, -1));
 		h[x + 1][y - 1] = computeDiamondNB(1, -1);
 	}
 }

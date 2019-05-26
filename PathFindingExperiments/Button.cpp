@@ -21,7 +21,7 @@ Button::Button()
 {
 }
 
-Button::Button(const char path[])
+Button::Button(const char *path)
 {
 	if (!texture.loadFromFile(path))
 		std::cout << "Can't find the image" << std::endl;

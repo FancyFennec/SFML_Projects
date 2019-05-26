@@ -8,6 +8,7 @@ public:
 
 	sf::Vector2i pos;
 	sf::Color color;
+	sf::Uint8 *pixels;
 
 	void draw(sf::RenderWindow &window);
 
@@ -19,7 +20,6 @@ private:
 
 	sf::Texture texture;
 	sf::Sprite sprite;
-	sf::Uint8 *pixels;
 
 	void updatePixels();
 	void setPixelColor(const int &pixelIndex);

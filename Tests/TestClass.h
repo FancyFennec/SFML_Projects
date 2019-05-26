@@ -1,10 +1,16 @@
 #pragma once
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
 class TestClass
 {
 public:
 
 	int number;
-	static int count;
+	int *array;
+
+	void setArray();
 
 	TestClass();
 	TestClass(int i);
