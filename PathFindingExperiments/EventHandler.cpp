@@ -58,8 +58,6 @@ void EventHandler::handleEvents(sf::Window &window, std::vector <DrawableObject>
 			}
 
 			//TODO: This is a stupid workaround for the memory leak -.-
-			for (DrawableObject drawable : drawables)
-				delete[] drawable.pixels;
 			drawables.clear();
 
 		}

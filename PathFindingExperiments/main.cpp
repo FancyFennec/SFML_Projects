@@ -45,7 +45,7 @@ int main() {
 		drawImage(sprite);
 		button.draw(window);
 
-		for (DrawableObject drawable : drawables) {
+		for (DrawableObject& drawable : drawables) {
 			drawable.draw(window);
 		}
 

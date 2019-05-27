@@ -3,7 +3,7 @@
 void DrawableObject::draw(sf::RenderWindow &window) {
 	updatePixels();
 
-	texture.update(pixels);
+	texture.update(pixels.data());
 	sprite.setTexture(texture);
 	window.draw(sprite);
 }
@@ -33,9 +33,12 @@ void DrawableObject::setPixelColor(const int &pixelIndex) {
 
 DrawableObject::DrawableObject()
 {
-	this->pos = sf::Vector2i(0,0);
-	this->pixels = new sf::Uint8[PIXELS]();
-	this->color = sf::Color::Blue;
+	pos = sf::Vector2i(0, 0);
+	color = sf::Color::Blue;
+	pixels.resize(PIXELS);
+	for (int i = 0; i < PIXELS; i++) {
+		pixels[i] = 0;
+	}
 
 	texture = sf::Texture();
 	texture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -45,8 +48,11 @@ DrawableObject::DrawableObject()
 DrawableObject::DrawableObject(sf::Vector2i pos)
 {
 	this->pos = pos;
-	this->pixels = new sf::Uint8[PIXELS]();
-	this->color = sf::Color::Blue;
+	color = sf::Color::Blue;
+	pixels.resize(PIXELS);
+	for (int i = 0; i < PIXELS; i++) {
+		pixels[i] = 0;
+	}
 
 	texture = sf::Texture();
 	texture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -55,5 +61,4 @@ DrawableObject::DrawableObject(sf::Vector2i pos)
 
 DrawableObject::~DrawableObject()
 {
-	//free(pixels);
 }

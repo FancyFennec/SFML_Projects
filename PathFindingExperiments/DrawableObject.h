@@ -8,16 +8,15 @@ public:
 
 	sf::Vector2i pos;
 	sf::Color color;
-	sf::Uint8 *pixels;
+	std::vector<sf::Uint8> pixels;
 
 	void draw(sf::RenderWindow &window);
 
+	DrawableObject();
 	DrawableObject(sf::Vector2i pos);
 	~DrawableObject();
 
 private:
-	DrawableObject();
-
 	sf::Texture texture;
 	sf::Sprite sprite;
 

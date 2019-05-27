@@ -23,5 +23,6 @@ TestClass::TestClass(int i)
 
 TestClass::~TestClass()
 {
+	//delete[] array;
 	std::cout << "Deleting Object.\n";
 }

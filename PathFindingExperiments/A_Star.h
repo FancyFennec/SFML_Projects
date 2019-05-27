@@ -120,8 +120,7 @@ void updateH(sf::Vector2i vert) {
 	int x = vert.x;
 	int y = vert.y;
 
-	auto computeSquareNB = [x, y](int r, int u) { return h[x + r][y + u] == -1 ? h[x][y] + 10 : h[x + r][y + u] < h[x][y] + 10 ? h[x + r][y + u] : h[x][y] + 10;
-};
+	auto computeSquareNB = [x, y](int r, int u) { return h[x + r][y + u] == -1 ? h[x][y] + 10 : h[x + r][y + u] < h[x][y] + 10 ? h[x + r][y + u] : h[x][y] + 10; };
 	auto computeDiamondNB = [x, y](int r, int u) { return h[x + r][y + u] == -1 ? h[x][y] + 14 : h[x + r][y + u] < h[x][y] + 14 ? h[x + r][y + u] : h[x][y] + 14; };
 
 	//Square
