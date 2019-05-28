@@ -110,7 +110,7 @@ void computeG(sf::Vector2i goal) {
 			x = x > 0 ? x : -x;
 			y = y > 0 ? y : -y;
 
-			g[i][j] = x > y ? 10 * y + 14 * (x - y) : 10 * x + 14 * (y - x);
+			g[i][j] = x > y ? 14 * y + 10 * (x - y) : 14 * x + 10 * (y - x);
 		}
 	}
 }
