@@ -14,6 +14,7 @@ TEST(initialize, test_initializing) {
 	activeVerteces.resize(std::distance(activeVerteces.begin(), it));
 	EXPECT_EQ(activeVerteces.size(), 2);
 	EXPECT_EQ(h[next.x][next.y], 10);
+	EXPECT_EQ(next.z, 1);
 	EXPECT_TRUE(true);
 }
 
