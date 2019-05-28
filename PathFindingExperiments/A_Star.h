@@ -30,6 +30,7 @@ std::vector<sf::Vector2i> computePath(sf::Vector2i &start, sf::Vector2i &goal)
 	sf::Vector3i currentVertex = step(start);
 
 	while (currentVertex.x != goal.x || currentVertex.y != goal.y) {
+		//TODO: This is not correct here, it might be that the size doesn't increase in one of the steps
 		if (activeVerteces.size() == previousSize) {
 			std::cout << "Could not compute shortest path with A*.\n";
 			return std::vector<sf::Vector2i>();
@@ -53,6 +54,7 @@ sf::Vector3i step(sf::Vector3i &currentVertex) {
 }
 
 void initialize(sf::Vector2i &start, sf::Vector2i &goal) {
+	activeVerteces.clear();
 	computeG(goal);
 	initializeH();
 	activeVerteces.push_back(sf::Vector3i(start.x, start.y, 1));
@@ -120,6 +122,9 @@ void updateH(sf::Vector2i vert) {
 	int x = vert.x;
 	int y = vert.y;
 
+	if (h[x][y] == -1)
+		h[x][y] = 0;
+
 	auto computeSquareNB = [x, y](int r, int u) { return h[x + r][y + u] == -1 ? h[x][y] + 10 : h[x + r][y + u] < h[x][y] + 10 ? h[x + r][y + u] : h[x][y] + 10; };
 	auto computeDiamondNB = [x, y](int r, int u) { return h[x + r][y + u] == -1 ? h[x][y] + 14 : h[x + r][y + u] < h[x][y] + 14 ? h[x + r][y + u] : h[x][y] + 14; };
 
@@ -162,8 +167,8 @@ void updateH(sf::Vector2i vert) {
 		h[x -1][y + 1] = computeDiamondNB(-1, 1);
 	}
 	if (x < TILES_WIDTH - 1 && y > 0) {
-		if (h[x - 1][y - 1] == -1)
-			activeVerteces.push_back(sf::Vector3i(x - 1, y - 1, -1));
+		if (h[x + 1][y - 1] == -1)
+			activeVerteces.push_back(sf::Vector3i(x + 1, y - 1, -1));
 		h[x + 1][y - 1] = computeDiamondNB(1, -1);
 	}
 }
