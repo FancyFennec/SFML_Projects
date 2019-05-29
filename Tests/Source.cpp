@@ -1,30 +1,24 @@
 #include "TestClass.h"
 #include "FunctionTest.h"
+#include <map>
 
 
 int main() {
 
 	int a = 2;
 
-	std::cout << "Creating Vector.\n";
-	std::vector<TestClass> vec;
-	vec.reserve(3);
+	struct Node {
+		TestClass child;
+		TestClass Parent;
 
-	std::cout << "Push back 1.\n";
-	vec.push_back(TestClass(1));
-	std::cout << "Push back 2.\n";
-	vec.push_back(TestClass(2));
-	std::cout << "Push back 3.\n";
-	vec.push_back(TestClass(3));
+		Node(TestClass newChild) {
+			child = newChild;
+		}
+	};
 
-	std::cout << "Setting the Arrays in the vector.\n";
-	for (TestClass& elem : vec)
-		elem.setArray();
+	Node testNode(TestClass(1));
 
-	/*for (TestClass* elem : vec)
-		elem->~TestClass();*/
-
-	vec.clear();
+	std::cout << testNode.child.number << "\n";
 
 	std::cin >> a;
 	return 0;

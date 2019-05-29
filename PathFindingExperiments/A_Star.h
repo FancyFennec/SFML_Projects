@@ -2,10 +2,11 @@
 
 #include "EventHandler.h"
 
-// g[i][j] contains the distance from the goal to the point [i][j]
-int g[TILES_WIDTH][TILES_WIDTH];
 //h[i][j] == -1 if it hasn't been added to the active set yet, if it has been added it contains the cost to travel to it
 int h[TILES_WIDTH][TILES_WIDTH];
+// g[i][j] contains the distance from the goal to the point [i][j]
+int g[TILES_WIDTH][TILES_WIDTH];
+
 std::vector<sf::Vector2i> path;
 std::vector<sf::Vector3i> activeVerteces;
 sf::Vector3i currentVertex;
