@@ -2,6 +2,7 @@
 //#include "../PathFindingExperiments/A_Star.h"
 //#include "../PathFindingExperiments/AStar.h"
 #include "../PathFindingExperiments/AStar.cpp"
+#include "../PathFindingExperiments/StarNode.h"
 
 //TEST(initialize, test_initializing) {
 //	initialize(start, goal);
@@ -52,5 +53,17 @@ TEST(AStar, test_constructor) {
 	EXPECT_EQ(aStar.getH(2, 1), -1);
 	EXPECT_EQ(aStar.getG(2, 1), 0);
 	EXPECT_EQ(aStar.getG(2, 2), 10);
+	EXPECT_TRUE(true);
+}
+
+TEST(StarNode, test_constructor) {
+	sf::Vector2i start = sf::Vector2i(1, 1);
+	sf::Vector2i goal = sf::Vector2i(2, 1);
+
+	StarNode node(start, goal);
+
+	EXPECT_EQ(node.visited, false);
+	node.visit();
+	EXPECT_EQ(node.visited, true);
 	EXPECT_TRUE(true);
 }

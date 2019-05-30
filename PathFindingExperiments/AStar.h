@@ -1,17 +1,7 @@
 #pragma once
 
 #include "EventHandler.h"
-#include <map>
-
-
-struct Comparator
-{
-	bool operator() (const sf::Vector2i& a, const sf::Vector2i& b) const
-	{
-		return a.y * TILES_WIDTH + a.x < b.y * TILES_WIDTH + b.x;
-	}
-
-};
+#include "StarNode.h"
 
 class AStar
 {
@@ -37,12 +27,11 @@ private:
 	std::vector<int> g;
 
 	sf::Vector2i currentVertex;
-	std::vector<sf::Vector2i> activeVerteces;
-	std::map<sf::Vector2i, sf::Vector2i, Comparator> mapping;
+	std::vector<StarNode> activeVerteces;
 
 	void initializeH();
 	void updateH(sf::Vector2i& start);
-	sf::Vector2i nextVertex();
+	StarNode nextVertex();
 	void computeG(sf::Vector2i& goal);
 };
 

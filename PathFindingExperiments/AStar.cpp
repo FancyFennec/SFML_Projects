@@ -16,21 +16,31 @@ void AStar::updateH(sf::Vector2i& vert) {
 
 	sf::Vector2i offset;
 
-	auto computeSquareNB = [this, vert](sf::Vector2i offset) { 
-		return getH(vert + offset) == -1 ? getH(vert) + 10 : getH(vert + offset) < getH(vert) + 10 ? getH(vert + offset) : getH(vert) + 10; };
-	auto computeDiamondNB = [this, vert](sf::Vector2i offset) { 
-		return getH(vert + offset) == -1 ? getH(vert) + 14 : getH(vert + offset) < getH(vert) + 14 ? getH(vert + offset) : getH(vert) + 14; };
-	
-	auto setSquareNB = [this, vert, computeSquareNB](sf::Vector2i offset) {
+	auto setSquareNB = [this, vert](sf::Vector2i offset) {
 		if (getH(vert + offset) == -1) {
-			activeVerteces.push_back(vert + offset);
-			setH(vert + offset, computeSquareNB(offset));
-		} 
+			setH(vert + offset, getH(vert) + 10);
+			activeVerteces.push_back(StarNode(vert + offset, vert));
+		}
+		else if (getH(vert + offset) != -2) {
+			if (getH(vert + offset) > getH(vert) + 10) {
+				setH(vert + offset, getH(vert) + 10);
+				auto ind = std::find_if(activeVerteces.begin(), activeVerteces.end(), [vert, offset](StarNode node) {return node.child == vert + offset; });
+				(*ind).parent = vert;
+			}
+		}
 	};
-	auto setDiamondNB = [this, vert, computeDiamondNB](sf::Vector2i offset) {
+
+	auto setDiamondNB = [this, vert](sf::Vector2i offset) {
 		if (getH(vert + offset) == -1) {
-			activeVerteces.push_back(vert + offset);
-			setH(vert + offset, computeDiamondNB(offset));
+			setH(vert + offset, getH(vert) + 14);
+			activeVerteces.push_back(StarNode(vert + offset, vert));
+		}
+		else if (getH(vert + offset) != -2) {
+			if (getH(vert + offset) > getH(vert) + 14) {
+				setH(vert + offset, getH(vert) + 14);
+				auto ind = std::find_if(activeVerteces.begin(), activeVerteces.end(), [vert, offset](StarNode node) {return node.child == vert + offset; });
+				(*ind).parent = vert;
+			}
 		}
 	};
 
@@ -71,21 +81,29 @@ void AStar::updateH(sf::Vector2i& vert) {
 	}
 }
 
-sf::Vector2i AStar::nextVertex() {
-	std::vector<sf::Vector2i> potentialMins(activeVerteces.size());
+StarNode AStar::nextVertex() {
+	std::vector<StarNode> potentialMins;
+
+	for (StarNode node : activeVerteces) {
+		if (!node.visited)
+			potentialMins.push_back(node);
+	}
 
 	// Find a vertex with minimum f value
-	sf::Vector2i min = *std::min_element(potentialMins.begin(), potentialMins.end(), [this](sf::Vector2i vert1, sf::Vector2i vert2) {
-		return getH(vert1) + getG(vert1) < getH(vert2) + getG(vert2); });
+	StarNode min = *std::min_element(potentialMins.begin(), potentialMins.end(), [this](StarNode vert1, StarNode vert2) {
+		return getH(vert1.child) + getG(vert1.child) < getH(vert2.child) + getG(vert2.child); });
 
 	// Find all vertices with minimum f value
-	auto it = std::copy_if(activeVerteces.begin(), activeVerteces.end(), potentialMins.begin(), [this, min](sf::Vector2i vert) {
-		return getH(vert) + getG(vert) == getH(min) + getG(min); });
+	auto it = std::copy_if(potentialMins.begin(), potentialMins.end(), potentialMins.begin(), [this, min](StarNode vert) {
+		return getH(vert.child) + getG(vert.child) == getH(min.child) + getG(min.child); });
 	potentialMins.resize(std::distance(potentialMins.begin(), it));
 
-	// Find a vertex with minimal h value out of subset
-	min = *std::min_element(potentialMins.begin(), potentialMins.end(), [this](sf::Vector2i vert1, sf::Vector2i vert2) {
-		return getH(vert1) + getG(vert1) < getH(vert2) + getG(vert2); });
+	// Find a vertex with minimal g value out of subset
+	min = *std::min_element(potentialMins.begin(), potentialMins.end(), [this](StarNode vert1, StarNode vert2) {
+		return getG(vert1.child) < getG(vert2.child); });
+
+	//Set as visited
+	min.visit();
 
 	return min;
 }
@@ -159,7 +177,6 @@ AStar::AStar(sf::Vector2i& start, sf::Vector2i& goal)
 	activeVerteces.clear();
 	computeG(goal);
 	initializeH();
-	activeVerteces.push_back(start);
 }
 
 AStar::~AStar()
