@@ -174,9 +174,11 @@ AStar::AStar(sf::Vector2i& start, sf::Vector2i& goal)
 	g.resize(TILES_WIDTH * TILES_HEIGHT);
 	h.resize(TILES_WIDTH * TILES_HEIGHT);
 
+	currentVertex = start;
 	activeVerteces.clear();
 	computeG(goal);
 	initializeH();
+	updateH(start);
 }
 
 AStar::~AStar()

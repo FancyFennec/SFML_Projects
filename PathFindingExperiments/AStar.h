@@ -6,6 +6,9 @@
 class AStar
 {
 public:
+	sf::Vector2i currentVertex;
+	std::vector<StarNode> activeVerteces;
+
 	std::vector<sf::Vector2i> path;
 	std::vector<sf::Vector2i> computePath();
 
@@ -25,9 +28,6 @@ public:
 private:
 	std::vector<int> h;
 	std::vector<int> g;
-
-	sf::Vector2i currentVertex;
-	std::vector<StarNode> activeVerteces;
 
 	void initializeH();
 	void updateH(sf::Vector2i& start);

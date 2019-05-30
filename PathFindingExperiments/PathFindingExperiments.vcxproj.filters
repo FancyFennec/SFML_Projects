@@ -58,7 +58,7 @@
     <ClInclude Include="AStar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StarNodes.h">
+    <ClInclude Include="StarNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
