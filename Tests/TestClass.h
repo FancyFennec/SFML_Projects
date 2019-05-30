@@ -8,9 +8,13 @@ class TestClass
 public:
 
 	int number;
+	std::vector<int> vec;
 
 	TestClass();
-	TestClass(int i);
+	TestClass(std::vector<int>& start, int x);
 	~TestClass();
+
+private:
+	void logging();
 };
 

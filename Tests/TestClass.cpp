@@ -6,14 +6,21 @@ TestClass::TestClass()
 	number = 0;
 }
 
-TestClass::TestClass(int i)
+TestClass::TestClass(std::vector<int>& start, int x)
 {
-	std::cout << "Constructing Object.\n";
-	number = i;
+	number = x;
+	vec = start;
+	logging();
 }
 
 
 TestClass::~TestClass()
 {
 	std::cout << "Deleting Object.\n";
+}
+
+void TestClass::logging()
+{
+	for (auto elem : vec)
+		std::cout << elem << " Constructing Object.\n";
 }

@@ -1,5 +1,5 @@
 #include "EventHandler.h"
-#include "A_Star.h"
+#include "AStar.h"
 
 sf::Uint8 pixels[PIXELS];
 char tiles[TILES_WIDTH][TILES_HEIGHT];
@@ -24,6 +24,11 @@ void setPixelColor(const int &pixelIndex, const sf::Color &color);
 void drawImage(sf::Sprite &sprite);
 
 int main() {
+
+	sf::Vector2i start(1, 2);
+	sf::Vector2i goal(2, 3);
+
+	AStar test(start, goal);
 
 	window.setFramerateLimit(FRAMERATE);
 	background.create(SCREEN_WIDTH, SCREEN_HEIGHT);

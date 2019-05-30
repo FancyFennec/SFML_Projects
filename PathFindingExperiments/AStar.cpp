@@ -20,6 +20,7 @@ void AStar::updateH(sf::Vector2i& vert) {
 		return getH(vert + offset) == -1 ? getH(vert) + 10 : getH(vert + offset) < getH(vert) + 10 ? getH(vert + offset) : getH(vert) + 10; };
 	auto computeDiamondNB = [this, vert](sf::Vector2i offset) { 
 		return getH(vert + offset) == -1 ? getH(vert) + 14 : getH(vert + offset) < getH(vert) + 14 ? getH(vert + offset) : getH(vert) + 14; };
+	
 	auto setSquareNB = [this, vert, computeSquareNB](sf::Vector2i offset) {
 		if (getH(vert + offset) == -1) {
 			activeVerteces.push_back(vert + offset);
@@ -93,14 +94,14 @@ void AStar::computeG(sf::Vector2i& goal) {
 	int x;
 	int y;
 
-	for (int i = 0; i < TILES_WIDTH; i++) {
-		for (int j = 0; j < TILES_HEIGHT; j++) {
+	for (int j = 0; j < TILES_HEIGHT; j++) {
+		for (int i = 0; i < TILES_WIDTH; i++) {
 			x = i - goal.x;
 			y = j - goal.y;
 
 			//Get Absolute value
-			x = x > 0 ? x : -x;
-			y = y > 0 ? y : -y;
+			x = x >= 0 ? x : -x;
+			y = y >= 0 ? y : -y;
 
 			//Set distance
 			setG(i, j, x > y ? 14 * y + 10 * (x - y) : 14 * x + 10 * (y - x));
@@ -130,7 +131,7 @@ void AStar::setH(sf::Vector2i vec, int value)
 
 int AStar::getG(int x, int y)
 {
-	return g[y * SCREEN_WIDTH + x];
+	return g[y * TILES_WIDTH + x];
 }
 
 int AStar::getG(const sf::Vector2i& vec)
@@ -158,7 +159,7 @@ AStar::AStar(sf::Vector2i& start, sf::Vector2i& goal)
 	activeVerteces.clear();
 	computeG(goal);
 	initializeH();
-	activeVerteces.push_back(sf::Vector2i(start.x, start.y));
+	activeVerteces.push_back(start);
 }
 
 AStar::~AStar()

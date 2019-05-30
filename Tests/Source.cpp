@@ -7,18 +7,13 @@ int main() {
 
 	int a = 2;
 
-	struct Node {
-		TestClass child;
-		TestClass Parent;
 
-		Node(TestClass newChild) {
-			child = newChild;
-		}
-	};
+	std::vector<int> sepp;
+	sepp.push_back(1);
+	sepp.push_back(2);
 
-	Node testNode(TestClass(1));
+	TestClass hans(sepp, 2);
 
-	std::cout << testNode.child.number << "\n";
 
 	std::cin >> a;
 	return 0;
