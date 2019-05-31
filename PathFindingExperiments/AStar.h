@@ -28,10 +28,15 @@ public:
 private:
 	std::vector<int> h;
 	std::vector<int> g;
+	sf::Vector2i start;
+	sf::Vector2i goal;
+
+	bool hasNext;
 
 	void initializeH();
 	void updateH(sf::Vector2i& start);
 	StarNode nextVertex();
+	sf::Vector2i step();
 	void computeG(sf::Vector2i& goal);
 };
 

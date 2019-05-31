@@ -89,23 +89,41 @@ StarNode AStar::nextVertex() {
 			potentialMins.push_back(node);
 	}
 
-	// Find a vertex with minimum f value
-	StarNode min = *std::min_element(potentialMins.begin(), potentialMins.end(), [this](StarNode vert1, StarNode vert2) {
-		return getH(vert1.child) + getG(vert1.child) < getH(vert2.child) + getG(vert2.child); });
+	StarNode min;
 
-	// Find all vertices with minimum f value
-	auto it = std::copy_if(potentialMins.begin(), potentialMins.end(), potentialMins.begin(), [this, min](StarNode vert) {
-		return getH(vert.child) + getG(vert.child) == getH(min.child) + getG(min.child); });
-	potentialMins.resize(std::distance(potentialMins.begin(), it));
+	if (potentialMins.size() != 0) {
+		hasNext = true;
 
-	// Find a vertex with minimal g value out of subset
-	min = *std::min_element(potentialMins.begin(), potentialMins.end(), [this](StarNode vert1, StarNode vert2) {
-		return getG(vert1.child) < getG(vert2.child); });
+		// Find a vertex with minimum f value
+		min = *std::min_element(potentialMins.begin(), potentialMins.end(), [this](StarNode vert1, StarNode vert2) {
+			return getH(vert1.child) + getG(vert1.child) < getH(vert2.child) + getG(vert2.child); });
 
-	//Set as visited
-	min.visit();
+		// Find all vertices with minimum f value
+		auto it = std::copy_if(potentialMins.begin(), potentialMins.end(), potentialMins.begin(), [this, min](StarNode vert) {
+			return getH(vert.child) + getG(vert.child) == getH(min.child) + getG(min.child); });
+		potentialMins.resize(std::distance(potentialMins.begin(), it));
+
+		// Find a vertex with minimal g value out of subset
+		min = *std::min_element(potentialMins.begin(), potentialMins.end(), [this](StarNode vert1, StarNode vert2) {
+			return getG(vert1.child) < getG(vert2.child); });
+
+		//TODO: they aren't being visited somehow
+		//Set as visited
+		min.visit();
+	}
+	else {
+		hasNext = false;
+	}
 
 	return min;
+}
+
+sf::Vector2i AStar::step()
+{
+	StarNode next = nextVertex();
+	updateH(next.child);
+
+	return next.child;
 }
 
 void AStar::computeG(sf::Vector2i& goal) {
@@ -124,6 +142,29 @@ void AStar::computeG(sf::Vector2i& goal) {
 			//Set distance
 			setG(i, j, x > y ? 14 * y + 10 * (x - y) : 14 * x + 10 * (y - x));
 		}
+	}
+}
+
+std::vector<sf::Vector2i> AStar::computePath()
+{
+	path.push_back(start);
+	sf::Vector2i next = step();
+
+	if (next == goal) {
+		path.push_back(next);
+		return path;
+	}
+	else {
+		while (hasNext) {
+			next = step();
+			if (next == goal) {
+				//TODO:calculate path and return it
+				std::cout << "Shortest path calculated.\n";
+				return path;
+			}
+		}
+		std::cout << "Could nto calculate shortest path.\n";
+		return path;
 	}
 }
 
@@ -169,6 +210,9 @@ void AStar::setG(sf::Vector2i vec, int value)
 
 AStar::AStar(sf::Vector2i& start, sf::Vector2i& goal)
 {
+	this->start = start;
+	this->goal = goal;
+
 	h.clear();
 	g.clear();
 	g.resize(TILES_WIDTH * TILES_HEIGHT);
