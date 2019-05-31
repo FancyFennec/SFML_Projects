@@ -10,7 +10,7 @@ sf::Sprite backgroundImage = sf::Sprite(background);
 
 Button button("Button.png", "Clear");
 
-sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot");
+sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Path Finding Experiments");
 EventHandler eventHandler;
 
 std::vector <DrawableObject> drawables;
@@ -24,11 +24,6 @@ void setPixelColor(const int &pixelIndex, const sf::Color &color);
 void drawImage(sf::Sprite &sprite);
 
 int main() {
-
-	sf::Vector2i start(1, 2);
-	sf::Vector2i goal(2, 3);
-
-	AStar test(start, goal);
 
 	window.setFramerateLimit(FRAMERATE);
 	background.create(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -45,7 +40,6 @@ int main() {
 		}
 
 		window.clear();
-
 		initialisePixels();
 		drawImage(sprite);
 		button.draw(window);
@@ -80,6 +74,9 @@ void initialisePixels()
 				break;
 			case 'r':
 				setTilePixels(tileIndex, sf::Color::Red);
+				break;
+			case 'b':
+				setTilePixels(tileIndex, sf::Color::Black);
 				break;
 			default:
 				setTilePixels(tileIndex, sf::Color::Green);

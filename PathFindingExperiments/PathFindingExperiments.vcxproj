@@ -142,7 +142,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="example.txt" />
-    <Text Include="map.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AStar.h" />

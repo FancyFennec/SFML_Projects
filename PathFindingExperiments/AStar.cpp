@@ -222,7 +222,7 @@ void AStar::setG(sf::Vector2i vec, int value)
 	setG(vec.x, vec.y, value);
 }
 
-AStar::AStar(sf::Vector2i& start, sf::Vector2i& goal):
+AStar::AStar(sf::Vector2i& start, sf::Vector2i& goal, char (&tiles)[TILES_WIDTH][TILES_HEIGHT]):
 	start(start),
 	goal(goal)
 {
@@ -235,6 +235,14 @@ AStar::AStar(sf::Vector2i& start, sf::Vector2i& goal):
 	activeVerteces.clear();
 	computeG(goal);
 	initializeH();
+
+	for (int j = 0; j < TILES_HEIGHT; j++) {
+		for (int i = 0; i < TILES_WIDTH; i++) {
+			if (tiles[i][j] == 'r')
+				setH(i, j, -2);
+		}
+	}
+
 	updateH(start);
 }
 

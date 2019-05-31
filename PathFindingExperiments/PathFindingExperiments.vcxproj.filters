@@ -32,9 +32,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="map.txt">
-      <Filter>Source Files</Filter>
-    </Text>
     <Text Include="example.txt">
       <Filter>Source Files</Filter>
     </Text>

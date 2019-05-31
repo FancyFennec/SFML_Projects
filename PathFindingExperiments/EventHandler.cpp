@@ -1,4 +1,5 @@
 #include "EventHandler.h"
+#include "AStar.h"
 
 
 
@@ -47,19 +48,15 @@ void EventHandler::handleEvents(sf::Window &window, std::vector <DrawableObject>
 		sf::Vector2f mousePosF(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y));
 		if (buttonImage.getGlobalBounds().contains(mousePosF))
 		{
-			std::cout << "Screen cleared, yay!" << std::endl;
 			for (auto& rows : tiles)
 			{
 				for (char& tile : rows)
 				{
-					if (tile == 'r')
+					if (tile == 'r' || tile == 'b')
 						tile = 'x';
 				}
 			}
-
-			//TODO: This is a stupid workaround for the memory leak -.-
 			drawables.clear();
-
 		}
 		else if (event.mouseButton.button == sf::Mouse::Left)
 		{
@@ -79,8 +76,31 @@ void EventHandler::handleEvents(sf::Window &window, std::vector <DrawableObject>
 		}
 	}
 	break;
+	case sf::Event::KeyPressed:
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+			for (auto& rows : tiles)
+			{
+				for (char& tile : rows)
+				{
+					if (tile == 'b')
+						tile = 'x';
+				}
+			}
+
+			sf::Vector2i start(1, 1);
+			sf::Vector2i goal(TILES_WIDTH - 2, TILES_HEIGHT - 2);
+
+			AStar test(start, goal, tiles);
+			test.computePath();
+			for (sf::Vector2i node : test.path) {
+				tiles[node.x][node.y] = 'b';
+			}
+		}
 	}
 }
+
+
+
 
 EventHandler::EventHandler()
 {

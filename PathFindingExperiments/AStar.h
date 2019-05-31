@@ -22,7 +22,7 @@ public:
 	void setG(int x, int y, int value);
 	void setG(sf::Vector2i vec, int value);
 
-	AStar(sf::Vector2i& start, sf::Vector2i& goal);
+	AStar(sf::Vector2i& start, sf::Vector2i& goal, char (&tiles)[TILES_WIDTH][TILES_HEIGHT]);
 	~AStar();
 
 private:
