@@ -11,10 +11,9 @@ public:
 	std::vector<int> vec;
 
 	TestClass();
-	TestClass(std::vector<int>& start, int x);
+	TestClass(int x);
 	~TestClass();
 
 private:
-	void logging();
 };
 

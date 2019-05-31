@@ -16,7 +16,7 @@ TEST(AStar, test_onestep) {
 	}
 	
 	EXPECT_EQ(aStar.activeVerteces.size(), 11);
-	EXPECT_EQ(visitedNodes.size(), 3);
+	EXPECT_EQ(visitedNodes.size(), 1);
 	EXPECT_EQ(aStar.path.size(), 2);
 	EXPECT_TRUE(true);
 }
@@ -28,7 +28,15 @@ TEST(AStar, test_twostep) {
 	AStar aStar(start, goal);
 	aStar.computePath();
 
+	std::vector<StarNode> visitedNodes;
+
+	for (StarNode node : aStar.activeVerteces) {
+		if (node.visited)
+			visitedNodes.push_back(node);
+	}
+
 	EXPECT_EQ(aStar.activeVerteces.size(), 14);
+	EXPECT_EQ(visitedNodes.size(), 2);
 	EXPECT_TRUE(true);
 }
 

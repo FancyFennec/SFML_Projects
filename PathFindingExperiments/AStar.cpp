@@ -9,6 +9,14 @@ void AStar::initializeH()
 
 //Computes new h values for the vertices surrounding vert
 void AStar::updateH(sf::Vector2i& vert) {
+	//Set as visited
+	if (vert != start) {
+		auto it = std::find_if(activeVerteces.begin(), activeVerteces.end(), [vert](StarNode node) {
+			return node.child.x == vert.x && node.child.y == vert.y;
+		});
+		(*it).visit();
+	}
+
 	int x = vert.x;
 	int y = vert.y;
 	if (getH(vert) == -1)
@@ -106,10 +114,6 @@ StarNode AStar::nextVertex() {
 		// Find a vertex with minimal g value out of subset
 		min = *std::min_element(potentialMins.begin(), potentialMins.end(), [this](StarNode vert1, StarNode vert2) {
 			return getG(vert1.child) < getG(vert2.child); });
-
-		//TODO: they aren't being visited somehow
-		//Set as visited
-		min.visit();
 	}
 	else {
 		hasNext = false;
@@ -208,11 +212,10 @@ void AStar::setG(sf::Vector2i vec, int value)
 	setG(vec.x, vec.y, value);
 }
 
-AStar::AStar(sf::Vector2i& start, sf::Vector2i& goal)
+AStar::AStar(sf::Vector2i& start, sf::Vector2i& goal):
+	start(start),
+	goal(goal)
 {
-	this->start = start;
-	this->goal = goal;
-
 	h.clear();
 	g.clear();
 	g.resize(TILES_WIDTH * TILES_HEIGHT);
