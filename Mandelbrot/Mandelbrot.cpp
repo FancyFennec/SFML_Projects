@@ -78,8 +78,9 @@ void eventHandling()
 
 void computeMandelbrot()
 {
-	for (unsigned int i = 0; i < SCREEN_WIDTH; i++) {
-		for (unsigned int j = 0; j < SCREEN_HEIGHT; j++) {
+	#pragma omp parallel for
+	for (int i = 0; i < SCREEN_WIDTH; i++) {
+		for (int j = 0; j < SCREEN_HEIGHT; j++) {
 
 			double cr = (((double)i - SCREEN_WIDTH / 2) / (SCREEN_WIDTH * pow(2, nZoom - 1))) + x;
 			double ci = (((double)j - SCREEN_HEIGHT / 2) / (SCREEN_WIDTH * pow(2, nZoom - 1))) + y;
