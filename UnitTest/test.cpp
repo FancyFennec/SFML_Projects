@@ -5,7 +5,9 @@ TEST(AStar, test_onestep) {
 	sf::Vector2i start = sf::Vector2i(1, 1);
 	sf::Vector2i goal = sf::Vector2i(2, 1);
 
-	AStar aStar(start, goal);
+	char tiles[TILES_WIDTH][TILES_WIDTH];
+
+	AStar aStar(start, goal, tiles);
 	aStar.computePath();
 
 	std::vector<StarNode> visitedNodes;
@@ -25,7 +27,9 @@ TEST(AStar, test_twostep) {
 	sf::Vector2i start = sf::Vector2i(1, 1);
 	sf::Vector2i goal = sf::Vector2i(3, 1);
 
-	AStar aStar(start, goal);
+	char tiles[TILES_WIDTH][TILES_WIDTH];
+
+	AStar aStar(start, goal, tiles);
 	aStar.computePath();
 
 	std::vector<StarNode> visitedNodes;
@@ -45,7 +49,9 @@ TEST(AStar, test_obstacle) {
 	sf::Vector2i start = sf::Vector2i(1, 1);
 	sf::Vector2i goal = sf::Vector2i(4, 1);
 
-	AStar aStar(start, goal);
+	char tiles[TILES_WIDTH][TILES_WIDTH];
+
+	AStar aStar(start, goal, tiles);
 	aStar.setH(3, 1, -2);
 	aStar.computePath();
 
@@ -66,7 +72,9 @@ TEST(AStar, test_constructor) {
 	sf::Vector2i start = sf::Vector2i(1, 1);
 	sf::Vector2i goal = sf::Vector2i(2, 1);
 
-	AStar aStar(start, goal);
+	char tiles[TILES_WIDTH][TILES_WIDTH];
+
+	AStar aStar(start, goal, tiles);
 
 	EXPECT_EQ(aStar.getH(1, 1), 0);
 	EXPECT_EQ(aStar.getH(2, 1), 10);
