@@ -164,7 +164,6 @@ std::vector<sf::Vector2i> AStar::computePath()
 			next = step();
 			if (next == goal) {
 				//TODO:calculate path and return it
-				std::cout << "Shortest path calculated.\n";
 				path.push_back(goal);
 				StarNode backTracking = *std::find_if(activeVerteces.begin(), activeVerteces.end(), [this](StarNode node) {
 					return node.child.x == goal.x && node.child.y == goal.y;
@@ -178,7 +177,6 @@ std::vector<sf::Vector2i> AStar::computePath()
 				return path;
 			}
 		}
-		std::cout << "Could nto calculate shortest path.\n";
 		return path;
 	}
 }
