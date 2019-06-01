@@ -64,7 +64,13 @@ void EventHandler::handleEvents(sf::Window &window, std::vector <DrawableObject>
 		}
 		else if (event.mouseButton.button == sf::Mouse::Right)
 		{
-			drawables.push_back(DrawableObject(sf::Vector2i((int)(mousePos.x / 10), (int)(mousePos.y / 10))));
+			if (drawables.size() == 2) {
+				drawables.erase(drawables.begin());
+				drawables.push_back(DrawableObject(sf::Vector2i((int)(mousePos.x / 10), (int)(mousePos.y / 10))));
+			}
+			else {
+				drawables.push_back(DrawableObject(sf::Vector2i((int)(mousePos.x / 10), (int)(mousePos.y / 10))));
+			}
 		}
 	}
 	break;
@@ -76,26 +82,6 @@ void EventHandler::handleEvents(sf::Window &window, std::vector <DrawableObject>
 		}
 	}
 	break;
-	case sf::Event::KeyPressed:
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
-			for (auto& rows : tiles)
-			{
-				for (char& tile : rows)
-				{
-					if (tile == 'b')
-						tile = 'x';
-				}
-			}
-
-			sf::Vector2i start(1, 1);
-			sf::Vector2i goal(TILES_WIDTH - 2, TILES_HEIGHT - 2);
-
-			AStar test(start, goal, tiles);
-			test.computePath();
-			for (sf::Vector2i node : test.path) {
-				tiles[node.x][node.y] = 'b';
-			}
-		}
 	}
 }
 

@@ -16,6 +16,7 @@ void DrawableObject::updatePixels()
 
 	int tileIndex = (pos.y * TILES_WIDTH * 100 + pos.x * 10) * 4;
 
+	#pragma omp parallel for
 	for (int j = 0; j < 10; j++) {
 		for (int i = 0; i < 10; i++) {
 			int pixelIndex = tileIndex + (j * SCREEN_WIDTH + i) * 4;
@@ -50,6 +51,8 @@ DrawableObject::DrawableObject(sf::Vector2i pos)
 	this->pos = pos;
 	color = sf::Color::Blue;
 	pixels.resize(PIXELS);
+
+	#pragma omp parallel for
 	for (int i = 0; i < PIXELS; i++) {
 		pixels[i] = 0;
 	}

@@ -2,12 +2,12 @@
 
 void AStar::initializeH()
 {
+	#pragma omp parallel for
 	for (int i = 0; i < TILES_WIDTH; i++)
 		for (int j = 0; j < TILES_HEIGHT; j++)
 			setH(i, j, -1);
 }
 
-//Computes new h values for the vertices surrounding vert
 void AStar::updateH(sf::Vector2i& vert) {
 	//Set as visited
 	if (vert != start) {
@@ -134,6 +134,7 @@ void AStar::computeG(sf::Vector2i& goal) {
 	int x;
 	int y;
 
+	#pragma omp parallel for
 	for (int j = 0; j < TILES_HEIGHT; j++) {
 		for (int i = 0; i < TILES_WIDTH; i++) {
 			x = i - goal.x;
@@ -236,6 +237,7 @@ AStar::AStar(sf::Vector2i& start, sf::Vector2i& goal, char (&tiles)[TILES_WIDTH]
 	computeG(goal);
 	initializeH();
 
+	#pragma omp parallel for
 	for (int j = 0; j < TILES_HEIGHT; j++) {
 		for (int i = 0; i < TILES_WIDTH; i++) {
 			if (tiles[i][j] == 'r')

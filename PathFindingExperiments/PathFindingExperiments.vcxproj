@@ -78,6 +78,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>..\..\SFML\include;</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>GTEST_HAS_STD_TUPLE_;GTEST_HAS_TR1_TUPLE=0;_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\SFML\lib;</AdditionalLibraryDirectories>
@@ -125,6 +126,7 @@
       <PrecompiledHeaderFile />
       <PrecompiledHeaderOutputFile />
       <PreprocessorDefinitions>GTEST_HAS_STD_TUPLE_;GTEST_HAS_TR1_TUPLE=0;_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

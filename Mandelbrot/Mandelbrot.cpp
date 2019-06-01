@@ -127,6 +127,7 @@ void drawImage(sf::Sprite &sprite)
 
 void initialisePixels()
 {
+	#pragma omp parallel for
 	for (int i = 0; i < SCREEN_HEIGHT * SCREEN_WIDTH * 4; i += 4) {
 		pixls[i] = 255;
 		pixls[i + 1] = 0;
