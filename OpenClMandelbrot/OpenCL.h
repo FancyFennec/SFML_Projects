@@ -16,7 +16,7 @@ public:
 	OpenCL(const char *filename);
 	~OpenCL();
 	int initialise();
-	char*  run(const char* input);
+	float*  run(int i, int j);
 	
 private:
 	const char *filename;

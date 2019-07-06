@@ -9,18 +9,17 @@ int main() {
 		return -1;
 	}
 
-	const char* input = "GdkknVnqkc";
-	std::cout << "Input string:" << std::endl;
+	int input = 1;
+	int input2 = 2;
+	std::cout << "Input:" << std::endl;
 	std::cout << input << std::endl;
+	std::cout << "Input2:" << std::endl;
+	std::cout << input2 << std::endl;
 
-	char* output = test.run(input);
-	std::cout << "Output string:" << std::endl;
-	std::cout << output << std::endl;
-
-	if (output != NULL)
-	{
-		free(output);
-		output = NULL;
+	float* output = test.run(input, input2);
+	std::cout << "Output:" << std::endl;
+	for (int i = 1; i < 100; i++) {
+		std::cout << output[i] << std::endl;
 	}
 
 	return SUCCESS;
