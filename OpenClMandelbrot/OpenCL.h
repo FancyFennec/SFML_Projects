@@ -1,6 +1,5 @@
 #pragma once
 
-#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
 #define SUCCESS 0
 #define FAILURE 1
 
@@ -13,7 +12,7 @@
 class OpenCL
 {
 public:
-	OpenCL(int SCREEN_WIDTH, const char *filename);
+	OpenCL(int SCREEN_WIDTH, int SCREEN_HEIGHT, const char *filename);
 	~OpenCL();
 	int initialise();
 	int* run(int nZoom, double x, double y);
@@ -23,6 +22,7 @@ private:
 	int openFile(const char *filename, std::string& s);
 
 	const int SCREEN_WIDTH;
+	const int SCREEN_HEIGHT;
 	int* output;
 
 	cl_uint numPlatforms;

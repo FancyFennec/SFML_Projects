@@ -1,10 +1,11 @@
 #include "OpenCL.h"
 
-OpenCL::OpenCL(int SCREEN_WIDTH, const char *filename) :
+OpenCL::OpenCL(int SCREEN_WIDTH, int SCREEN_HEIGHT, const char *filename) :
 filename(filename),
-SCREEN_WIDTH(SCREEN_WIDTH)
+SCREEN_WIDTH(SCREEN_WIDTH),
+SCREEN_HEIGHT(SCREEN_HEIGHT)
 {
-	output = new int[SCREEN_WIDTH * SCREEN_WIDTH];
+	output = new int[SCREEN_WIDTH * SCREEN_HEIGHT];
 }
 
 OpenCL::~OpenCL()
@@ -59,7 +60,7 @@ int OpenCL::openFile(const char * filename, std::string & s)
 
 int OpenCL::initialise()
 {
-	/*Step1: Getting platforms and choose an available one.*/
+	/*Getting platforms and choose an available one.*/
 	if (clGetPlatformIDs(0, NULL, &numPlatforms) != CL_SUCCESS)
 	{
 		std::cout << "Error: Getting platforms!" << std::endl;
@@ -75,7 +76,7 @@ int OpenCL::initialise()
 		free(platforms);
 	}
 
-	/*Step 2:Query the platform and choose the first GPU device if has one.Otherwise use the CPU as device.*/
+	/*Query the platform and choose the first GPU device if has one.Otherwise use the CPU as device.*/
 	clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, NULL, &numDevices);
 	if (numDevices == 0) //no GPU available.
 	{
@@ -91,45 +92,46 @@ int OpenCL::initialise()
 		clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, numDevices, devices, NULL);
 	}
 
-	/*Step 3: Create context.*/
+	/*Create context.*/
 	context = clCreateContext(NULL, 1, devices, NULL, NULL, NULL);
 
 	/*Step 4: Creating command queue associate with the context.*/
-	commandQueue = clCreateCommandQueue(context, devices[0], 0, NULL);
+	commandQueue = clCreateCommandQueueWithProperties(context, devices[0], 0, NULL);
 
-	/*Step 5: Create program object */
+	/*Create program object */
 	std::string sourceStr;
 	openFile(filename, sourceStr);
 	const char *source = sourceStr.c_str();
 	size_t sourceSize[] = { strlen(source) };
 	program = clCreateProgramWithSource(context, 1, &source, sourceSize, NULL);
 
-	/*Step 6: Build program. */
+	/*Build program. */
 	clBuildProgram(program, 1, devices, NULL, NULL, NULL);
 
-	/*Step 8: Create kernel object */
+	/*Create kernel object */
 	kernel = clCreateKernel(program, "helloworld", NULL);
 }
 
 int* OpenCL::run(int nZoom, double x, double y)
 {
-	cl_mem outputBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, SCREEN_WIDTH * SCREEN_WIDTH * sizeof(int), NULL, NULL);
+	cl_mem outputBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int), NULL, NULL);
 
-	/*Step 9: Sets Kernel arguments.*/
+	/*Set Kernel arguments.*/
 	clSetKernelArg(kernel, 0, sizeof(int), &SCREEN_WIDTH);
-	clSetKernelArg(kernel, 1, sizeof(int), &nZoom);
-	clSetKernelArg(kernel, 2, sizeof(double), &x);
-	clSetKernelArg(kernel, 3, sizeof(double), &y);
-	clSetKernelArg(kernel, 4, sizeof(cl_mem), &outputBuffer);
+	clSetKernelArg(kernel, 1, sizeof(int), &SCREEN_HEIGHT);
+	clSetKernelArg(kernel, 2, sizeof(int), &nZoom);
+	clSetKernelArg(kernel, 3, sizeof(double), &x);
+	clSetKernelArg(kernel, 4, sizeof(double), &y);
+	clSetKernelArg(kernel, 5, sizeof(cl_mem), &outputBuffer);
 
-	/*Step 10: Running the kernel.*/
-	size_t global_work_size[1] = { SCREEN_WIDTH * SCREEN_WIDTH };
+	/*Running the kernel.*/
+	size_t global_work_size[1] = { SCREEN_WIDTH * SCREEN_HEIGHT };
 	clEnqueueNDRangeKernel(commandQueue, kernel, 1, NULL, global_work_size, NULL, 0, NULL, NULL);
 
-	/*Step 11: Read the cout put back to host memory.*/
-	clEnqueueReadBuffer(commandQueue, outputBuffer, CL_TRUE, 0, SCREEN_WIDTH * SCREEN_WIDTH * sizeof(int), output, 0, NULL, NULL);
+	/*Read the cout put back to host memory.*/
+	clEnqueueReadBuffer(commandQueue, outputBuffer, CL_TRUE, 0, SCREEN_WIDTH * SCREEN_HEIGHT * sizeof(int), output, 0, NULL, NULL);
 
-	clReleaseMemObject(outputBuffer);
+	clReleaseMemObject(outputBuffer);//Release buffer.
 
 	return output;
 }

@@ -83,7 +83,7 @@ void computeMandelbrot()
 		for (int j = 0; j < SCREEN_HEIGHT; j++) {
 
 			double cr = (((double)i - SCREEN_WIDTH / 2) / (SCREEN_WIDTH * pow(2, nZoom - 1))) + x;
-			double ci = (((double)j - SCREEN_HEIGHT / 2) / (SCREEN_WIDTH * pow(2, nZoom - 1))) + y;
+			double ci = (((double)j - SCREEN_HEIGHT / 2) / (SCREEN_HEIGHT * pow(2, nZoom - 1))) + y;
 
 			double zr = 0, zi = 0;
 

@@ -1,8 +1,9 @@
 #include <SFML/Graphics.hpp>
 #include "OpenCL.h"
 
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 800;
+
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 
 sf::Uint8 pixls[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
 int coords[SCREEN_HEIGHT * SCREEN_WIDTH];
@@ -15,10 +16,10 @@ int iterations = 1000;
 sf::Texture background = sf::Texture();
 sf::Sprite backgroundImage = sf::Sprite(background);
 
-sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot");
+sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot", sf::Style::Fullscreen);
 sf::Event event;
 
-OpenCL test(SCREEN_WIDTH, "HelloWorld_Kernel.cl");
+OpenCL test(SCREEN_WIDTH, SCREEN_HEIGHT, "HelloWorld_Kernel.cl");
 int* output;
 
 void initialisePixels();
@@ -63,21 +64,26 @@ void eventHandling()
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			mousePos = sf::Mouse::getPosition(window);
 			x += ((double)mousePos.x - SCREEN_WIDTH / 2) / (SCREEN_WIDTH * pow(2, nZoom - 1));
-			y += ((double)mousePos.y - SCREEN_HEIGHT / 2) / (SCREEN_WIDTH * pow(2, nZoom - 1));
+			y += ((double)mousePos.y - SCREEN_HEIGHT / 2) / (SCREEN_HEIGHT * pow(2, nZoom - 1));
 			nZoom++;
 		}
 		if (event.mouseButton.button == sf::Mouse::Right) {
 			mousePos = sf::Mouse::getPosition(window);
 			x += ((double)mousePos.x - SCREEN_WIDTH / 2) / (SCREEN_WIDTH * pow(2, nZoom - 1));
-			y += ((double)mousePos.y - SCREEN_HEIGHT / 2) / (SCREEN_WIDTH * pow(2, nZoom - 1));
+			y += ((double)mousePos.y - SCREEN_HEIGHT / 2) / (SCREEN_HEIGHT * pow(2, nZoom - 1));
 			nZoom--;
 		}
 	}
 	if (event.type == sf::Event::KeyPressed) {
 		if (event.key.code == sf::Keyboard::S) {
 			std::cout << "Saving Image. \n";
-			background.copyToImage().saveToFile("C:/Users/JonasAllemann/MandelBrot.png");
-
+			background.copyToImage().saveToFile("Mandelbrot.png");
+		}
+	}
+	if (event.type == sf::Event::KeyPressed) {
+		if (event.key.code == sf::Keyboard::Escape) {
+			std::cout << "Closing Window. \n";
+			window.close();
 		}
 	}
 }
@@ -87,22 +93,22 @@ void computeMandelbrot()
 	output = test.run(nZoom, x, y);
 
 #pragma omp parallel for
-	for (int i = 0; i < SCREEN_WIDTH; i++) {
-		for (int j = 0; j < SCREEN_HEIGHT; j++) {
-			pixls[getCoords(i, j)] = output[i * SCREEN_WIDTH + j];
+	for (int j = 0; j < SCREEN_HEIGHT; j++) {
+		for (int i = 0; i < SCREEN_WIDTH; i++) {
+			pixls[getCoords(i, j)] = output[j * SCREEN_WIDTH + i];
 		}
 	}
 }
 
 int getCoords(int i, int j) {
-	if (i < 0 || i >= SCREEN_WIDTH || j < 0 || i >= SCREEN_HEIGHT) {
+	if (i < 0 || i >= SCREEN_WIDTH || j < 0 || j >= SCREEN_HEIGHT) {
 		std::cout << "ERROR! i or j out of range.\n";
 		std::cout << "i was: " << i << "\n";
 		std::cout << "j was: " << j << "\n";
 		return -1;
 	}
 
-	return (i + j * SCREEN_WIDTH) * 4;
+	return (j * SCREEN_WIDTH + i) * 4;
 }
 
 void drawImage(sf::Sprite &sprite)

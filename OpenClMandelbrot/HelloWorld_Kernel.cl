@@ -1,25 +1,28 @@
 double power(int b);
 
-__kernel void helloworld(int SCREEN_WIDTH, int nZoom, double x, double y, __global int* out)
+__kernel void helloworld(int SCREEN_WIDTH, int SCREEN_HEIGHT, int nZoom, double x, double y, __global int* out)
 {
+	double aspectRatio = (double)SCREEN_WIDTH / (double)SCREEN_HEIGHT;
 	int num = get_global_id(0);
-	double cr = (((num - 1) / SCREEN_WIDTH) - SCREEN_WIDTH / 2.0) / (SCREEN_WIDTH * power(nZoom - 1)) + x;
-	double ci = (((num - 1) % SCREEN_WIDTH) - SCREEN_WIDTH / 2.0) / (SCREEN_WIDTH * power(nZoom - 1)) + y;
+
+	double cr = (((num - 1) % SCREEN_WIDTH) - SCREEN_WIDTH / 2.0) / (SCREEN_WIDTH * power(nZoom - 1)) + x;
+	double ci = (((num - 1) / SCREEN_WIDTH) - SCREEN_HEIGHT / 2.0) / (SCREEN_HEIGHT * power(nZoom - 1)) + y;
+
+	cr = cr * aspectRatio;
 
 	double zr = 0.0;
 	double zi = 0.0;
 
 	int nIter = 0;
-
-	while (zr * zr + zi * zi < 4 && nIter <= 1000) {
+	int maxIter = 2000;
+	while (zr * zr + zi * zi < 4 && nIter <= maxIter) {
 		double tr = zr * zr - zi * zi + cr;
 		zi = 2 * zr *zi + ci;
 		zr = tr;
 		nIter++;
 	}
-
-	if (nIter <= 1000) {
-		out[num] = (int)((255 * nIter) / 1000);
+	if (nIter <= maxIter) {
+		out[num] = (int)((255 * nIter) / maxIter);
 	}
 	else {
 		out[num] = 0;
@@ -27,7 +30,6 @@ __kernel void helloworld(int SCREEN_WIDTH, int nZoom, double x, double y, __glob
 }
 
 double power(int b){
-	
 	if(b < 0){
 		double a = 0.5;
 		for(int i = 1; i < -b; i++){
