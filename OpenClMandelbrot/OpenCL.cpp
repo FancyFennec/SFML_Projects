@@ -4,7 +4,7 @@ OpenCL::OpenCL(int SCREEN_WIDTH, const char *filename) :
 filename(filename),
 SCREEN_WIDTH(SCREEN_WIDTH)
 {
-	output = new double[SCREEN_WIDTH * SCREEN_WIDTH];
+	output = new int[SCREEN_WIDTH * SCREEN_WIDTH];
 }
 
 OpenCL::~OpenCL()
@@ -111,11 +111,9 @@ int OpenCL::initialise()
 	kernel = clCreateKernel(program, "helloworld", NULL);
 }
 
-double* OpenCL::run(int nZoom, double x, double y)
+int* OpenCL::run(int nZoom, double x, double y)
 {
-	//double* output = (double*) malloc(SCREEN_WIDTH * SCREEN_WIDTH);
-
-	cl_mem outputBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, SCREEN_WIDTH * SCREEN_WIDTH * sizeof(double), NULL, NULL);
+	cl_mem outputBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, SCREEN_WIDTH * SCREEN_WIDTH * sizeof(int), NULL, NULL);
 
 	/*Step 9: Sets Kernel arguments.*/
 	clSetKernelArg(kernel, 0, sizeof(int), &SCREEN_WIDTH);
@@ -129,7 +127,7 @@ double* OpenCL::run(int nZoom, double x, double y)
 	clEnqueueNDRangeKernel(commandQueue, kernel, 1, NULL, global_work_size, NULL, 0, NULL, NULL);
 
 	/*Step 11: Read the cout put back to host memory.*/
-	clEnqueueReadBuffer(commandQueue, outputBuffer, CL_TRUE, 0, SCREEN_WIDTH * SCREEN_WIDTH * sizeof(double), output, 0, NULL, NULL);
+	clEnqueueReadBuffer(commandQueue, outputBuffer, CL_TRUE, 0, SCREEN_WIDTH * SCREEN_WIDTH * sizeof(int), output, 0, NULL, NULL);
 
 	clReleaseMemObject(outputBuffer);
 

@@ -19,7 +19,7 @@ sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot"
 sf::Event event;
 
 OpenCL test(SCREEN_WIDTH, "HelloWorld_Kernel.cl");
-double* output;
+int* output;
 
 void initialisePixels();
 void drawImage(sf::Sprite &sprite);
@@ -122,39 +122,3 @@ void initialisePixels()
 		pixls[i + 3] = 255;
 	}
 }
-
-//#include <ctime>
-//#include "OpenCL.h"
-//#include <algorithm>
-//int main() {
-//	OpenCL test(800, "HelloWorld_Kernel.cl");
-//	if (!test.initialise()) {
-//		return -1;
-//	}
-//
-//	int nZoom = 2;
-//
-//	int x = 400;
-//	int y = 400;
-//
-//	double* output;
-//
-//	clock_t begin = clock();
-//
-//	for (int i = 0; i < 10; i++) {
-//		output = test.run(nZoom, x, y);
-//		std::cout << " max element is: " << *std::max_element(output, output + 800 * 800) << std::endl;
-//	}
-//
-//	/*std::cout << "Output:" << std::endl;
-//	for (int i = 1; i < 10000; i++) {
-//		std::cout << output[i] << std::endl;
-//	}*/
-//
-//	//std::cout << " max element is: " << *std::max_element(output, output + 800 * 800) << std::endl;
-//
-//	clock_t end = clock();
-//	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
-//	std::cout << "Elapsed time is: " << elapsed_secs << std::endl;
-//	return SUCCESS;
-//}
