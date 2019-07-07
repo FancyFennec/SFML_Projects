@@ -13,14 +13,17 @@
 class OpenCL
 {
 public:
-	OpenCL(const char *filename);
+	OpenCL(int SCREEN_WIDTH, const char *filename);
 	~OpenCL();
 	int initialise();
-	float*  run(int i, int j);
+	double* run(int nZoom, double x, double y);
 	
 private:
 	const char *filename;
 	int openFile(const char *filename, std::string& s);
+
+	const int SCREEN_WIDTH;
+	double* output;
 
 	cl_uint numPlatforms;
 	cl_platform_id platform = NULL;

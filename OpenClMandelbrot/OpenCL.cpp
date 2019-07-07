@@ -1,15 +1,30 @@
 #include "OpenCL.h"
 
-
-
-OpenCL::OpenCL(const char *filename) :
-filename(filename)
+OpenCL::OpenCL(int SCREEN_WIDTH, const char *filename) :
+filename(filename),
+SCREEN_WIDTH(SCREEN_WIDTH)
 {
+	output = new double[SCREEN_WIDTH * SCREEN_WIDTH];
 }
-
 
 OpenCL::~OpenCL()
 {
+	clReleaseKernel(kernel); //Release kernel.
+	clReleaseProgram(program); //Release the program object.
+	clReleaseContext(context); //Release context.
+	clReleaseCommandQueue(commandQueue); //Release  Command queue.
+
+	if (output != NULL)
+	{
+		free(output);
+		output = NULL;
+	}
+
+	if (devices != NULL)
+	{
+		free(devices);
+		devices = NULL;
+	}
 }
 
 int OpenCL::openFile(const char * filename, std::string & s)
@@ -91,52 +106,32 @@ int OpenCL::initialise()
 
 	/*Step 6: Build program. */
 	clBuildProgram(program, 1, devices, NULL, NULL, NULL);
-}
 
-float* OpenCL::run(int i, int j)
-{
-	/*Step 7: Initial input,output for the host and create memory objects for the kernel*/
-	float* output = (float*)malloc(100);
-
-	cl_mem inputBuffer = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-		1 * sizeof(int), (void *)&i, NULL);
-	cl_mem inputBuffer2 = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-		1 * sizeof(int), (void *)&j, NULL);
-	cl_mem outputBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY,
-		100 * sizeof(float), NULL, NULL);
-
-	
 	/*Step 8: Create kernel object */
 	kernel = clCreateKernel(program, "helloworld", NULL);
+}
+
+double* OpenCL::run(int nZoom, double x, double y)
+{
+	//double* output = (double*) malloc(SCREEN_WIDTH * SCREEN_WIDTH);
+
+	cl_mem outputBuffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY, SCREEN_WIDTH * SCREEN_WIDTH * sizeof(double), NULL, NULL);
 
 	/*Step 9: Sets Kernel arguments.*/
-	clSetKernelArg(kernel, 0, sizeof(cl_mem), (void *)&inputBuffer);
-	clSetKernelArg(kernel, 1, sizeof(cl_mem), (void *)&inputBuffer2);
-	clSetKernelArg(kernel, 2, sizeof(cl_mem), (void *)&outputBuffer);
+	clSetKernelArg(kernel, 0, sizeof(int), &SCREEN_WIDTH);
+	clSetKernelArg(kernel, 1, sizeof(int), &nZoom);
+	clSetKernelArg(kernel, 2, sizeof(double), &x);
+	clSetKernelArg(kernel, 3, sizeof(double), &y);
+	clSetKernelArg(kernel, 4, sizeof(cl_mem), &outputBuffer);
 
 	/*Step 10: Running the kernel.*/
-	size_t global_work_size[2] = { 100 };
-	clEnqueueNDRangeKernel(commandQueue, kernel, 1, NULL,
-		global_work_size, NULL, 0, NULL, NULL);
+	size_t global_work_size[1] = { SCREEN_WIDTH * SCREEN_WIDTH };
+	clEnqueueNDRangeKernel(commandQueue, kernel, 1, NULL, global_work_size, NULL, 0, NULL, NULL);
 
 	/*Step 11: Read the cout put back to host memory.*/
-	clEnqueueReadBuffer(commandQueue, outputBuffer, CL_TRUE, 0,
-		100 * sizeof(float), output, 0, NULL, NULL);
+	clEnqueueReadBuffer(commandQueue, outputBuffer, CL_TRUE, 0, SCREEN_WIDTH * SCREEN_WIDTH * sizeof(double), output, 0, NULL, NULL);
 
-
-	clReleaseKernel(kernel); //Release kernel.
-	clReleaseProgram(program); //Release the program object.
-	clReleaseMemObject(inputBuffer); //Release mem object.
-	clReleaseMemObject(inputBuffer2);
 	clReleaseMemObject(outputBuffer);
-	clReleaseCommandQueue(commandQueue); //Release  Command queue.
-	clReleaseContext(context); //Release context.
-
-	if (devices != NULL)
-	{
-		free(devices);
-		devices = NULL;
-	}
 
 	return output;
 }
