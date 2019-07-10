@@ -2,8 +2,8 @@
 #include "OpenCL.h"
 
 
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
+const int SCREEN_WIDTH = 1400;
+const int SCREEN_HEIGHT = 900;
 
 sf::Uint8 pixls[SCREEN_HEIGHT * SCREEN_WIDTH * 4];
 int coords[SCREEN_HEIGHT * SCREEN_WIDTH];
@@ -16,7 +16,8 @@ int iterations = 1000;
 sf::Texture background = sf::Texture();
 sf::Sprite backgroundImage = sf::Sprite(background);
 
-sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot", sf::Style::Fullscreen);
+sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot");
+//sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot", sf::Style::Fullscreen);
 sf::Event event;
 
 OpenCL test(SCREEN_WIDTH, SCREEN_HEIGHT, "HelloWorld_Kernel.cl");

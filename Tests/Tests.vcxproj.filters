@@ -33,4 +33,7 @@
   <ItemGroup>
     <None Include="HelloWorld_Kernel.cl" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="inplane.txt" />
+  </ItemGroup>
 </Project>

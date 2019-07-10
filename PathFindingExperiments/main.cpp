@@ -15,7 +15,7 @@ EventHandler eventHandler;
 
 std::vector <DrawableObject> drawables;
 
-void initialiseTiles();
+void initialiseData();
 void initialisePixels();
 
 void eventHandling();
@@ -31,7 +31,7 @@ int main() {
 	background.create(SCREEN_WIDTH, SCREEN_HEIGHT);
 	sf::Sprite sprite(background);
 
-	initialiseTiles();
+	initialiseData();
 	initialisePixels();
 
 	while (window.isOpen())
@@ -137,7 +137,7 @@ void setPixelColor(const int &pixelIndex, const sf::Color &color) {
 	pixels[pixelIndex + 3] = color.a;
 }
 
-void initialiseTiles()
+void initialiseData()
 {
 	std::ifstream myfile("example.txt");
 	std::string line;

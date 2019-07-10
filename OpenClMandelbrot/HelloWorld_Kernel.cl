@@ -14,7 +14,7 @@ __kernel void helloworld(int SCREEN_WIDTH, int SCREEN_HEIGHT, int nZoom, double 
 	double zi = 0.0;
 
 	int nIter = 0;
-	int maxIter = 2000;
+	int maxIter = 1000;
 	while (zr * zr + zi * zi < 4 && nIter <= maxIter) {
 		double tr = zr * zr - zi * zi + cr;
 		zi = 2 * zr *zi + ci;
