@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UnitTest", "UnitTest\UnitTe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenCLMandelbrot", "OpenClMandelbrot\OpenClMandelbrot.vcxproj", "{E8239F8E-59E2-4F6E-82E9-20B03DD74606}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "LSystems", "LSystems\LSystems.vcxproj", "{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -121,6 +123,16 @@ Global
 		{E8239F8E-59E2-4F6E-82E9-20B03DD74606}.Release|x64.Build.0 = Release|x64
 		{E8239F8E-59E2-4F6E-82E9-20B03DD74606}.Release|x86.ActiveCfg = Release|Win32
 		{E8239F8E-59E2-4F6E-82E9-20B03DD74606}.Release|x86.Build.0 = Release|Win32
+		{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}.Debug|x64.ActiveCfg = Debug|x64
+		{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}.Debug|x64.Build.0 = Debug|x64
+		{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}.Debug|x86.ActiveCfg = Debug|Win32
+		{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}.Debug|x86.Build.0 = Debug|Win32
+		{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}.Release|Any CPU.ActiveCfg = Release|Win32
+		{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}.Release|x64.ActiveCfg = Release|x64
+		{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}.Release|x64.Build.0 = Release|x64
+		{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}.Release|x86.ActiveCfg = Release|Win32
+		{6A6C9D77-572A-4350-9B73-CAAB51A0BE13}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
