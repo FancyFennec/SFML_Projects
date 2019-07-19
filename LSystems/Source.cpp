@@ -27,7 +27,15 @@ sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "L-Systems")
 sf::RenderStates state;
 sf::Event event;
 
-unsigned int step = 1;
+sf::Texture tex;
+
+bool mouseIsPressed = false;
+
+int step = 1;
+int oldStep = 0;
+float size = 1.0f;
+float oldSize = 1.0f;
+
 std::string result = "";
 
 //float angle = pi * 45.0f / 360.0f;
@@ -50,7 +58,9 @@ int main() {
 
 	window.setFramerateLimit(60);
 	ImGui::SFML::Init(window);
-	state.transform.translate(sf::Vector2f(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 + 300));
+
+	tex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	sf::Sprite sprite(tex);
 
 	while (window.isOpen())
 	{
@@ -65,14 +75,39 @@ int main() {
 
 		window.clear(sf::Color(25.5f, 25.5f, 25.5f, 255.0f));
 
+		sprite.setTexture(tex);
+		window.draw(sprite);
+
 		for (std::vector<sf::Vertex> line : lines) {
+			sf::Vector2i mousePos = sf::Mouse::getPosition();
+
+			state.transform.translate(-570 + mousePos.x, mousePos.y);
 			window.draw(line.data(), line.size(), sf::LinesStrip, state);
+			state.transform.translate(570 - mousePos.x, -mousePos.y);
+		}
+		if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered()) {
+			if (mouseIsPressed) {
+				tex.update(window);
+			}
 		}
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
 		ImGui::Begin("Hello, world!");
 		ImGui::Button("Look at this pretty button");
+		ImGui::InputInt("L-Ssteps", &step);
+		ImGui::SliderFloat("Size", &size, 0.0f, 1.0f);
+
+		if (oldStep != step) {
+			result = createString(step);
+			createLines(result);
+			oldStep = step;
+		}
+		if (oldSize != size) {
+			createLines(result);
+			oldSize = size;
+		}
+
 		ImGui::End();
 
 		ImGui::SFML::Render(window);
@@ -143,7 +178,7 @@ void createLines(std::string input)
 	srand(time(0));  // Initialize random number generator.
 	float r;
 	lines.clear();
-	sf::Vector2f currentSegment(0.0f, -400.0f / (float)(pow(2, step)));
+	sf::Vector2f currentSegment(0.0f, - size * 400.0f / (float)(pow(2, step)));
 
 	std::vector<sf::Vector2f> lineSegments = { currentSegment };
 	std::vector<sf::Vector2f> savedPos = { sf::Vector2f(0.0f, 0.0f) };
@@ -216,18 +251,24 @@ void eventHandling()
 {
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			result = createString(step);
-			createLines(result);
-			step++;
+			mouseIsPressed = true;
 		}
 	}
-
+	if (event.type == sf::Event::MouseButtonReleased) {
+		if (event.mouseButton.button == sf::Mouse::Left) {
+			mouseIsPressed = false;
+		}
+	}
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Right) {
 			createLines(result);
 		}
 	}
-
+	if (event.type == sf::Event::KeyPressed) {
+		if (event.key.code == sf::Keyboard::Q) {
+			tex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+		}
+	}
 	if (event.type == sf::Event::KeyPressed) {
 		if (event.key.code == sf::Keyboard::Escape) {
 			window.close();
