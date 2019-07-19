@@ -3,12 +3,21 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <ctime>
+#include <cstdlib> 
+
+#include "Imgui/imgui.h"
+#include "Imgui/imgui-SFML.h"
+
 
 void eventHandling();
 bool checkString(std::string input);
 sf::Vector2f rotate(float alpha, sf::Vector2f vec);
 std::string createString(unsigned int n);
-void drawString(std::string input);
+void createLines(std::string input);
+void setColour(std::vector<sf::Vertex>& line);
+
+sf::Clock deltaClock;
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
@@ -21,30 +30,34 @@ sf::Event event;
 unsigned int step = 1;
 std::string result = "";
 
-float angle = pi * 25.0f / 360.0f;
+//float angle = pi * 45.0f / 360.0f;
 //std::string axiom = "B";
 //std::map<char, std::string> rules = { 
 //	{'A', "AA"}, {'B', "A[-B]+B"}
 //	, {'[', "["}, {']', "]"}, {'-', "-"}, {'+', "+"}
 //};
+
+float angle = pi * 25.0f / 360.0f;
 std::string axiom = "C";
 std::map<char, std::string> rules = {
 	{'A', "AA"}, {'C', "A+[[C]-C]-A[-AC]+C"}
 	, {'[', "["}, {']', "]"}, {'-', "-"}, {'+', "+"}
 };
 
-
-
+std::vector<std::vector<sf::Vertex>> lines = {};
 
 int main() {
 
 	window.setFramerateLimit(60);
+	ImGui::SFML::Init(window);
 	state.transform.translate(sf::Vector2f(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 + 300));
 
 	while (window.isOpen())
 	{
 		while (window.pollEvent(event))
 		{
+			ImGui::SFML::ProcessEvent(event);
+
 			if (event.type == sf::Event::Closed)
 				window.close();
 			eventHandling();
@@ -52,7 +65,17 @@ int main() {
 
 		window.clear(sf::Color(25.5f, 25.5f, 25.5f, 255.0f));
 
-		drawString(result);
+		for (std::vector<sf::Vertex> line : lines) {
+			window.draw(line.data(), line.size(), sf::LinesStrip, state);
+		}
+
+		ImGui::SFML::Update(window, deltaClock.restart());
+
+		ImGui::Begin("Hello, world!");
+		ImGui::Button("Look at this pretty button");
+		ImGui::End();
+
+		ImGui::SFML::Render(window);
 
 		window.display();
 	}
@@ -109,7 +132,7 @@ std::string createString(unsigned int n)
 	return value;
 }
 
-void drawString(std::string input)
+void createLines(std::string input)
 {
 
 	if (!checkString(input)) {
@@ -117,55 +140,76 @@ void drawString(std::string input)
 		return;
 	}
 
-	sf::Vector2f startSegment(0.0f, -400.0f / (float)(pow(2, step)));
-	std::vector<sf::Vector2f> lineSegments = { startSegment };
+	srand(time(0));  // Initialize random number generator.
+	float r;
+	lines.clear();
+	sf::Vector2f currentSegment(0.0f, -400.0f / (float)(pow(2, step)));
+
+	std::vector<sf::Vector2f> lineSegments = { currentSegment };
 	std::vector<sf::Vector2f> savedPos = { sf::Vector2f(0.0f, 0.0f) };
 	std::vector<sf::Vertex> line = { sf::Vector2f (0.0f, 0.0f) };
+	setColour(line);
+	
 
 	for (char c : input) {
+
+		r = (float)((rand() % 11) + -5) / 20.0f;
+
 		switch (c) {
 		case ('A'):
 		case ('B'): {
-			line.push_back(line.back().position + startSegment);
+			line.push_back(line.back().position + currentSegment * (1 + r));
+			setColour(line);
 			break;
 		}
 		case('['): {
 			if (line.size() > 1) {
-				window.draw(line.data(), line.size(), sf::LinesStrip, state);
+				lines.push_back(line);
 				lineSegments.push_back(line.back().position - line[line.size() - 2].position);
 			}
 			else {
 				lineSegments.push_back(lineSegments.back());
 			}
 
+			currentSegment = lineSegments.back();
 			savedPos.push_back(line.back().position);
 			line = { savedPos.back() };
-
-			break;
-		}
-		case('-'): {
-			startSegment = rotate(angle, lineSegments.back());
+			setColour(line);
 
 			break;
 		}
 		case(']'): {
-			if (line.size() > 1) window.draw(line.data(), line.size(), sf::LinesStrip, state);
+			if (line.size() > 1) lines.push_back(line);
 
+			currentSegment = lineSegments.back();
 			lineSegments.pop_back();
 
 			line = { savedPos.back() };
+			setColour(line);
 			savedPos.pop_back();
 
 			break;
 		}
+		case('-'): {
+			currentSegment = rotate(angle  * (1 + r), currentSegment);
+
+			break;
+		}
 		case('+'): {
-			startSegment = rotate(-angle, lineSegments.back());
+			currentSegment = rotate(-angle * (1 + r), currentSegment);
 
 			break;
 		}
 		}
 	}
-	window.draw(line.data(), line.size(), sf::LinesStrip, state);
+	lines.push_back(line);
+}
+
+void setColour(std::vector<sf::Vertex>& line)
+{
+	line.back().color.r = sf::Color::Green.r * (1 + line.back().position.y / SCREEN_HEIGHT) - sf::Color::Red.r * line.back().position.y / SCREEN_HEIGHT;
+	line.back().color.g = sf::Color::Green.g * (1 + line.back().position.y / SCREEN_HEIGHT) - sf::Color::Red.g * line.back().position.y / SCREEN_HEIGHT;
+	line.back().color.b = sf::Color::Green.b * (1 + line.back().position.y / SCREEN_HEIGHT) - sf::Color::Red.b * line.back().position.y / SCREEN_HEIGHT;
 }
 
 void eventHandling()
@@ -173,7 +217,14 @@ void eventHandling()
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			result = createString(step);
+			createLines(result);
 			step++;
+		}
+	}
+
+	if (event.type == sf::Event::MouseButtonPressed) {
+		if (event.mouseButton.button == sf::Mouse::Right) {
+			createLines(result);
 		}
 	}
 
