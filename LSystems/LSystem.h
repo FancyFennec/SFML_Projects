@@ -9,7 +9,7 @@
 class LSystem
 {
 public:
-	LSystem(float angle, std::string axiom, std::map<char, std::string> rules);
+	LSystem(std::string name, float angle, std::string axiom, std::map<char, std::string> rules);
 	~LSystem();
 
 	void createString(unsigned int n);
@@ -24,7 +24,6 @@ private:
 	sf::Vector2f rotate(float alpha, sf::Vector2f vec);
 
 	unsigned int step = 0;
-	float pi = 3.14159265358979323846f;
 
 	float angle;
 	std::string axiom;
@@ -34,7 +33,8 @@ private:
 
 
 
-LSystem::LSystem(float angle, std::string axiom, std::map<char, std::string> rules):
+LSystem::LSystem(std::string name, float angle, std::string axiom, std::map<char, std::string> rules):
+	name(name),
 	angle(angle),
 	axiom(axiom),
 	rules(rules)

@@ -35,21 +35,23 @@ float oldSize = 1.0f;
 
 std::string result = "";
 
-//float angle = pi * 45.0f / 360.0f;
-//std::string axiom = "B";
-//std::map<char, std::string> rules = { 
-//	{'A', "AA"}, {'B', "A[-B]+B"}
-//	, {'[', "["}, {']', "]"}, {'-', "-"}, {'+', "+"}
-//};
-
-float angle = pi * 25.0f / 360.0f;
-std::string axiom = "C";
-std::map<char, std::string> rules = {
+float angle1 = pi * 25.0f / 360.0f;
+std::string axiom1 = "C";
+std::map<char, std::string> rules1 = {
 	{'A', "AA"}, {'C', "A+[[C]-C]-A[-AC]+C"}
 	, {'[', "["}, {']', "]"}, {'-', "-"}, {'+', "+"}
 };
 
-LSystem ls(angle, axiom, rules);
+float angle2 = pi * 45.0f / 360.0f;
+std::string axiom2 = "B";
+std::map<char, std::string> rules2 = {
+	{'A', "AA"}, {'B', "A[-B]+B"}
+	, {'[', "["}, {']', "]"}, {'-', "-"}, {'+', "+"}
+};
+
+std::vector<LSystem> lSystems = { LSystem("Wheat", angle1, axiom1, rules1), LSystem("Tree", angle2, axiom2, rules2) };
+
+LSystem ls = lSystems[0];
 
 std::vector<std::vector<sf::Vertex>> lines = {};
 
@@ -96,12 +98,23 @@ int main() {
 		ImGui::Begin("Chose L-System Settings");
 		ImGui::InputInt("Step Size", &step);
 		ImGui::SliderFloat("Brush Size", &size, 0.0f, 1.0f);
-		
-		ImGui::ImageButton(sprite, sf::Vector2f(50, 50), 1);
-		ImGui::SameLine();
-		ImGui::ImageButton(sprite, sf::Vector2f(50, 50), 1);
-		ImGui::SameLine();
-		ImGui::ImageButton(sprite, sf::Vector2f(50, 50), 1);
+
+
+		if (ImGui::CollapsingHeader("L-System")) {
+			for (size_t i = 0; i < lSystems.size(); i++) {
+				if (ImGui::Button(lSystems[i].name.data())) {
+					ls = lSystems[i];
+				}
+			}
+		}
+
+		if (ImGui::CollapsingHeader("Brush")) {
+			ImGui::ImageButton(sprite, sf::Vector2f(50, 50), 1);
+			ImGui::SameLine();
+			ImGui::ImageButton(sprite, sf::Vector2f(50, 50), 1);
+			ImGui::SameLine();
+			ImGui::ImageButton(sprite, sf::Vector2f(50, 50), 1);
+		}
 
 		if (oldStep != step) {
 			ls.createString(step);
