@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <string>
@@ -9,15 +10,21 @@
 #include "Imgui/imgui.h"
 #include "Imgui/imgui-SFML.h"
 #include "LSystem.h"
+#include "json.hpp"
+
+using json = nlohmann::json;
 
 
 void eventHandling();
 void setColour(std::vector<sf::Vertex>& line);
+void loadLSystems(const char* filename);
+void saveLSystems(const char* filename);
 
 sf::Clock deltaClock;
 
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 800;
+const char* filename = "lsystems.json";
 float pi = 3.14159265358979323846f;
 
 sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "L-Systems");
@@ -25,6 +32,7 @@ sf::RenderStates state;
 sf::Event event;
 
 sf::Texture tex;
+sf::Vector2i mousePos;
 
 bool mouseIsPressed = false;
 
@@ -33,29 +41,23 @@ int oldStep = 0;
 float size = 1.0f;
 float oldSize = 1.0f;
 
-std::string result = "";
+static char name[128] = "";
+static char axiom[128] = "";
+static float angle = 0;
 
-float angle1 = pi * 25.0f / 360.0f;
-std::string axiom1 = "C";
-std::map<char, std::string> rules1 = {
-	{'A', "AA"}, {'C', "A+[[C]-C]-A[-AC]+C"}
-	, {'[', "["}, {']', "]"}, {'-', "-"}, {'+', "+"}
-};
+static char key[128] = "";
+static char value[128] = "";
 
-float angle2 = pi * 45.0f / 360.0f;
-std::string axiom2 = "B";
-std::map<char, std::string> rules2 = {
-	{'A', "AA"}, {'B', "A[-B]+B"}
-	, {'[', "["}, {']', "]"}, {'-', "-"}, {'+', "+"}
-};
+std::map<char, std::string> rules;
 
-std::vector<LSystem> lSystems = { LSystem("Wheat", angle1, axiom1, rules1), LSystem("Tree", angle2, axiom2, rules2) };
-
-LSystem ls = lSystems[0];
+std::vector<LSystem> lSystems;
+LSystem ls;
 
 std::vector<std::vector<sf::Vertex>> lines = {};
 
 int main() {
+	loadLSystems(filename);
+	ls = lSystems[0];
 
 	window.setFramerateLimit(60);
 	ImGui::SFML::Init(window);
@@ -79,9 +81,9 @@ int main() {
 		sprite.setTexture(tex);
 		window.draw(sprite);
 
-		for (std::vector<sf::Vertex> line : ls.lines) {
-			sf::Vector2i mousePos = sf::Mouse::getPosition();
+		mousePos = sf::Mouse::getPosition();
 
+		for (std::vector<sf::Vertex> line : ls.lines) {
 			setColour(line);
 			state.transform.translate(-570 + mousePos.x, mousePos.y);
 			window.draw(line.data(), line.size(), sf::LinesStrip, state);
@@ -95,16 +97,25 @@ int main() {
 
 		ImGui::SFML::Update(window, deltaClock.restart());
 
-		ImGui::Begin("Chose L-System Settings");
+		ImGui::Begin("L-System Settings");
 		ImGui::InputInt("Step Size", &step);
 		ImGui::SliderFloat("Brush Size", &size, 0.0f, 1.0f);
 
-
-		if (ImGui::CollapsingHeader("L-System")) {
+		if (ImGui::CollapsingHeader("Select L-System")) {
 			for (size_t i = 0; i < lSystems.size(); i++) {
-				if (ImGui::Button(lSystems[i].name.data())) {
+				if (ImGui::Button(lSystems[i].name.data(),sf::Vector2i(80,20))) {
 					ls = lSystems[i];
+					ls.createString(step);
+					ls.createLines(size);
 				}
+				ImGui::SameLine();
+				ImGui::Dummy(sf::Vector2i(80, 20));
+				ImGui::SameLine();
+				ImGui::PushID(i);
+				if (ImGui::Button("Delete")) {
+					lSystems.erase(lSystems.begin() + i);
+				}
+				ImGui::PopID();
 			}
 		}
 
@@ -128,12 +139,102 @@ int main() {
 
 		ImGui::End();
 
+		ImGui::Begin("Create L-System");
+
+		ImGui::InputText("Name : ", name, sizeof(name));
+		ImGui::InputFloat("Angle : ", &angle);
+		ImGui::InputText("Axiom : ", axiom, sizeof(axiom));
+		if (ImGui::Button("Add new Rule")) rules[key[0]] = value;
+		ImGui::InputText("Key : ", key, sizeof(key));
+		ImGui::InputText("Value : ", value, sizeof(value));
+	
+		if (ImGui::CollapsingHeader("Show Rules")) {
+			int i = 0;
+			for (auto &rule : rules) {
+				char key[1] = { rule.first };
+
+				ImGui::Text(key);
+				ImGui::SameLine();
+				ImGui::Text(" | ");
+				ImGui::SameLine();
+				ImGui::Text(rule.second.data());
+				ImGui::SameLine();
+				ImGui::PushID(i);
+
+				if (ImGui::Button("Delete")) rules.erase(rule.first);
+				ImGui::PopID();
+				i++;
+			}
+		}
+		if (ImGui::Button("Add L-System")) {
+			std::string lName(name);
+			std::string lAxiom(axiom);
+			if (!lName.empty() && !lAxiom.empty() && angle != 0.0f && !rules.empty()) {
+				lSystems.push_back(LSystem(lName, angle * pi / 180.0f, lAxiom, rules));
+			}
+			else {
+				std::cout << "Error!!! You have missed a field." << std::endl;
+			}
+		}
+
+		ImGui::End();
+
 		ImGui::SFML::Render(window);
 
 		window.display();
 	}
 
+	saveLSystems(filename);
+
 	return 0;
+}
+
+void loadLSystems(const char* filename)
+{
+	std::ifstream i(filename);
+	json j;
+	i >> j;
+
+	for (auto lSys : j["lslist"]) {
+		std::string name = lSys["name"].get<std::string>();
+		float angle = lSys["angle"].get<float>();
+		std::string axiom = lSys["axiom"].get<std::string>();
+		std::map<char, std::string> rules;
+
+		for (auto &rule : lSys["rules"].get<json::object_t>()) {
+			char key = rule.first[0];
+			std::string value = rule.second.get<std::string>();
+
+			rules[key] = value;
+		}
+
+		lSystems.push_back(LSystem(name, angle, axiom, rules));
+	}
+}
+
+void saveLSystems(const char* filename)
+{
+	json jList;
+
+	for (auto sys : lSystems) {
+		json jSys;
+		jSys["name"] = sys.name;
+		jSys["angle"] = sys.angle;
+		jSys["axiom"] = sys.axiom;
+
+		jSys["rules"] = {};
+		for (auto &pair : sys.rules) {
+			std::string key = { pair.first };
+			std::string value = pair.second;
+
+			jSys["rules"][key]=value;
+		}
+
+		jList["lslist"].push_back(jSys);
+	}
+
+	std::ofstream o(filename);
+	o << jList << std::endl;
 }
 
 void setColour(std::vector<sf::Vertex>& line)

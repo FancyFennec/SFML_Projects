@@ -9,6 +9,7 @@
 class LSystem
 {
 public:
+	LSystem();
 	LSystem(std::string name, float angle, std::string axiom, std::map<char, std::string> rules);
 	~LSystem();
 
@@ -17,21 +18,29 @@ public:
 	void setAngle(float angle) { this->angle = angle; };
 
 	std::string name;
+	float angle;
+	std::string axiom;
+	std::map<char, std::string> rules;
+
 	std::vector<std::vector<sf::Vertex>> lines = {};
 
 private:
+	float pi = 3.14159265358979323846f;
+
 	bool checkString(std::string input);
 	sf::Vector2f rotate(float alpha, sf::Vector2f vec);
 
 	unsigned int step = 0;
-
-	float angle;
-	std::string axiom;
-	std::map<char, std::string> rules;
 	std::string currentLString = "";
 };
 
-
+LSystem::LSystem() :
+	name("please change me"),
+	angle(pi / 4.0f),
+	axiom("A"),
+	rules(std::initializer_list<std::pair<const char, std::string> > { {'A', "AA"} })
+{
+}
 
 LSystem::LSystem(std::string name, float angle, std::string axiom, std::map<char, std::string> rules):
 	name(name),
