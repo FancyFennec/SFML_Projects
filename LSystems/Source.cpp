@@ -18,6 +18,8 @@ using json = nlohmann::json;
 void eventHandling();
 void setColour(std::vector<sf::Vertex>& line);
 void loadLSystems(const char* filename);
+void createWindow();
+void settingsWindow();
 void saveLSystems(const char* filename);
 
 sf::Clock deltaClock;
@@ -32,9 +34,11 @@ sf::RenderStates state;
 sf::Event event;
 
 sf::Texture tex;
+sf::Sprite sprite;
 sf::Vector2i mousePos;
 
 bool mouseIsPressed = false;
+bool isRandom = false;
 
 int step = 1;
 int oldStep = 0;
@@ -63,7 +67,7 @@ int main() {
 	ImGui::SFML::Init(window);
 
 	tex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
-	sf::Sprite sprite(tex);
+	sprite.setTexture(tex);
 
 	while (window.isOpen())
 	{
@@ -95,89 +99,8 @@ int main() {
 			}
 		}
 
-		ImGui::SFML::Update(window, deltaClock.restart());
-
-		ImGui::Begin("L-System Settings");
-		ImGui::InputInt("Step Size", &step);
-		ImGui::SliderFloat("Brush Size", &size, 0.0f, 1.0f);
-
-		if (ImGui::CollapsingHeader("Select L-System")) {
-			for (size_t i = 0; i < lSystems.size(); i++) {
-				if (ImGui::Button(lSystems[i].name.data(),sf::Vector2i(80,20))) {
-					ls = lSystems[i];
-					ls.createString(step);
-					ls.createLines(size);
-				}
-				ImGui::SameLine();
-				ImGui::Dummy(sf::Vector2i(80, 20));
-				ImGui::SameLine();
-				ImGui::PushID(i);
-				if (ImGui::Button("Delete")) {
-					lSystems.erase(lSystems.begin() + i);
-				}
-				ImGui::PopID();
-			}
-		}
-
-		if (ImGui::CollapsingHeader("Brush")) {
-			ImGui::ImageButton(sprite, sf::Vector2f(50, 50), 1);
-			ImGui::SameLine();
-			ImGui::ImageButton(sprite, sf::Vector2f(50, 50), 1);
-			ImGui::SameLine();
-			ImGui::ImageButton(sprite, sf::Vector2f(50, 50), 1);
-		}
-
-		if (oldStep != step) {
-			ls.createString(step);
-			ls.createLines(size);
-			oldStep = step;
-		}
-		if (oldSize != size) {
-			ls.createLines(size);
-			oldSize = size;
-		}
-
-		ImGui::End();
-
-		ImGui::Begin("Create L-System");
-
-		ImGui::InputText("Name : ", name, sizeof(name));
-		ImGui::InputFloat("Angle : ", &angle);
-		ImGui::InputText("Axiom : ", axiom, sizeof(axiom));
-		if (ImGui::Button("Add new Rule")) rules[key[0]] = value;
-		ImGui::InputText("Key : ", key, sizeof(key));
-		ImGui::InputText("Value : ", value, sizeof(value));
-	
-		if (ImGui::CollapsingHeader("Show Rules")) {
-			int i = 0;
-			for (auto &rule : rules) {
-				char key[1] = { rule.first };
-
-				ImGui::Text(key);
-				ImGui::SameLine();
-				ImGui::Text(" | ");
-				ImGui::SameLine();
-				ImGui::Text(rule.second.data());
-				ImGui::SameLine();
-				ImGui::PushID(i);
-
-				if (ImGui::Button("Delete")) rules.erase(rule.first);
-				ImGui::PopID();
-				i++;
-			}
-		}
-		if (ImGui::Button("Add L-System")) {
-			std::string lName(name);
-			std::string lAxiom(axiom);
-			if (!lName.empty() && !lAxiom.empty() && angle != 0.0f && !rules.empty()) {
-				lSystems.push_back(LSystem(lName, angle * pi / 180.0f, lAxiom, rules));
-			}
-			else {
-				std::cout << "Error!!! You have missed a field." << std::endl;
-			}
-		}
-
-		ImGui::End();
+		settingsWindow();
+		createWindow();
 
 		ImGui::SFML::Render(window);
 
@@ -187,6 +110,98 @@ int main() {
 	saveLSystems(filename);
 
 	return 0;
+}
+
+void settingsWindow()
+{
+	ImGui::SFML::Update(window, deltaClock.restart());
+
+	ImGui::Begin("L-System Settings");
+	ImGui::InputInt("Step Size", &step);
+	ImGui::SliderFloat("Brush Size", &size, 0.0f, 1.0f);
+	if (ImGui::Button("Random")) {
+		isRandom = !isRandom;
+		ls.isRandom = isRandom;
+		ls.createLines(size);
+	}
+
+	if (ImGui::CollapsingHeader("Select L-System")) {
+		for (size_t i = 0; i < lSystems.size(); i++) {
+			if (ImGui::Button(lSystems[i].name.data(), sf::Vector2i(80, 20))) {
+
+				ls = lSystems[i];
+				ls.isRandom = isRandom;
+				ls.createString(step);
+				ls.createLines(size);
+			}
+			ImGui::SameLine();
+			ImGui::Dummy(sf::Vector2i(30, 20));
+
+			ImGui::SameLine();
+			ImGui::PushID(i);
+			if (ImGui::Button("Delete")) {
+				lSystems.erase(lSystems.begin() + i);
+			}
+			ImGui::PopID();
+		}
+	}
+
+	if (oldStep != step) {
+		if (step >= 0) {
+			ls.createString(step);
+			ls.createLines(size);
+			oldStep = step;
+		}
+	}
+	if (oldSize != size) {
+		ls.createLines(size);
+		oldSize = size;
+	}
+
+	ImGui::End();
+}
+
+void createWindow()
+{
+	ImGui::Begin("Create L-System");
+
+	ImGui::InputText("Name : ", name, sizeof(name));
+	ImGui::InputFloat("Angle : ", &angle);
+	ImGui::InputText("Axiom : ", axiom, sizeof(axiom));
+	if (ImGui::Button("Add new Rule")) rules[key[0]] = value;
+	ImGui::InputText("Key : ", key, sizeof(key));
+	ImGui::InputText("Value : ", value, sizeof(value));
+
+	if (ImGui::CollapsingHeader("Show Rules")) {
+		int i = 0;
+		for (auto &rule : rules) {
+			char key[1] = { rule.first };
+
+			ImGui::Text(key);
+			ImGui::SameLine();
+			ImGui::Text(" | ");
+			ImGui::SameLine();
+			ImGui::Text(rule.second.data());
+			ImGui::SameLine();
+			ImGui::PushID(i);
+
+			if (ImGui::Button("Delete")) rules.erase(rule.first);
+			ImGui::PopID();
+			i++;
+		}
+	}
+	if (ImGui::Button("Add L-System")) {
+		std::string lName(name);
+		std::string lAxiom(axiom);
+		if (!lName.empty() && !lAxiom.empty() && angle != 0.0f && !rules.empty()) {
+			lSystems.push_back(LSystem(lName, angle * pi / 180.0f, lAxiom, rules));
+		}
+		else {
+			std::cout << "Error!!! You have missed a field." << std::endl;
+		}
+	}
+
+	ImGui::End();
 }
 
 void loadLSystems(const char* filename)
