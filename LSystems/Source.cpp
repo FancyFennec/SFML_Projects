@@ -33,11 +33,14 @@ sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "L-Systems")
 sf::RenderStates state;
 sf::Event event;
 
-sf::Texture tex;
+sf::Texture currentTexture;
+std::vector<sf::Texture> textureBuffer;
+std::vector<sf::Texture>::iterator textureIter;
 sf::Sprite sprite;
 sf::Vector2i mousePos;
 
-bool mouseIsPressed = false;
+bool mouseIsHeld = false;
+bool ctrlIsPressed = false;
 bool isRandom = false;
 
 int step = 1;
@@ -66,8 +69,11 @@ int main() {
 	window.setFramerateLimit(60);
 	ImGui::SFML::Init(window);
 
-	tex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
-	sprite.setTexture(tex);
+	currentTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	textureBuffer.reserve(10);
+	textureBuffer.push_back(currentTexture);
+	textureIter = textureBuffer.begin();
+	sprite.setTexture(currentTexture);
 
 	while (window.isOpen())
 	{
@@ -82,7 +88,7 @@ int main() {
 
 		window.clear(sf::Color(25.5f, 25.5f, 25.5f, 255.0f));
 
-		sprite.setTexture(tex);
+		sprite.setTexture(currentTexture);
 		window.draw(sprite);
 
 		mousePos = sf::Mouse::getPosition();
@@ -94,8 +100,8 @@ int main() {
 			state.transform.translate(570 - mousePos.x, -mousePos.y);
 		}
 		if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-			if (mouseIsPressed) {
-				tex.update(window);
+			if (mouseIsHeld) {
+				currentTexture.update(window);
 			}
 		}
 
@@ -168,6 +174,7 @@ void createWindow()
 	ImGui::InputText("Name : ", name, sizeof(name));
 	ImGui::InputFloat("Angle : ", &angle);
 	ImGui::InputText("Axiom : ", axiom, sizeof(axiom));
+
 	if (ImGui::Button("Add new Rule")) rules[key[0]] = value;
 	ImGui::InputText("Key : ", key, sizeof(key));
 	ImGui::InputText("Value : ", value, sizeof(value));
@@ -265,12 +272,23 @@ void eventHandling()
 {
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			mouseIsPressed = true;
+			mouseIsHeld = true;
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			mouseIsPressed = false;
+			if (textureIter != textureBuffer.end() - 1) {
+				auto iter = textureIter + 1;
+				while (iter < textureBuffer.end()) {
+					textureBuffer.erase(iter);
+				}
+			}
+			if (textureBuffer.size() >= 10) {
+				textureBuffer.erase(textureBuffer.begin());
+			}
+			textureBuffer.push_back(currentTexture);
+			textureIter = textureBuffer.end() - 1;
+			mouseIsHeld = false;
 		}
 	}
 	if (event.type == sf::Event::MouseButtonPressed) {
@@ -280,7 +298,29 @@ void eventHandling()
 	}
 	if (event.type == sf::Event::KeyPressed) {
 		if (event.key.code == sf::Keyboard::Q) {
-			tex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+			currentTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+		}
+	}
+	if (event.type == sf::Event::KeyPressed) {
+		if (event.key.code == sf::Keyboard::LControl) {
+			ctrlIsPressed = true;
+		}
+	}
+	if (event.type == sf::Event::KeyReleased) {
+		if (event.key.code == sf::Keyboard::LControl) {
+			ctrlIsPressed = false;
+		}
+	}
+	if (event.type == sf::Event::KeyPressed) {
+		if (ctrlIsPressed && event.key.code == sf::Keyboard::Z) {
+			if (textureIter != textureBuffer.begin()) --textureIter;
+			currentTexture = *textureIter;
+		}
+	}
+	if (event.type == sf::Event::KeyPressed) {
+		if (ctrlIsPressed && event.key.code == sf::Keyboard::Y) {
+			if (textureIter != textureBuffer.end() - 1) ++textureIter;
+			currentTexture = *textureIter;
 		}
 	}
 	if (event.type == sf::Event::KeyPressed) {
