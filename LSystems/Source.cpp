@@ -105,6 +105,8 @@ int main() {
 			}
 		}
 
+		ImGui::SFML::Update(window, deltaClock.restart());
+
 		settingsWindow();
 		createWindow();
 
@@ -120,8 +122,6 @@ int main() {
 
 void settingsWindow()
 {
-	ImGui::SFML::Update(window, deltaClock.restart());
-
 	ImGui::Begin("L-System Settings");
 	ImGui::InputInt("Step Size", &step);
 	ImGui::SliderFloat("Brush Size", &size, 0.0f, 1.0f);
@@ -249,7 +249,7 @@ void saveLSystems(const char* filename)
 			std::string key = { pair.first };
 			std::string value = pair.second;
 
-			jSys["rules"][key]=value;
+			jSys["rules"][key] = value;
 		}
 
 		jList["lslist"].push_back(jSys);
