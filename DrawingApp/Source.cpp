@@ -37,7 +37,7 @@ sf::Sprite sprite;
 sf::RenderStates state;
 
 float radius = 20.f;
-int stepsize = 40;
+int stepsize = 10;
 float deltaDist = 0;
 
 sf::Vector2i lastPos;
@@ -51,6 +51,7 @@ sf::CircleShape circle;
 
 int main() {
 	getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
+
 	window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
 	//window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
 	window.setMouseCursorVisible(false);
@@ -187,14 +188,19 @@ void eventHandling()
 }
 
 void getDesktopResolution(int& horizontal, int& vertical) {
-	RECT desktop;
-	// Get a handle to the desktop window
-	const HWND hDesktop = GetDesktopWindow();
-	// Get the size of screen to the variable desktop
-	GetWindowRect(hDesktop, &desktop);
-	// The top left corner will have coordinates (0,0)
-	// and the bottom right corner will have coordinates
-	// (horizontal, vertical)
-	horizontal = desktop.right;
-	vertical = desktop.bottom;
+
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+
+	// Alternative Solution :
+	//RECT desktop;
+	//// Get a handle to the desktop window
+	//const HWND hDesktop = GetDesktopWindow();
+	//// Get the size of screen to the variable desktop
+	//GetWindowRect(hDesktop, &desktop);
+	//
+	//horizontal = desktop.right;
+	//horizontal = desktop.bottom;
+
+	horizontal = GetSystemMetrics(SM_CXSCREEN);
+	vertical = GetSystemMetrics(SM_CYSCREEN);
 }
