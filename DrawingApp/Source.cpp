@@ -15,10 +15,12 @@ using json = nlohmann::json;
 
 
 void eventHandling();
+void drawOnCanvas();
 void getDesktopResolution(int& horizontal, int& vertical);
 float distance(const sf::Vector2i& lastPos, const sf::Vector2i& mousePos) {
 	return (float)sqrt((lastPos.x - mousePos.x) * (lastPos.x - mousePos.x) + (lastPos.y - mousePos.y) * (lastPos.y - mousePos.y));
 }
+void updateCanvas(sf::Vector2f &circlePos);
 
 sf::Clock deltaClock;
 
@@ -28,6 +30,12 @@ const float PI = 3.14159265358979323846f;
 
 sf::RenderWindow window;
 sf::Event event;
+
+sf::Color brushColour(255, 255, 255, 15);
+
+sf::Image canvasImage;
+sf::Texture canvasTex;
+sf::Sprite canvasSprite;
 
 sf::Texture currentTexture;
 std::vector<sf::Texture> textureBuffer;
@@ -56,9 +64,17 @@ int main() {
 	//window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
 	window.setMouseCursorVisible(false);
 	window.setFramerateLimit(120);
+	window.clear(sf::Color(25, 25, 25, 255));
+
 	ImGui::SFML::Init(window);
 
 	currentTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	canvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0,0,0,0));
+	canvasTex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	canvasTex.update(canvasImage);
+	canvasSprite.setTexture(canvasTex);
+
 	textureBuffer.reserve(10);
 	textureBuffer.push_back(currentTexture);
 	textureIter = textureBuffer.begin();
@@ -67,13 +83,14 @@ int main() {
 	circle.setRadius(radius);
 	circle.setOrigin(sf::Vector2f(radius, radius));
 	circle.setOutlineColor(sf::Color::White);
-	circle.setFillColor(sf::Color(255, 255, 255, 10));
+	circle.setFillColor(sf::Color(0, 0, 0, 0));
 
 	mousePos, lastPos, oldPos = sf::Mouse::getPosition();
 
 	while (window.isOpen())
 	{
 		mousePos = sf::Mouse::getPosition(window);
+
 		while (window.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
@@ -83,29 +100,18 @@ int main() {
 			eventHandling();
 		}
 
-		window.clear(sf::Color(25, 25, 25, 255));
 		sprite.setTexture(currentTexture);
 		window.draw(sprite);
 
 		if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 			if (mouseIsHeld) {
-				deltaDist += distance(lastPos, mousePos);
-				if (deltaDist > stepsize) {
-					int circles = std::floorf(deltaDist / stepsize);
-					deltaDist -= circles * stepsize;
-
-					sf::Vector2f deltaVec = circles == 0 ? sf::Vector2f(0.0f, 0.0f) : sf::Vector2f(mousePos - oldPos) / (float)circles;
-					sf::Vector2f circlePos = sf::Vector2f(oldPos);
-					oldPos = mousePos;
-
-					for (int i = 0; i < circles; i++) {
-						circle.setPosition(circlePos);
-						circlePos += deltaVec;
-						window.draw(circle);
-					}
-				}
-				currentTexture.update(window);
+				drawOnCanvas();
+				window.draw(canvasSprite);
 			}
+		}
+
+		if (event.type == sf::Event::MouseButtonReleased) {
+			currentTexture.update(window);
 		}
 
 		circle.setPosition(sf::Vector2f(mousePos));
@@ -122,7 +128,48 @@ int main() {
 	return 0;
 }
 
+void drawOnCanvas()
+{
+	deltaDist += distance(lastPos, mousePos);
+	if (deltaDist > stepsize) {
+		int circles = std::floorf(deltaDist / stepsize);
+		deltaDist -= circles * stepsize;
 
+		sf::Vector2f deltaVec = circles == 0 ? sf::Vector2f(0.0f, 0.0f) : sf::Vector2f(mousePos - oldPos) / (float)circles;
+		sf::Vector2f circlePos = sf::Vector2f(oldPos);
+		oldPos = mousePos;
+
+		for (int i = 0; i < circles; i++) {
+			circlePos += deltaVec;
+			updateCanvas(circlePos);
+		}
+	}
+}
+
+void updateCanvas(sf::Vector2f &circlePos)
+{
+	int xPos;
+	int yPos;
+
+	for (int i = -std::ceilf(radius); i < std::ceilf(radius); i++) {
+		for (int j = -std::ceilf(radius); j < std::ceilf(radius); j++) {
+
+			xPos = circlePos.x + i;
+			yPos = circlePos.y + j;
+
+			if (xPos >= 0 && yPos >= 0 && xPos < SCREEN_WIDTH && yPos < SCREEN_HEIGHT) {
+				canvasImage.setPixel(xPos, yPos, i*i + j * j > radius * radius ?
+					canvasImage.getPixel(xPos, yPos) :
+					canvasImage.getPixel(xPos, yPos).a >= brushColour.a ?
+					canvasImage.getPixel(xPos, yPos) :
+					brushColour
+				);
+			}
+		}
+	}
+	canvasTex.update(canvasImage);
+	canvasSprite.setTexture(canvasTex);
+}
 
 void eventHandling()
 {
@@ -131,9 +178,17 @@ void eventHandling()
 			deltaDist = 0.0f;
 			lastPos, oldPos = mousePos;
 			mouseIsHeld = true;
+			canvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0, 0, 0, 0));
+			canvasTex.update(canvasImage);
+			canvasSprite.setTexture(canvasTex);
+
+			sf::Vector2f circlePos = sf::Vector2f(mousePos);
+			updateCanvas(circlePos);
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
+		currentTexture.update(window);
+
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (textureIter != textureBuffer.end() - 1) {
 				auto iter = textureIter + 1;
@@ -190,16 +245,6 @@ void eventHandling()
 void getDesktopResolution(int& horizontal, int& vertical) {
 
 	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
-
-	// Alternative Solution :
-	//RECT desktop;
-	//// Get a handle to the desktop window
-	//const HWND hDesktop = GetDesktopWindow();
-	//// Get the size of screen to the variable desktop
-	//GetWindowRect(hDesktop, &desktop);
-	//
-	//horizontal = desktop.right;
-	//horizontal = desktop.bottom;
 
 	horizontal = GetSystemMetrics(SM_CXSCREEN);
 	vertical = GetSystemMetrics(SM_CYSCREEN);
