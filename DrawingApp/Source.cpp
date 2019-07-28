@@ -18,7 +18,7 @@ void eventHandling();
 void drawOnCanvas();
 void getDesktopResolution(int& horizontal, int& vertical);
 float distance(const sf::Vector2i& lastPos, const sf::Vector2i& mousePos) {
-	return (float)sqrt((lastPos.x - mousePos.x) * (lastPos.x - mousePos.x) + (lastPos.y - mousePos.y) * (lastPos.y - mousePos.y));
+	return sqrtf(powf((lastPos.x - mousePos.x), 2.0f) + powf(lastPos.y - mousePos.y, 2.0f));
 }
 void updateCanvas(sf::Vector2f &circlePos);
 
@@ -31,7 +31,7 @@ const float PI = 3.14159265358979323846f;
 sf::RenderWindow window;
 sf::Event event;
 
-sf::Color brushColour(255, 255, 255, 15);
+sf::Color brushColour(25, 25, 25, 15);
 
 sf::Image canvasImage;
 sf::Texture canvasTex;
@@ -48,27 +48,30 @@ float radius = 20.f;
 int stepsize = 10;
 float deltaDist = 0;
 
+sf::Vector2i deltaLastPos;
 sf::Vector2i lastPos;
+sf::Vector2i deltaOldPos;
 sf::Vector2i oldPos;
 sf::Vector2i mousePos;
 
 bool mouseIsHeld = false;
 bool ctrlIsPressed = false;
 
-sf::CircleShape circle;
-
 int main() {
 	getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-	window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
-	//window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
+	SCREEN_WIDTH = 800; 
+	SCREEN_HEIGHT = 800;
+	//window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
+	window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
 	window.setMouseCursorVisible(false);
 	window.setFramerateLimit(120);
-	window.clear(sf::Color(25, 25, 25, 255));
+	window.clear(sf::Color(255, 255, 255, 255));
 
 	ImGui::SFML::Init(window);
 
 	currentTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	currentTexture.update(window);
+	sprite.setTexture(currentTexture);
 
 	canvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0,0,0,0));
 	canvasTex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -78,14 +81,6 @@ int main() {
 	textureBuffer.reserve(10);
 	textureBuffer.push_back(currentTexture);
 	textureIter = textureBuffer.begin();
-	sprite.setTexture(currentTexture);
-
-	circle.setRadius(radius);
-	circle.setOrigin(sf::Vector2f(radius, radius));
-	circle.setOutlineColor(sf::Color::White);
-	circle.setFillColor(sf::Color(0, 0, 0, 0));
-
-	mousePos, lastPos, oldPos = sf::Mouse::getPosition();
 
 	while (window.isOpen())
 	{
@@ -114,13 +109,14 @@ int main() {
 			currentTexture.update(window);
 		}
 
-		circle.setPosition(sf::Vector2f(mousePos));
-		window.draw(circle);
-
 		ImGui::SFML::Update(window, deltaClock.restart());
 		ImGui::SFML::Render(window);
 
 		window.display();
+
+		deltaOldPos = lastPos - oldPos;
+		deltaLastPos = mousePos - lastPos;
+		oldPos = lastPos;
 		lastPos = mousePos;
 	}
 
@@ -130,14 +126,13 @@ int main() {
 
 void drawOnCanvas()
 {
-	deltaDist += distance(lastPos, mousePos);
+	deltaDist += distance(lastPos, oldPos);
 	if (deltaDist > stepsize) {
 		int circles = std::floorf(deltaDist / stepsize);
 		deltaDist -= circles * stepsize;
 
-		sf::Vector2f deltaVec = circles == 0 ? sf::Vector2f(0.0f, 0.0f) : sf::Vector2f(mousePos - oldPos) / (float)circles;
+		sf::Vector2f deltaVec = circles == 0 ? sf::Vector2f(0.0f, 0.0f) : sf::Vector2f(lastPos - oldPos) / (float)circles;
 		sf::Vector2f circlePos = sf::Vector2f(oldPos);
-		oldPos = mousePos;
 
 		for (int i = 0; i < circles; i++) {
 			circlePos += deltaVec;
