@@ -119,15 +119,29 @@ void drawOnCanvas()
 	deltaDist += distance(cursorPositions[2], cursorPositions[1]);
 	if (deltaDist > stepsize) {
 		int circles = std::floorf(deltaDist / stepsize);
-		deltaDist -= circles * stepsize;
 
-		sf::Vector2f deltaVec = circles == 0 ? sf::Vector2f(0.0f, 0.0f) : sf::Vector2f(cursorPositions[2] - cursorPositions[1]) / (float)circles;
-		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[1]);
-
-		for (int i = 0; i < circles; i++) {
-			circlePos += deltaVec;
+		if (circles == 1) {
+			sf::Vector2f circlePos = sf::Vector2f(cursorPositions[1]);
 			updateCanvas(circlePos);
 		}
+		else {
+			sf::Vector2f control1 = sf::Vector2f(cursorPositions[1])
+				+ sf::Vector2f(cursorPositions[1] - cursorPositions[0]) / 3.0f;
+			sf::Vector2f control2 = sf::Vector2f(cursorPositions[2])
+				+ sf::Vector2f(cursorPositions[2] - cursorPositions[3]) / 3.0f;
+
+			for (int i = 0; i < circles; i++) {
+				sf::Vector2f circlePos(0, 0);
+				float x = (float)i / circles;
+
+				circlePos += powf(1 - x, 3)*sf::Vector2f(cursorPositions[1]);
+				circlePos += 3.0f * powf(1 - x, 2)*x*control1;
+				circlePos += 3.0f * (1 - x)*x*x*control2;
+				circlePos += x * x*x*sf::Vector2f(cursorPositions[2]);
+				updateCanvas(circlePos);
+			}
+		}
+		deltaDist -= stepsize * circles;
 	}
 }
 
