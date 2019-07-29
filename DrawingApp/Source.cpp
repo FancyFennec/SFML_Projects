@@ -208,7 +208,8 @@ void eventHandling()
 	}
 	if (event.type == sf::Event::KeyPressed) {
 		if (event.key.code == sf::Keyboard::Q) {
-			currentTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+			window.clear(sf::Color(255, 255, 255, 255));
+			currentTexture.update(window);
 		}
 	}
 	if (event.type == sf::Event::KeyPressed) {
