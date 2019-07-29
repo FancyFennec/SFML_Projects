@@ -48,11 +48,7 @@ float radius = 20.f;
 int stepsize = 10;
 float deltaDist = 0;
 
-sf::Vector2i deltaLastPos;
-sf::Vector2i lastPos;
-sf::Vector2i deltaOldPos;
-sf::Vector2i oldPos;
-sf::Vector2i mousePos;
+std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
 
 bool mouseIsHeld = false;
 bool ctrlIsPressed = false;
@@ -84,7 +80,8 @@ int main() {
 
 	while (window.isOpen())
 	{
-		mousePos = sf::Mouse::getPosition(window);
+		cursorPositions.erase(cursorPositions.begin());
+		cursorPositions.push_back(sf::Mouse::getPosition(window));
 
 		while (window.pollEvent(event))
 		{
@@ -113,26 +110,19 @@ int main() {
 		ImGui::SFML::Render(window);
 
 		window.display();
-
-		deltaOldPos = lastPos - oldPos;
-		deltaLastPos = mousePos - lastPos;
-		oldPos = lastPos;
-		lastPos = mousePos;
 	}
-
-
 	return 0;
 }
 
 void drawOnCanvas()
 {
-	deltaDist += distance(lastPos, oldPos);
+	deltaDist += distance(cursorPositions[2], cursorPositions[1]);
 	if (deltaDist > stepsize) {
 		int circles = std::floorf(deltaDist / stepsize);
 		deltaDist -= circles * stepsize;
 
-		sf::Vector2f deltaVec = circles == 0 ? sf::Vector2f(0.0f, 0.0f) : sf::Vector2f(lastPos - oldPos) / (float)circles;
-		sf::Vector2f circlePos = sf::Vector2f(oldPos);
+		sf::Vector2f deltaVec = circles == 0 ? sf::Vector2f(0.0f, 0.0f) : sf::Vector2f(cursorPositions[2] - cursorPositions[1]) / (float)circles;
+		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[1]);
 
 		for (int i = 0; i < circles; i++) {
 			circlePos += deltaVec;
@@ -171,13 +161,12 @@ void eventHandling()
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			deltaDist = 0.0f;
-			lastPos, oldPos = mousePos;
 			mouseIsHeld = true;
 			canvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0, 0, 0, 0));
 			canvasTex.update(canvasImage);
 			canvasSprite.setTexture(canvasTex);
 
-			sf::Vector2f circlePos = sf::Vector2f(mousePos);
+			sf::Vector2f circlePos = sf::Vector2f(cursorPositions.back());
 			updateCanvas(circlePos);
 		}
 	}
