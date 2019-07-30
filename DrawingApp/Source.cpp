@@ -31,7 +31,7 @@ const float PI = 3.14159265358979323846f;
 sf::RenderWindow window;
 sf::Event event;
 
-sf::Color brushColour(25, 25, 25, 15);
+sf::Color brushColour(25, 25, 25, 50);
 
 sf::Image canvasImage;
 sf::Texture canvasTex;
@@ -44,14 +44,16 @@ sf::Sprite sprite;
 
 sf::RenderStates state;
 
-float radius = 20.f;
-int stepsize = 10;
+float radius = 10.f;
+int stepsize = 5;
 float deltaDist = 0;
 
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
 
 bool mouseIsHeld = false;
 bool ctrlIsPressed = false;
+
+float col[3] = { 0,0,0 };// TODO: make it such that we can chose the color we draw with
 
 int main() {
 	getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -95,6 +97,16 @@ int main() {
 		sprite.setTexture(currentTexture);
 		window.draw(sprite);
 
+		ImGui::SFML::Update(window, deltaClock.restart());
+
+		ImGui::Begin("Brush Settings");
+		if (ImGui::ColorPicker3("Brush Colour", col)) {
+			brushColour.r = (sf::Uint8)(col[0] * 255);
+			brushColour.g = (sf::Uint8)(col[1] * 255);
+			brushColour.b = (sf::Uint8)(col[2] * 255);
+		}
+		ImGui::End();
+
 		if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 			if (mouseIsHeld) {
 				drawOnCanvas();
@@ -106,7 +118,6 @@ int main() {
 			currentTexture.update(window);
 		}
 
-		ImGui::SFML::Update(window, deltaClock.restart());
 		ImGui::SFML::Render(window);
 
 		window.display();
@@ -118,7 +129,7 @@ void drawOnCanvas()
 {
 	deltaDist += distance(cursorPositions[2], cursorPositions[1]);
 	if (deltaDist > stepsize) {
-		int circles = std::floorf(deltaDist / stepsize);
+		int circles = (int)std::floorf(deltaDist / stepsize);
 
 		if (circles == 1) {
 			sf::Vector2f circlePos = sf::Vector2f(cursorPositions[1]);
@@ -130,6 +141,7 @@ void drawOnCanvas()
 			sf::Vector2f control2 = sf::Vector2f(cursorPositions[2])
 				+ sf::Vector2f(cursorPositions[2] - cursorPositions[3]) / 3.0f;
 
+#pragma omp parallel for
 			for (int i = 0; i < circles; i++) {
 				sf::Vector2f circlePos(0, 0);
 				float x = (float)i / circles;
@@ -150,11 +162,13 @@ void updateCanvas(sf::Vector2f &circlePos)
 	int xPos;
 	int yPos;
 
-	for (int i = -std::ceilf(radius); i < std::ceilf(radius); i++) {
-		for (int j = -std::ceilf(radius); j < std::ceilf(radius); j++) {
+	int rad = std::ceilf(radius);
+//#pragma omp parallel for
+	for (int i = -rad; i < rad; i++) {
+		for (int j = -rad; j < rad; j++) {
 
-			xPos = circlePos.x + i;
-			yPos = circlePos.y + j;
+			xPos = (int)circlePos.x + i;
+			yPos = (int)circlePos.y + j;
 
 			if (xPos >= 0 && yPos >= 0 && xPos < SCREEN_WIDTH && yPos < SCREEN_HEIGHT) {
 				canvasImage.setPixel(xPos, yPos, i*i + j * j > radius * radius ?
