@@ -17,10 +17,10 @@ using json = nlohmann::json;
 void eventHandling();
 void drawOnCanvas();
 void getDesktopResolution(int& horizontal, int& vertical);
-float distance(const sf::Vector2i& lastPos, const sf::Vector2i& mousePos) {
-	return sqrtf(powf((lastPos.x - mousePos.x), 2.0f) + powf(lastPos.y - mousePos.y, 2.0f));
+float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
+	return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
 }
-void updateCanvas(sf::Vector2f &circlePos);
+void drawShapeAt(sf::Vector2f &circlePos);
 
 sf::Clock deltaClock;
 
@@ -30,8 +30,6 @@ const float PI = 3.14159265358979323846f;
 
 sf::RenderWindow window;
 sf::Event event;
-
-sf::Color brushColour(25, 25, 25, 50);
 
 sf::Image canvasImage;
 sf::Texture canvasTex;
@@ -45,22 +43,24 @@ sf::Sprite sprite;
 sf::RenderStates state;
 
 float radius = 10.f;
-int stepsize = 5;
-float deltaDist = 0;
+float stepsize = 20;
+float movedDistance = 0;
 
-std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
+std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0) };
 
 bool mouseIsHeld = false;
 bool ctrlIsPressed = false;
 
-float col[3] = { 0,0,0 };// TODO: make it such that we can chose the color we draw with
+int alpha = 100;
+float col[3] = { 0.5f,0.0f,0.5f };
+sf::Color brushColour((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
 
 int main() {
 	getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
-	SCREEN_WIDTH = 800; 
+	window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
+	/*SCREEN_WIDTH = 800;
 	SCREEN_HEIGHT = 800;
-	//window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
-	window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
+	window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");*/
 	window.setMouseCursorVisible(false);
 	window.setFramerateLimit(120);
 	window.clear(sf::Color(255, 255, 255, 255));
@@ -82,9 +82,6 @@ int main() {
 
 	while (window.isOpen())
 	{
-		cursorPositions.erase(cursorPositions.begin());
-		cursorPositions.push_back(sf::Mouse::getPosition(window));
-
 		while (window.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
@@ -104,6 +101,11 @@ int main() {
 			brushColour.r = (sf::Uint8)(col[0] * 255);
 			brushColour.g = (sf::Uint8)(col[1] * 255);
 			brushColour.b = (sf::Uint8)(col[2] * 255);
+		}
+		ImGui::SliderFloat("Spacing", &stepsize, 0, 50);
+		ImGui::SliderFloat("Radius", &radius, 0, 50);
+		if (ImGui::SliderInt("Opacity", &alpha, 0, 255)) {
+			brushColour.a = alpha;
 		}
 		ImGui::End();
 
@@ -127,43 +129,39 @@ int main() {
 
 void drawOnCanvas()
 {
-	deltaDist += distance(cursorPositions[2], cursorPositions[1]);
-	if (deltaDist > stepsize) {
-		int circles = (int)std::floorf(deltaDist / stepsize);
+	sf::Vector2i currentPos = sf::Mouse::getPosition(window);
+	movedDistance += distance(cursorPositions[1], currentPos);
+	cursorPositions[1] = currentPos;
 
-		if (circles == 1) {
-			sf::Vector2f circlePos = sf::Vector2f(cursorPositions[1]);
-			updateCanvas(circlePos);
-		}
-		else {
-			sf::Vector2f control1 = sf::Vector2f(cursorPositions[1])
-				+ sf::Vector2f(cursorPositions[1] - cursorPositions[0]) / 3.0f;
-			sf::Vector2f control2 = sf::Vector2f(cursorPositions[2])
-				+ sf::Vector2f(cursorPositions[2] - cursorPositions[3]) / 3.0f;
+	if (movedDistance > stepsize) {
 
+		int steps = (int)std::floorf(movedDistance / stepsize);
+		float offsetFactor = (steps * stepsize - movedDistance);
+
+		sf::Vector2f direction = sf::Vector2f(cursorPositions[1] - cursorPositions[0]) / distance(cursorPositions[1], cursorPositions[0]);
+		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[0]);
+
+		
 #pragma omp parallel for
-			for (int i = 0; i < circles; i++) {
-				sf::Vector2f circlePos(0, 0);
-				float x = (float)i / circles;
-
-				circlePos += powf(1 - x, 3)*sf::Vector2f(cursorPositions[1]);
-				circlePos += 3.0f * powf(1 - x, 2)*x*control1;
-				circlePos += 3.0f * (1 - x)*x*x*control2;
-				circlePos += x * x*x*sf::Vector2f(cursorPositions[2]);
-				updateCanvas(circlePos);
-			}
+		for (int i = 0; i < steps; i++) {
+			sf::Vector2f drawingPos = circlePos + (i + 1) * stepsize * direction;
+			drawShapeAt(drawingPos);
 		}
-		deltaDist -= stepsize * circles;
+		circlePos += steps * stepsize * direction;
+
+		cursorPositions[0] = sf::Vector2i(circlePos);
+		cursorPositions[1] = currentPos;
+		
+		movedDistance -= stepsize * steps;
 	}
 }
 
-void updateCanvas(sf::Vector2f &circlePos)
+void drawShapeAt(sf::Vector2f &circlePos)
 {
 	int xPos;
 	int yPos;
 
 	int rad = std::ceilf(radius);
-//#pragma omp parallel for
 	for (int i = -rad; i < rad; i++) {
 		for (int j = -rad; j < rad; j++) {
 
@@ -188,18 +186,24 @@ void eventHandling()
 {
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			deltaDist = 0.0f;
+			movedDistance = 0.0f;
 			mouseIsHeld = true;
 			canvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0, 0, 0, 0));
 			canvasTex.update(canvasImage);
 			canvasSprite.setTexture(canvasTex);
 
-			sf::Vector2f circlePos = sf::Vector2f(cursorPositions.back());
-			updateCanvas(circlePos);
+			sf::Vector2i newPos = sf::Mouse::getPosition(window);
+			cursorPositions[0] = newPos;
+			cursorPositions[1] = newPos;
+
+			sf::Vector2f circlePos = sf::Vector2f(newPos);
+			drawShapeAt(circlePos);
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
-		currentTexture.update(window);
+		if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
+			currentTexture.update(window);
+		}
 
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (textureIter != textureBuffer.end() - 1) {
