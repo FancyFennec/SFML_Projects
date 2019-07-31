@@ -42,8 +42,8 @@ sf::Sprite sprite;
 
 sf::RenderStates state;
 
-float radius = 10.f;
-float stepsize = 20;
+float radius = 3.f;
+float stepsize = 2;
 float movedDistance = 0;
 
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0) };
@@ -56,25 +56,25 @@ float col[3] = { 0.5f,0.0f,0.5f };
 sf::Color brushColour((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
 
 int main() {
-	getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
-	window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
-	/*SCREEN_WIDTH = 800;
+	//getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
+	//window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
+	SCREEN_WIDTH = 800;
 	SCREEN_HEIGHT = 800;
-	window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");*/
+	window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
 	window.setMouseCursorVisible(false);
 	window.setFramerateLimit(120);
 	window.clear(sf::Color(255, 255, 255, 255));
 
 	ImGui::SFML::Init(window);
 
-	currentTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
-	currentTexture.update(window);
-	sprite.setTexture(currentTexture);
-
 	canvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0,0,0,0));
 	canvasTex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
 	canvasTex.update(canvasImage);
 	canvasSprite.setTexture(canvasTex);
+
+	currentTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	currentTexture.update(window);
+	sprite.setTexture(currentTexture);
 
 	textureBuffer.reserve(10);
 	textureBuffer.push_back(currentTexture);
@@ -186,6 +186,14 @@ void eventHandling()
 {
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
+			if (textureIter != std::prev(textureBuffer.end())) {
+				auto lastIter = std::prev(textureBuffer.end());
+
+				while (textureIter != lastIter) {
+					textureBuffer.erase(lastIter);
+					std::advance(lastIter, -1);
+				}
+			}
 			movedDistance = 0.0f;
 			mouseIsHeld = true;
 			canvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0, 0, 0, 0));
@@ -201,16 +209,11 @@ void eventHandling()
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
-		if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-			currentTexture.update(window);
-		}
-
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			if (textureIter != textureBuffer.end() - 1) {
-				auto iter = textureIter + 1;
-				while (iter < textureBuffer.end()) {
-					textureBuffer.erase(iter);
-				}
+			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
+				window.draw(sprite);
+				window.draw(canvasSprite);
+				currentTexture.update(window);
 			}
 			if (textureBuffer.size() >= 10) {
 				textureBuffer.erase(textureBuffer.begin());
@@ -242,13 +245,13 @@ void eventHandling()
 	}
 	if (event.type == sf::Event::KeyPressed) {
 		if (ctrlIsPressed && event.key.code == sf::Keyboard::Z) {
-			if (textureIter != textureBuffer.begin()) --textureIter;
+			if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
 			currentTexture = *textureIter;
 		}
 	}
 	if (event.type == sf::Event::KeyPressed) {
 		if (ctrlIsPressed && event.key.code == sf::Keyboard::Y) {
-			if (textureIter != textureBuffer.end() - 1) ++textureIter;
+			if (textureIter != textureBuffer.end() - 1) std::advance(textureIter, 1);
 			currentTexture = *textureIter;
 		}
 	}
