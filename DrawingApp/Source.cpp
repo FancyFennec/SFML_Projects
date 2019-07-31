@@ -50,10 +50,11 @@ std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,
 
 bool mouseIsHeld = false;
 bool ctrlIsPressed = false;
+bool lAltIsPressed = false;
 
 int alpha = 100;
-float col[3] = { 0.5f,0.0f,0.5f };
-sf::Color brushColour((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
+static float col[3] = { 0.5f,0.0f,0.5f };
+static sf::Color brushColour((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
 
 int main() {
 	//getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -186,26 +187,41 @@ void eventHandling()
 {
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			if (textureIter != std::prev(textureBuffer.end())) {
-				auto lastIter = std::prev(textureBuffer.end());
-
-				while (textureIter != lastIter) {
-					textureBuffer.erase(lastIter);
-					std::advance(lastIter, -1);
-				}
-			}
-			movedDistance = 0.0f;
-			mouseIsHeld = true;
 			canvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0, 0, 0, 0));
 			canvasTex.update(canvasImage);
 			canvasSprite.setTexture(canvasTex);
 
-			sf::Vector2i newPos = sf::Mouse::getPosition(window);
-			cursorPositions[0] = newPos;
-			cursorPositions[1] = newPos;
+			if (lAltIsPressed) {
+				if (event.mouseButton.button == sf::Mouse::Left) {
+					sf::Uint8 alpha = brushColour.a;
+					sf::Vector2i pos = sf::Mouse::getPosition(window);
 
-			sf::Vector2f circlePos = sf::Vector2f(newPos);
-			drawShapeAt(circlePos);
+					brushColour = currentTexture.copyToImage().getPixel(pos.x, pos.y);
+					brushColour.a = alpha;
+
+					col[0] = brushColour.r;
+					col[1] = brushColour.g;
+					col[2] = brushColour.b;
+				}
+			} else {
+				if (textureIter != std::prev(textureBuffer.end())) {
+					auto lastIter = std::prev(textureBuffer.end());
+
+					while (textureIter != lastIter) {
+						textureBuffer.erase(lastIter);
+						std::advance(lastIter, -1);
+					}
+				}
+				movedDistance = 0.0f;
+				mouseIsHeld = true;
+
+				sf::Vector2i newPos = sf::Mouse::getPosition(window);
+				cursorPositions[0] = newPos;
+				cursorPositions[1] = newPos;
+
+				sf::Vector2f circlePos = sf::Vector2f(newPos);
+				drawShapeAt(circlePos);
+			}
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
@@ -223,41 +239,51 @@ void eventHandling()
 			mouseIsHeld = false;
 		}
 	}
-	if (event.type == sf::Event::MouseButtonPressed) {
-		if (event.mouseButton.button == sf::Mouse::Right) {
-		}
-	}
 	if (event.type == sf::Event::KeyPressed) {
-		if (event.key.code == sf::Keyboard::Q) {
+		switch (event.key.code) {
+		case(sf::Keyboard::Q): {
 			window.clear(sf::Color(255, 255, 255, 255));
 			currentTexture.update(window);
+			break;
 		}
-	}
-	if (event.type == sf::Event::KeyPressed) {
-		if (event.key.code == sf::Keyboard::LControl) {
+		case(sf::Keyboard::LAlt) : {
+			lAltIsPressed = true;
+			break;
+		}
+		case(sf::Keyboard::LControl): {
 			ctrlIsPressed = true;
+			break;
+		}
+		case(sf::Keyboard::Z): {
+			if (ctrlIsPressed) {
+				if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
+				currentTexture = *textureIter;
+			}
+			break;
+		}
+		case(sf::Keyboard::Y): {
+			if (ctrlIsPressed) {
+				if (textureIter != textureBuffer.end() - 1) std::advance(textureIter, 1);
+				currentTexture = *textureIter;
+			}
+			break;
+		}
+		case(sf::Keyboard::Escape): {
+			window.close();
+			break;
+		}
 		}
 	}
 	if (event.type == sf::Event::KeyReleased) {
-		if (event.key.code == sf::Keyboard::LControl) {
+		switch (event.key.code) {
+		case(sf::Keyboard::LAlt): {
+			lAltIsPressed = false;
+			break;
+		}
+		case(sf::Keyboard::LControl): {
 			ctrlIsPressed = false;
+			break;
 		}
-	}
-	if (event.type == sf::Event::KeyPressed) {
-		if (ctrlIsPressed && event.key.code == sf::Keyboard::Z) {
-			if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
-			currentTexture = *textureIter;
-		}
-	}
-	if (event.type == sf::Event::KeyPressed) {
-		if (ctrlIsPressed && event.key.code == sf::Keyboard::Y) {
-			if (textureIter != textureBuffer.end() - 1) std::advance(textureIter, 1);
-			currentTexture = *textureIter;
-		}
-	}
-	if (event.type == sf::Event::KeyPressed) {
-		if (event.key.code == sf::Keyboard::Escape) {
-			window.close();
 		}
 	}
 }
