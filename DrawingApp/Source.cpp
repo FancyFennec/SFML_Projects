@@ -143,14 +143,28 @@ int main() {
 
 			for (int i = 0; i < BRUSH_WIDTH; i++) {
 				for (int j = 0; j < BRUSH_WIDTH; j++) {
-					int x = i - BRUSH_WIDTH / 2;
-					int y = j - BRUSH_WIDTH / 2;
-					if (x*x + y * y < 80 * 80)
-						brushImage.setPixel(i, j, sf::Color::Black);
+					float x = i - BRUSH_WIDTH / 2;
+					float y = j - BRUSH_WIDTH / 2;
+
+					int count = 0;
+
+					for (float k = 0; k < 4; k++) {
+						for (float l = 0; l < 4; l++) {
+							if ((x + k / 4.0f + l / 4.0f)*(x + k / 4.0f + l / 4.0f) + 
+								(y + k / 4.0f + l / 4.0f) * (y + k / 4.0f + l / 4.0f) < 80 * 80) {
+								count++;
+							}
+						}
+					}
+
+					sf::Color pixelColour = sf::Color::Black;
+					pixelColour.a = sf::Uint8((255 * count) / 16);
+					brushImage.setPixel(i, j, pixelColour);
 				}
 			}
 			brushTex.update(brushImage);
 			brushSprite.setTexture(brushTex);
+			brushSprite.scale(sf::Vector2f(0.5f, 0.5f));
 		}
 		ImGui::End();
 
