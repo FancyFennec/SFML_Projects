@@ -16,6 +16,7 @@ using json = nlohmann::json;
 
 void eventHandling();
 void drawOnCanvas();
+void brushWindowRendering();
 void getDesktopResolution(int& horizontal, int& vertical);
 float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
 	return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
@@ -28,8 +29,17 @@ int SCREEN_WIDTH;
 int SCREEN_HEIGHT;
 const float PI = 3.14159265358979323846f;
 
+sf::Text title;
+
 sf::RenderWindow window;
+sf::RenderWindow brushWindow;
 sf::Event event;
+
+int BRUSH_WIDTH = 200;
+
+sf::Image brushImage;
+sf::Texture brushTex;
+sf::Sprite brushSprite;
 
 sf::Image canvasImage;
 sf::Texture canvasTex;
@@ -64,9 +74,24 @@ int main() {
 	window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
 	window.setMouseCursorVisible(false);
 	window.setFramerateLimit(120);
-	window.clear(sf::Color(255, 255, 255, 255));
+	window.clear(sf::Color::White);
+
+	sf::Font font;
+	font.loadFromFile("Arial.ttf");
+	title.setFont(font);
+	title.setString(sf::String("Baole Drawing App"));
+	title.setFillColor(sf::Color::Black);
+	title.setCharacterSize(24);
+	sf::FloatRect rec = title.getGlobalBounds();
+	title.setOrigin(rec.width / 2, rec.height / 2);
+	title.setPosition(SCREEN_WIDTH / 2, 10);
 
 	ImGui::SFML::Init(window);
+
+	brushImage.create(BRUSH_WIDTH, BRUSH_WIDTH, sf::Color(0, 0, 0, 0));
+	brushTex.create(BRUSH_WIDTH, BRUSH_WIDTH);
+	brushTex.update(brushImage);
+	brushSprite.setTexture(brushTex);
 
 	canvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0,0,0,0));
 	canvasTex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -95,6 +120,8 @@ int main() {
 		sprite.setTexture(currentTexture);
 		window.draw(sprite);
 
+		brushWindowRendering();
+
 		ImGui::SFML::Update(window, deltaClock.restart());
 
 		ImGui::Begin("Brush Settings");
@@ -107,6 +134,23 @@ int main() {
 		ImGui::SliderFloat("Radius", &radius, 0, 50);
 		if (ImGui::SliderInt("Opacity", &alpha, 0, 255)) {
 			brushColour.a = alpha;
+		}
+		if (ImGui::SmallButton("New Brush")) {
+			brushWindow.create(sf::VideoMode(BRUSH_WIDTH, BRUSH_WIDTH), "Define Brush", sf::Style::Titlebar);
+			brushWindow.setFramerateLimit(120);
+			brushWindow.clear(sf::Color::White);
+			brushWindow.setPosition(sf::Mouse::getPosition());
+
+			for (int i = 0; i < BRUSH_WIDTH; i++) {
+				for (int j = 0; j < BRUSH_WIDTH; j++) {
+					int x = i - BRUSH_WIDTH / 2;
+					int y = j - BRUSH_WIDTH / 2;
+					if (x*x + y * y < 80 * 80)
+						brushImage.setPixel(i, j, sf::Color::Black);
+				}
+			}
+			brushTex.update(brushImage);
+			brushSprite.setTexture(brushTex);
 		}
 		ImGui::End();
 
@@ -121,11 +165,30 @@ int main() {
 			currentTexture.update(window);
 		}
 
+		window.draw(title);
 		ImGui::SFML::Render(window);
-
 		window.display();
 	}
 	return 0;
+}
+
+void brushWindowRendering()
+{
+	if (brushWindow.isOpen()) {
+		while (brushWindow.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				brushWindow.close();
+			if (event.type == sf::Event::KeyPressed)
+				if (event.key.code == sf::Keyboard::Escape) {
+					brushImage.saveToFile("newBrush.png");
+					brushWindow.close();
+				}
+		}
+		brushWindow.clear(sf::Color::White);
+		brushWindow.draw(brushSprite);
+		brushWindow.display();
+	}
 }
 
 void drawOnCanvas()
