@@ -10,7 +10,7 @@ sf::Sprite backgroundImage = sf::Sprite(background);
 
 Button button("Button.png", "Clear");
 
-sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Path Finding Experiments");
+sf::RenderWindow mainWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Path Finding Experiments");
 EventHandler eventHandler;
 
 std::vector <DrawableObject> drawables;
@@ -18,7 +18,7 @@ std::vector <DrawableObject> drawables;
 void initialiseTiles();
 void initialisePixels();
 
-void eventHandling();
+void mainWindowEventHandling();
 void setTilePixels(const int &tileIndex, const sf::Color &color);
 void setPixelColor(const int &pixelIndex, const sf::Color &color);
 void drawImage(sf::Sprite &sprite);
@@ -27,27 +27,27 @@ void drawShortestPath();
 
 int main() {
 
-	window.setFramerateLimit(FRAMERATE);
+	mainWindow.setFramerateLimit(FRAMERATE);
 	background.create(SCREEN_WIDTH, SCREEN_HEIGHT);
 	sf::Sprite sprite(background);
 
 	initialiseTiles();
 	initialisePixels();
 
-	while (window.isOpen())
+	while (mainWindow.isOpen())
 	{
-		while (window.pollEvent(eventHandler.event))
+		while (mainWindow.pollEvent(eventHandler.event))
 		{
-			eventHandler.handleEvents(window, drawables, tiles, button.sprite);
+			eventHandler.handleEvents(mainWindow, drawables, tiles, button.sprite);
 		}
 
-		window.clear();
+		mainWindow.clear();
 		initialisePixels();
 
 		drawImage(sprite);
 		drawShortestPath();
 
-		window.display();
+		mainWindow.display();
 	}
 
 	return 0;
@@ -80,10 +80,10 @@ void drawShortestPath()
 	for (sf::Vector2i node : pathFinder.path) {
 		tiles[node.x][node.y] = 'b';
 	}
-	button.draw(window);
+	button.draw(mainWindow);
 
 	for (DrawableObject& drawable : drawables) {
-		drawable.draw(window);
+		drawable.draw(mainWindow);
 	}
 }
 
@@ -91,7 +91,7 @@ void drawImage(sf::Sprite &sprite)
 {
 	background.update(pixels);
 	sprite.setTexture(background);
-	window.draw(sprite);
+	mainWindow.draw(sprite);
 }
 
 void initialisePixels()

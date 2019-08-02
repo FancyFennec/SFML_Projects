@@ -15,7 +15,7 @@
 using json = nlohmann::json;
 
 
-void eventHandling();
+void mainWindowEventHandling();
 void setColour(std::vector<sf::Vertex>& line);
 void loadLSystems(const char* filename);
 void createWindow();
@@ -29,14 +29,14 @@ const int SCREEN_HEIGHT = 800;
 const char* filename = "lsystems.json";
 float pi = 3.14159265358979323846f;
 
-sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "L-Systems");
+sf::RenderWindow mainWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "L-Systems");
 sf::RenderStates state;
 sf::Event event;
 
 sf::Texture currentTexture;
 std::vector<sf::Texture> textureBuffer;
 std::vector<sf::Texture>::iterator textureIter;
-sf::Sprite sprite;
+sf::Sprite backgroundSprite;
 sf::Vector2i mousePos;
 
 bool mouseIsHeld = false;
@@ -66,53 +66,53 @@ int main() {
 	loadLSystems(filename);
 	ls = lSystems[0];
 
-	window.setFramerateLimit(60);
-	ImGui::SFML::Init(window);
+	mainWindow.setFramerateLimit(60);
+	ImGui::SFML::Init(mainWindow);
 
 	currentTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
 	textureBuffer.reserve(10);
 	textureBuffer.push_back(currentTexture);
 	textureIter = textureBuffer.begin();
-	sprite.setTexture(currentTexture);
+	backgroundSprite.setTexture(currentTexture);
 
-	while (window.isOpen())
+	while (mainWindow.isOpen())
 	{
-		while (window.pollEvent(event))
+		while (mainWindow.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
 
 			if (event.type == sf::Event::Closed)
-				window.close();
-			eventHandling();
+				mainWindow.close();
+			mainWindowEventHandling();
 		}
 
-		window.clear(sf::Color(25.5f, 25.5f, 25.5f, 255.0f));
+		mainWindow.clear(sf::Color(25.5f, 25.5f, 25.5f, 255.0f));
 
-		sprite.setTexture(currentTexture);
-		window.draw(sprite);
+		backgroundSprite.setTexture(currentTexture);
+		mainWindow.draw(backgroundSprite);
 
 		mousePos = sf::Mouse::getPosition();
 
 		for (std::vector<sf::Vertex> line : ls.lines) {
 			setColour(line);
 			state.transform.translate(-570 + mousePos.x, mousePos.y);
-			window.draw(line.data(), line.size(), sf::LinesStrip, state);
+			mainWindow.draw(line.data(), line.size(), sf::LinesStrip, state);
 			state.transform.translate(570 - mousePos.x, -mousePos.y);
 		}
 		if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 			if (mouseIsHeld) {
-				currentTexture.update(window);
+				currentTexture.update(mainWindow);
 			}
 		}
 
-		ImGui::SFML::Update(window, deltaClock.restart());
+		ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
 		settingsWindow();
 		createWindow();
 
-		ImGui::SFML::Render(window);
+		ImGui::SFML::Render(mainWindow);
 
-		window.display();
+		mainWindow.display();
 	}
 
 	saveLSystems(filename);
@@ -268,7 +268,7 @@ void setColour(std::vector<sf::Vertex>& line)
 	}
 }
 
-void eventHandling()
+void mainWindowEventHandling()
 {
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
@@ -325,7 +325,7 @@ void eventHandling()
 	}
 	if (event.type == sf::Event::KeyPressed) {
 		if (event.key.code == sf::Keyboard::Escape) {
-			window.close();
+			mainWindow.close();
 		}
 	}
 }

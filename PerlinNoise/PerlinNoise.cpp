@@ -11,7 +11,7 @@ int counter = 0;
 const int SCREEN_WIDTH = sideLength;
 const int SCREEN_HEIGHT = sideLength;
 
-sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Height Map Generator");
+sf::RenderWindow mainWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Height Map Generator");
 PerlinNoise pNoise = PerlinNoise(3);
 sf::Event event;
 
@@ -72,7 +72,7 @@ int main()
 	std::iota(xVec.begin(), xVec.end(), 0);
 	std::iota(yVec.begin(), yVec.end(), 0);
 
-	window.setFramerateLimit(60);
+	mainWindow.setFramerateLimit(60);
 
 	if (!isPowerOf2Plus1(sideLength)) {
 		std::cout << "ERROR: Sidelength is not a power of 2 plus 1.\n";
@@ -86,22 +86,22 @@ int main()
 
 	initialisePixels();
 
-	while (window.isOpen())
+	while (mainWindow.isOpen())
 	{
 
-		while (window.pollEvent(event))
+		while (mainWindow.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
-				window.close();
+				mainWindow.close();
 		}
 
-		window.clear();
+		mainWindow.clear();
 
 		applyPerlinNoise();
 		applyErosion();
 
 		drawImage(sprite);
-		window.display();
+		mainWindow.display();
 
 		saveImage();
 	}
@@ -414,7 +414,7 @@ void drawImage(sf::Sprite &sprite)
 {
 	background.update(pixels);
 	sprite.setTexture(background);
-	window.draw(sprite);
+	mainWindow.draw(sprite);
 }
 
 void saveImage()

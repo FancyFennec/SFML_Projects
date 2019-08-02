@@ -10,7 +10,7 @@ const float angle = 0.5;
 float dist = 10;
 const float radius = 20;
 
-sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "FlowerGenerator");
+sf::RenderWindow mainWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "FlowerGenerator");
 sf::Event event;
 
 std::vector<sf::CircleShape*> circles;
@@ -61,7 +61,7 @@ void addCircle() {
 	circles.push_back(newCircle);
 }
 
-void eventHandling()
+void mainWindowEventHandling()
 {
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
@@ -71,25 +71,25 @@ void eventHandling()
 }
 
 int main() {
-	window.setFramerateLimit(60);
+	mainWindow.setFramerateLimit(60);
 	addCircle();
 
-	while (window.isOpen())
+	while (mainWindow.isOpen())
 	{
-		while (window.pollEvent(event))
+		while (mainWindow.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
-				window.close();
-			eventHandling();
+				mainWindow.close();
+			mainWindowEventHandling();
 		}
 
-		window.clear();
+		mainWindow.clear();
 
 		for (sf::CircleShape* circle : circles) {
-			window.draw(*circle);
+			mainWindow.draw(*circle);
 		}
 
-		window.display();
+		mainWindow.display();
 	}
 
 	return 0;

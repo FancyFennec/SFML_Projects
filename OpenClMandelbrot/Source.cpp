@@ -16,7 +16,7 @@ int iterations = 1000;
 sf::Texture background = sf::Texture();
 sf::Sprite backgroundImage = sf::Sprite(background);
 
-sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot", sf::Style::Fullscreen);
+sf::RenderWindow mainWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Mandelbrot", sf::Style::Fullscreen);
 sf::Event event;
 
 OpenCL test(SCREEN_WIDTH, SCREEN_HEIGHT, "HelloWorld_Kernel.cl");
@@ -26,11 +26,11 @@ void initialisePixels();
 void drawImage(sf::Sprite &sprite);
 int getCoords(int i, int j);
 void computeMandelbrot();
-void eventHandling();
+void mainWindowEventHandling();
 
 int main()
 {
-	window.setFramerateLimit(60);
+	mainWindow.setFramerateLimit(60);
 	background.create(SCREEN_WIDTH, SCREEN_HEIGHT);
 	sf::Sprite sprite(background);
 
@@ -39,36 +39,36 @@ int main()
 		return -1;
 	}
 
-	while (window.isOpen())
+	while (mainWindow.isOpen())
 	{
-		while (window.pollEvent(event))
+		while (mainWindow.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
-				window.close();
-			eventHandling();
+				mainWindow.close();
+			mainWindowEventHandling();
 		}
 
-		window.clear();
+		mainWindow.clear();
 
 		computeMandelbrot();
 		drawImage(sprite);
 
-		window.display();
+		mainWindow.display();
 	}
 	return 0;
 }
 
-void eventHandling()
+void mainWindowEventHandling()
 {
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			mousePos = sf::Mouse::getPosition(window);
+			mousePos = sf::Mouse::getPosition(mainWindow);
 			x += ((double)mousePos.x - SCREEN_WIDTH / 2) / (SCREEN_WIDTH * pow(2, nZoom - 1));
 			y += ((double)mousePos.y - SCREEN_HEIGHT / 2) / (SCREEN_HEIGHT * pow(2, nZoom - 1));
 			nZoom++;
 		}
 		if (event.mouseButton.button == sf::Mouse::Right) {
-			mousePos = sf::Mouse::getPosition(window);
+			mousePos = sf::Mouse::getPosition(mainWindow);
 			x += ((double)mousePos.x - SCREEN_WIDTH / 2) / (SCREEN_WIDTH * pow(2, nZoom - 1));
 			y += ((double)mousePos.y - SCREEN_HEIGHT / 2) / (SCREEN_HEIGHT * pow(2, nZoom - 1));
 			nZoom--;
@@ -83,7 +83,7 @@ void eventHandling()
 	if (event.type == sf::Event::KeyPressed) {
 		if (event.key.code == sf::Keyboard::Escape) {
 			std::cout << "Closing Window. \n";
-			window.close();
+			mainWindow.close();
 		}
 	}
 }
@@ -115,7 +115,7 @@ void drawImage(sf::Sprite &sprite)
 {
 	background.update(pixls);
 	sprite.setTexture(background);
-	window.draw(sprite);
+	mainWindow.draw(sprite);
 }
 
 void initialisePixels()

@@ -16,7 +16,7 @@ sf::Uint8 newPixels[SCREEN_HEIGHT * SCREEN_WIDTH] = { 0 };
 int percolationMatrix[SCREEN_WIDTH * SCREEN_HEIGHT] = { 0 };
 float diamondMatrix[SCREEN_WIDTH * SCREEN_HEIGHT] = { 0 };
 
-sf::RenderWindow window(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Height Map Generator");
+sf::RenderWindow mainWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Height Map Generator");
 sf::Event event;
 bool gWasPressed = false;
 bool dWasPressed = false;
@@ -57,7 +57,7 @@ int noise = 1;
 int main()
 {
 
-	window.setFramerateLimit(60);
+	mainWindow.setFramerateLimit(60);
 
 	if (!isPowerOf2Plus1(sideLength)) {
 		std::cout << "ERROR: Sidelength is not a power of 2 plus 1.\n";
@@ -76,16 +76,16 @@ int main()
 		pixels[i + 3] = 255;
 	}
 
-	while (window.isOpen())
+	while (mainWindow.isOpen())
 	{
 		sf::Event event;
-		while (window.pollEvent(event))
+		while (mainWindow.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
-				window.close();
+				mainWindow.close();
 		}
 
-		window.clear();
+		mainWindow.clear();
 
 		paintPixelsWithMouse();
 
@@ -135,9 +135,9 @@ int main()
 
 		background.update(pixels);
 		sprite.setTexture(background);
-		window.draw(sprite);
+		mainWindow.draw(sprite);
 
-		window.display();
+		mainWindow.display();
 	}
 
 	return 0;
@@ -311,7 +311,7 @@ void diamond(const int &x, const int &y, const int &stepLength) {
 void paintPixelsWithMouse()
 {
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
-		sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+		sf::Vector2i mousePosition = sf::Mouse::getPosition(mainWindow);
 		if ((0 <= mousePosition.y && mousePosition.y < SCREEN_HEIGHT) && (0 <= mousePosition.x && mousePosition.x < SCREEN_WIDTH)) {
 			pixels[(mousePosition.y * SCREEN_WIDTH + mousePosition.x) * 4 + 0] = 255;
 			pixels[(mousePosition.y * SCREEN_WIDTH + mousePosition.x) * 4 + 1] = 255;
