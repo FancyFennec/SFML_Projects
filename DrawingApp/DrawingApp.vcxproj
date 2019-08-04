@@ -142,6 +142,7 @@
     <ClInclude Include="Imgui\imstb_textedit.h" />
     <ClInclude Include="Imgui\imstb_truetype.h" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="Layer.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
