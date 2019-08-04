@@ -9,13 +9,15 @@ public:
 	sf::Image image;
 	sf::Color color = sf::Color::Black;
 
-	float stepsize = 10.0f;
+	float stepsize = 2.0f;
 	int brushsize = 8;
-	float opacity = 255.0f;
+	int opacity = 100;
 
 	void setBrushsize(int newsize) {
-		if(8 < newsize && newsize < 2)
-		image = images[newsize];
+		if (9 > newsize && newsize >= 0) {
+			std::cout << images.size() << std::endl;
+			image = images[8 - newsize];
+		}
 	}
 
 	Brush(sf::Image image) : image(image) {
@@ -23,15 +25,17 @@ public:
 		createBrushes();
 	};
 
-	Brush(const char* filePath) {
+	Brush(int brush_width, const char* filePath) {
+		image.create(brush_width, brush_width);
 		image.loadFromFile(filePath);
+		images.push_back(image);
 		createBrushes();
 	}
 
 	~Brush() {};
 
 private:
-	std::vector<sf::Image> images;
+	std::vector<sf::Image> images = {};
 
 	void createBrushes();
 };

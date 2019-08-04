@@ -28,9 +28,14 @@ public:
 		sprite.setTexture(tex);
 	};
 
-	//TODO: Make a brush class that can get passed to the method
+	void clearLayer() {
+		image.create(image.getSize().x, image.getSize().y, sf::Color(0, 0, 0, 0));
+		tex.update(image);
+		sprite.setTexture(tex);
+	}
+
 	void drawOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
-	void drawShapeAt(Brush& brush, sf::Vector2f& cursorPos);
+	void drawBrushAt(Brush& brush, sf::Vector2f& cursorPos);
 
 	~Layer();
 
@@ -41,30 +46,6 @@ private:
 		return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
 	}
 };
-
-inline void Layer::drawShapeAt(Brush& brush, sf::Vector2f& cursorPos)
-{
-	sf::Color newColour;
-
-	for (int i = 0; i < brush.image.getSize().x; i++) {
-		for (int j = 0; j < brush.image.getSize().y; j++) {
-
-			int xPos = cursorPos.x - brush.image.getSize().x / 2 + i;
-			int yPos = cursorPos.y - brush.image.getSize().y / 2  + j;
-
-			if (xPos >= 0 && yPos >= 0 && xPos < image.getSize().x && yPos < image.getSize().y) {
-				if (image.getPixel(xPos, yPos).a < brush.image.getPixel(i, j).a * brush.opacity / 255.0f) {
-					
-					newColour.r = brush.color.r * brush.image.getPixel(i, j).a * brush.opacity / 255.0f;
-					newColour.g = brush.color.r * brush.image.getPixel(i, j).a * brush.opacity / 255.0f;
-					newColour.b = brush.color.r * brush.image.getPixel(i, j).a * brush.opacity / 255.0f;
-					newColour.a = brush.image.getPixel(i, j).a * brush.opacity / 255.0f;
-					image.setPixel(xPos, yPos, newColour);
-				}
-			}
-		}
-	}
-}
 
 inline void Layer::drawOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions)
 {
@@ -84,9 +65,7 @@ inline void Layer::drawOnCanvas(float& movedDistance, Brush& brush, std::vector<
 #pragma omp parallel for
 		for (int i = 0; i < steps; i++) {
 			sf::Vector2f drawingPos = circlePos + (i + 1) * brush.stepsize * direction;
-			drawShapeAt(brush, drawingPos);
-			tex.update(image);
-			sprite.setTexture(tex);
+			drawBrushAt(brush, drawingPos);
 		}
 		circlePos += steps * brush.stepsize * direction;
 
@@ -95,6 +74,33 @@ inline void Layer::drawOnCanvas(float& movedDistance, Brush& brush, std::vector<
 
 		movedDistance -= brush.stepsize * steps;
 	}
+}
+
+inline void Layer::drawBrushAt(Brush& brush, sf::Vector2f& cursorPos)
+{
+	sf::Color newColour;
+
+	for (int i = 0; i < brush.image.getSize().x; i++) {
+		for (int j = 0; j < brush.image.getSize().y; j++) {
+
+			int xPos = cursorPos.x - brush.image.getSize().x / 2 + i;
+			int yPos = cursorPos.y - brush.image.getSize().y / 2 + j;
+
+			if (xPos >= 0 && yPos >= 0 && xPos < image.getSize().x && yPos < image.getSize().y) {
+				if (image.getPixel(xPos, yPos).a < brush.image.getPixel(i, j).a * brush.opacity / 255.0f) {
+
+					newColour.r = brush.color.r * brush.opacity / 255;
+					newColour.g = brush.color.g * brush.opacity / 255;
+					newColour.b = brush.color.b * brush.opacity / 255;
+					newColour.a = brush.opacity;
+					image.setPixel(xPos, yPos, newColour);
+				}
+			}
+		}
+	}
+
+	tex.update(image);
+	sprite.setTexture(tex);
 }
 
 Layer::~Layer()

@@ -14,25 +14,22 @@
 #include "Layer.h"
 using json = nlohmann::json;
 
-
 void mainWindowEventHandling();
-void drawOnCanvas(sf::RenderWindow & window, sf::Image& canvasImage, sf::Texture &canvasTexture, sf::Sprite &canvasSprite);
 void brushWindowRendering();
 void brushWindowEventHandling();
 void createBrushWindow();
-void renderBrushGUI();
+void brushGUIRendering();
 void mainWindowDrawing();
 void brushWindowDrawing();
 void getDesktopResolution(int& horizontal, int& vertical);
 float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
 	return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
 }
-void drawShapeAt(sf::Vector2f &circlePos, sf::Image& canvasImage);
 
 sf::Clock deltaClock;
 
-int SCREEN_WIDTH;
-int SCREEN_HEIGHT;
+int SCREEN_WIDTH = 800;
+int SCREEN_HEIGHT = 800;
 const float PI = 3.14159265358979323846f;
 
 sf::Text title;
@@ -45,13 +42,8 @@ int BRUSH_WIDTH = 512;
 
 sf::Image defaultBrush;
 
-sf::Image brushImage;
-sf::Texture brushTex;
-sf::Sprite brushSprite;
-
-sf::Image mainCanvasImage;
-sf::Texture mainCanvasTex;
-sf::Sprite mainCanvasSprite;
+Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH, brushWindow);
+Layer mainLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow);
 
 sf::Texture currentTexture;
 std::vector<sf::Texture> textureBuffer;
@@ -60,8 +52,9 @@ sf::Sprite backgroundSprite;
 
 sf::RenderStates state;
 
-float radius = 3.f;
-float stepsize = 2;
+Brush currentbrush(BRUSH_WIDTH, "newBrush.png");
+int brushSize = 4;
+float stepsize = 2.0f;
 float movedDistance = 0;
 
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0) };
@@ -77,8 +70,6 @@ static sf::Color brushColour((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255
 int main() {
 	//getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
 	//window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
-	SCREEN_WIDTH = 800;
-	SCREEN_HEIGHT = 800;
 	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(120);
@@ -96,17 +87,8 @@ int main() {
 
 	ImGui::SFML::Init(mainWindow);
 
-	defaultBrush.loadFromFile("newBrush.png");
-
-	brushImage.create(BRUSH_WIDTH, BRUSH_WIDTH, sf::Color(0, 0, 0, 0));
-	brushTex.create(BRUSH_WIDTH, BRUSH_WIDTH);
-	brushTex.update(brushImage);
-	brushSprite.setTexture(brushTex);
-
-	mainCanvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0,0,0,0));
-	mainCanvasTex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
-	mainCanvasTex.update(mainCanvasImage);
-	mainCanvasSprite.setTexture(mainCanvasTex);
+	currentbrush.color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
+	currentbrush.setBrushsize(brushSize);
 
 	currentTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
 	currentTexture.update(mainWindow);
@@ -118,20 +100,16 @@ int main() {
 
 	while (mainWindow.isOpen())
 	{
+		mainWindow.draw(backgroundSprite);
+
 		while (mainWindow.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
-
-			if (event.type == sf::Event::Closed)
-				mainWindow.close();
 			mainWindowEventHandling();
 		}
 
-		backgroundSprite.setTexture(currentTexture);
-		mainWindow.draw(backgroundSprite);
-
 		brushWindowRendering();
-		renderBrushGUI();
+		brushGUIRendering();
 
 		mainWindowDrawing();
 		brushWindowDrawing();
@@ -151,8 +129,8 @@ void mainWindowDrawing()
 {
 	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 		if (mouseIsHeld) {
-			drawOnCanvas(mainWindow, mainCanvasImage, mainCanvasTex, mainCanvasSprite);
-			mainWindow.draw(mainCanvasSprite);
+			mainLayer.drawOnCanvas(movedDistance, currentbrush, cursorPositions);
+			mainWindow.draw(mainLayer.sprite);
 		}
 	}
 }
@@ -162,27 +140,27 @@ void brushWindowDrawing()
 	if (brushWindow.hasFocus()) {
 		if (mouseIsHeld) {
 			std::cout << "Drawing in Brush Window" << std::endl;
-			drawOnCanvas(brushWindow, brushImage, brushTex, brushSprite);
-			//mainWindow.draw(mainCanvasSprite);
+			brushLayer.drawOnCanvas(movedDistance, currentbrush, cursorPositions);
+			brushWindow.draw(brushLayer.sprite);
 		}
 	}
 }
 
-void renderBrushGUI()
+void brushGUIRendering()
 {
 	ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
 	ImGui::Begin("Brush Settings");
 	if (ImGui::ColorPicker3("Brush Colour", col)) {
-		brushColour.r = (sf::Uint8)(col[0] * 255);
-		brushColour.g = (sf::Uint8)(col[1] * 255);
-		brushColour.b = (sf::Uint8)(col[2] * 255);
+		currentbrush.color.r = (sf::Uint8)(col[0] * 255);
+		currentbrush.color.g = (sf::Uint8)(col[1] * 255);
+		currentbrush.color.b = (sf::Uint8)(col[2] * 255);
 	}
-	ImGui::SliderFloat("Spacing", &stepsize, 0, 50);
-	if (ImGui::SliderFloat("Radius", &radius, 0, 50)) {
+	ImGui::SliderFloat("Spacing", &currentbrush.stepsize, 0, 50);
+	if (ImGui::SliderInt("Radius", &brushSize, 0, 8)) {
+		currentbrush.setBrushsize(brushSize);
 	}
-	if (ImGui::SliderInt("Opacity", &alpha, 0, 255)) {
-		brushColour.a = alpha;
+	if (ImGui::SliderInt("Opacity", &currentbrush.opacity, 0, 255)) {
 	}
 	if (ImGui::SmallButton("New Brush")) {
 		createBrushWindow();
@@ -198,6 +176,7 @@ void createBrushWindow()
 	brushWindow.setPosition(mainWindow.getPosition() +
 		sf::Vector2i(SCREEN_WIDTH / 2 - BRUSH_WIDTH / 2, SCREEN_HEIGHT / 2 - BRUSH_WIDTH / 2));
 
+	//TODO: This might be useful for something else
 	/*for (int i = 0; i < BRUSH_WIDTH; i++) {
 		for (int j = 0; j < BRUSH_WIDTH; j++) {
 			float x = i - BRUSH_WIDTH / 2;
@@ -233,73 +212,18 @@ void brushWindowRendering()
 			brushWindowEventHandling();
 		}
 		brushWindow.clear(sf::Color::White);
-		brushWindow.draw(brushSprite);
+		brushWindow.draw(brushLayer.sprite);
 		brushWindow.display();
-	}
-}
-
-void drawOnCanvas(sf::RenderWindow & window, sf::Image& canvasImage, sf::Texture &canvasTexture, sf::Sprite &canvasSprite)
-{
-	sf::Vector2i currentPos = sf::Mouse::getPosition(window);
-	movedDistance += distance(cursorPositions[1], currentPos);
-	cursorPositions[1] = currentPos;
-
-	if (movedDistance > stepsize) {
-
-		int steps = (int)std::floorf(movedDistance / stepsize);
-		float offsetFactor = (steps * stepsize - movedDistance);
-
-		sf::Vector2f direction = sf::Vector2f(cursorPositions[1] - cursorPositions[0]) / distance(cursorPositions[1], cursorPositions[0]);
-		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[0]);
-
-		
-#pragma omp parallel for
-		for (int i = 0; i < steps; i++) {
-			sf::Vector2f drawingPos = circlePos + (i + 1) * stepsize * direction;
-			drawShapeAt(drawingPos, canvasImage);
-			mainCanvasTex.update(canvasImage);
-			canvasSprite.setTexture(mainCanvasTex);
-		}
-		circlePos += steps * stepsize * direction;
-
-		cursorPositions[0] = sf::Vector2i(circlePos);
-		cursorPositions[1] = currentPos;
-		
-		movedDistance -= stepsize * steps;
-	}
-}
-
-void drawShapeAt(sf::Vector2f& circlePos, sf::Image& canvasImage)
-{
-	int xPos;
-	int yPos;
-
-	int rad = std::ceilf(radius);
-	for (int i = -rad; i < rad; i++) {
-		for (int j = -rad; j < rad; j++) {
-
-			xPos = (int)circlePos.x + i;
-			yPos = (int)circlePos.y + j;
-
-			if (xPos >= 0 && yPos >= 0 && xPos < canvasImage.getSize().x && yPos < canvasImage.getSize().y) {
-				canvasImage.setPixel(xPos, yPos, i*i + j * j > radius * radius ?
-					canvasImage.getPixel(xPos, yPos) :
-					canvasImage.getPixel(xPos, yPos).a >= brushColour.a ?
-					canvasImage.getPixel(xPos, yPos) :
-					brushColour
-				);
-			}
-		}
 	}
 }
 
 void mainWindowEventHandling()
 {
+	if (event.type == sf::Event::Closed)
+		mainWindow.close();
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			mainCanvasImage.create(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color(0, 0, 0, 0));
-			mainCanvasTex.update(mainCanvasImage);
-			mainCanvasSprite.setTexture(mainCanvasTex);
+			mainLayer.clearLayer();
 
 			if (lAltIsPressed) {
 				if (event.mouseButton.button == sf::Mouse::Left) {
@@ -328,9 +252,10 @@ void mainWindowEventHandling()
 				sf::Vector2i newPos = sf::Mouse::getPosition(mainWindow);
 				cursorPositions[0] = newPos;
 				cursorPositions[1] = newPos;
+				sf::Vector2f currentPos = sf::Vector2f(newPos);
 
-				sf::Vector2f circlePos = sf::Vector2f(newPos);
-				drawShapeAt(circlePos, mainCanvasImage);
+				mainLayer.drawBrushAt(currentbrush, currentPos);
+				//No need to dra the window here, it gets drawn because the lmb is held
 			}
 		}
 	}
@@ -338,7 +263,7 @@ void mainWindowEventHandling()
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 				mainWindow.draw(backgroundSprite);
-				mainWindow.draw(mainCanvasSprite);
+				mainWindow.draw(mainLayer.sprite);
 				currentTexture.update(mainWindow);
 			}
 			if (textureBuffer.size() >= 10) {
@@ -410,7 +335,7 @@ void brushWindowEventHandling()
 			cursorPositions[1] = newPos;
 
 			sf::Vector2f circlePos = sf::Vector2f(newPos);
-			drawShapeAt(circlePos, brushImage);
+			brushLayer.drawBrushAt(currentbrush, circlePos);
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {

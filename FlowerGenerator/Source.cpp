@@ -8,7 +8,7 @@ const int SCREEN_HEIGHT = 800;
 const float angle = 0.5;
 //const float angle = 2.39996;
 float dist = 10;
-const float radius = 20;
+const float brushSize = 20;
 
 sf::RenderWindow mainWindow(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "FlowerGenerator");
 sf::Event event;
@@ -27,17 +27,17 @@ float max(std::vector<float> scalProds) {
 
 void addCircle() {
 	sf::CircleShape* newCircle = new sf::CircleShape();
-	newCircle->setRadius(radius);
+	newCircle->setRadius(brushSize);
 	std::vector<float> scalProds;
 
 	for (sf::CircleShape* circle : circles) {
-		float yProj = sin(angle * circles.size()) * (circle->getPosition().x - SCREEN_WIDTH / 2 + radius) +
-			cos(angle * circles.size()) * (circle->getPosition().y - SCREEN_HEIGHT / 2 + radius);
-		float xProj = abs(-cos(angle * circles.size()) * (circle->getPosition().x - SCREEN_WIDTH / 2 + radius) +
-			sin(angle * circles.size()) * (circle->getPosition().y - SCREEN_HEIGHT / 2 + radius));
+		float yProj = sin(angle * circles.size()) * (circle->getPosition().x - SCREEN_WIDTH / 2 + brushSize) +
+			cos(angle * circles.size()) * (circle->getPosition().y - SCREEN_HEIGHT / 2 + brushSize);
+		float xProj = abs(-cos(angle * circles.size()) * (circle->getPosition().x - SCREEN_WIDTH / 2 + brushSize) +
+			sin(angle * circles.size()) * (circle->getPosition().y - SCREEN_HEIGHT / 2 + brushSize));
 		if (yProj >= 0) {
-			if (xProj < 2 * radius) {
-				scalProds.push_back(yProj + sqrt(4 * radius * radius - xProj * xProj));
+			if (xProj < 2 * brushSize) {
+				scalProds.push_back(yProj + sqrt(4 * brushSize * brushSize - xProj * xProj));
 			}
 			else {
 				scalProds.push_back(yProj);
@@ -52,8 +52,8 @@ void addCircle() {
 		dist = 0;
 	}
 	newCircle->setPosition(
-		SCREEN_WIDTH / 2 - radius + dist * sin(angle * circles.size()), 
-		SCREEN_HEIGHT / 2 - radius + dist * cos(angle * circles.size())
+		SCREEN_WIDTH / 2 - brushSize + dist * sin(angle * circles.size()), 
+		SCREEN_HEIGHT / 2 - brushSize + dist * cos(angle * circles.size())
 	);
 
 	sf::Uint8 color = 255 * std::max({ 0.f, ((float)SCREEN_WIDTH / 2 - dist) / ((float)SCREEN_WIDTH / 2) });
