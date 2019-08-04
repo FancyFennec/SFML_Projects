@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include "Brush.h"
 
 class Layer
 {
@@ -28,8 +29,9 @@ public:
 		sprite.setTexture(tex);
 	};
 
-	void drawOnCanvas(float& movedDistance, float& stepsize, std::vector<sf::Vector2i>& cursorPositions);
-	void drawShapeAt(sf::Vector2f& cursorPos, sf::Image& brush);
+	//TODO: Make a brush class that can get passed to the method
+	void drawOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
+	void drawShapeAt(Brush& brush, sf::Vector2f& cursorPos);
 
 	~Layer();
 
@@ -41,36 +43,40 @@ private:
 	}
 };
 
-inline void Layer::drawShapeAt(sf::Vector2f& cursorPos, sf::Image& brush)
+inline void Layer::drawShapeAt(Brush& brush, sf::Vector2f& cursorPos)
 {
+	sf::Color newColour;
 
-	//TODO: make it such that we can select the brush size here
-	//int rad = std::ceilf(radius);
-	for (int i = 0; i < brush.getSize().x; i++) {
-		for (int j = 0; j < brush.getSize().y; j++) {
+	for (int i = 0; i < brush.image.getSize().x; i++) {
+		for (int j = 0; j < brush.image.getSize().y; j++) {
 
-			int xPos = cursorPos.x - brush.getSize().x / 2 + i;
-			int yPos = cursorPos.y - brush.getSize().y / 2  + j;
+			int xPos = cursorPos.x - brush.image.getSize().x / 2 + i;
+			int yPos = cursorPos.y - brush.image.getSize().y / 2  + j;
 
 			if (xPos >= 0 && yPos >= 0 && xPos < image.getSize().x && yPos < image.getSize().y) {
-				if (image.getPixel(xPos, yPos).a < brush.getPixel(i, j).a) {
-					image.setPixel(xPos, yPos, brush.getPixel(i, j));
+				if (image.getPixel(xPos, yPos).a < brush.image.getPixel(i, j).a * brush.opacity / 255.0f) {
+					
+					newColour.r = brush.color.r * brush.image.getPixel(i, j).a * brush.opacity / 255.0f;
+					newColour.g = brush.color.r * brush.image.getPixel(i, j).a * brush.opacity / 255.0f;
+					newColour.b = brush.color.r * brush.image.getPixel(i, j).a * brush.opacity / 255.0f;
+					newColour.a = brush.image.getPixel(i, j).a * brush.opacity / 255.0f;
+					image.setPixel(xPos, yPos, newColour);
 				}
 			}
 		}
 	}
 }
 
-inline void Layer::drawOnCanvas(float& movedDistance, float& stepsize, std::vector<sf::Vector2i>& cursorPositions)
+inline void Layer::drawOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions)
 {
 	sf::Vector2i currentPos = sf::Mouse::getPosition(window);
 	movedDistance += distance(cursorPositions[1], currentPos);
 	cursorPositions[1] = currentPos;
 
-	if (movedDistance > stepsize) {
+	if (movedDistance > brush.stepsize) {
 
-		int steps = (int)std::floorf(movedDistance / stepsize);
-		float offsetFactor = (steps * stepsize - movedDistance);
+		int steps = (int)std::floorf(movedDistance / brush.stepsize);
+		float offsetFactor = (steps * brush.stepsize - movedDistance);
 
 		sf::Vector2f direction = sf::Vector2f(cursorPositions[1] - cursorPositions[0]) / distance(cursorPositions[1], cursorPositions[0]);
 		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[0]);
@@ -78,17 +84,17 @@ inline void Layer::drawOnCanvas(float& movedDistance, float& stepsize, std::vect
 
 #pragma omp parallel for
 		for (int i = 0; i < steps; i++) {
-			sf::Vector2f drawingPos = circlePos + (i + 1) * stepsize * direction;
-			drawShapeAt(drawingPos, image);
+			sf::Vector2f drawingPos = circlePos + (i + 1) * brush.stepsize * direction;
+			drawShapeAt(brush, drawingPos);
 			tex.update(image);
 			sprite.setTexture(tex);
 		}
-		circlePos += steps * stepsize * direction;
+		circlePos += steps * brush.stepsize * direction;
 
 		cursorPositions[0] = sf::Vector2i(circlePos);
 		cursorPositions[1] = currentPos;
 
-		movedDistance -= stepsize * steps;
+		movedDistance -= brush.stepsize * steps;
 	}
 }
 

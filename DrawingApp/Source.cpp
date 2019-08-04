@@ -179,22 +179,6 @@ void renderBrushGUI()
 	}
 	ImGui::SliderFloat("Spacing", &stepsize, 0, 50);
 	if (ImGui::SliderFloat("Radius", &radius, 0, 50)) {
-		//TODO: This could be reused for creating different scaled brushes
-		/*sf::Image newBrush;
-		sf::Vector2u size = defaultBrush.getSize();
-
-		newBrush.create(size.x/2, size.y/2, sf::Color(0, 0, 0, 0));
-
-		for (int j = 0; j < size.y / 2; j++) {
-		for (int i = 0; i < size.x / 2; i++) {
-		sf::Color newColour = defaultBrush.getPixel(2 * i, 2 * j);
-		newColour += defaultBrush.getPixel(2 * i + 1, 2 * j);
-		newColour += defaultBrush.getPixel(2 * i, 2 * j + 1);
-		newColour += defaultBrush.getPixel(2 * i + 1, 2 * j + 1);
-
-		newBrush.setPixel(i, j, newColour);
-		}
-		}*/
 	}
 	if (ImGui::SliderInt("Opacity", &alpha, 0, 255)) {
 		brushColour.a = alpha;
