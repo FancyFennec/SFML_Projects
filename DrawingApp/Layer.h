@@ -10,6 +10,8 @@ public:
 	sf::Texture tex;
 	sf::Sprite sprite;
 
+	unsigned int counter = 0;
+
 	Layer(sf::RenderWindow& window) :
 		window(window) {};
 
@@ -43,24 +45,30 @@ public:
 private:
 	sf::RenderWindow& window;
 
+	std::function<sf::Vector2f (float)> getBezier(std::vector<sf::Vector2i>& cursorPositions);
 	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
 		return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
+	}
+	float distance(const sf::Vector2f& vec1, const sf::Vector2f& vec2) {
+		return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
+	}
+
+	float scalarProd(const sf::Vector2f& vec1, const sf::Vector2f& vec2) {
+		return vec1.x * vec2.x + vec1.y + vec2.y;
 	}
 };
 
 inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions)
 {
-	sf::Vector2i currentPos = sf::Mouse::getPosition(window);
-	movedDistance = distance(cursorPositions[0], currentPos);
-	cursorPositions[1] = currentPos;
+	cursorPositions[3] = sf::Mouse::getPosition(window);
+	movedDistance = distance(cursorPositions[2], cursorPositions[3]);
 
 	if (movedDistance > brush.stepsize) {
 
 		int steps = (int)std::floorf(movedDistance / brush.stepsize);
-		float offsetFactor = (steps * brush.stepsize - movedDistance);
 
-		sf::Vector2f direction = sf::Vector2f(cursorPositions[1] - cursorPositions[0]) / distance(cursorPositions[1], cursorPositions[0]);
-		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[0]);
+		sf::Vector2f direction = sf::Vector2f(cursorPositions[3] - cursorPositions[2]) / distance(cursorPositions[3], cursorPositions[2]);
+		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
 
 
 #pragma omp parallel for
@@ -70,8 +78,7 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 		}
 		circlePos += steps * brush.stepsize * direction;
 
-		cursorPositions[0] = sf::Vector2i(circlePos);
-		cursorPositions[1] = currentPos;
+		cursorPositions[2] = sf::Vector2i(circlePos);
 
 		movedDistance -= brush.stepsize * steps;
 	}
@@ -79,7 +86,58 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 
 inline void Layer::drawCubicOnCanvas(float & movedDistance, Brush & brush, std::vector<sf::Vector2i>& cursorPositions)
 {
-	//TODO: Implement Bezier curves
+	//TODO: This isn't working properly yet
+	sf::Vector2i newPos = sf::Mouse::getPosition(window);
+	movedDistance = distance(newPos, cursorPositions[3]);
+
+	if (movedDistance > brush.stepsize) {
+		if (counter == 0) {
+			counter++;
+			cursorPositions[1] = cursorPositions[3] - cursorPositions[2];
+			cursorPositions[2] = cursorPositions[3];
+			cursorPositions[3] = newPos;
+
+			cursorPositions[1] += cursorPositions[3] - cursorPositions[2];
+			cursorPositions[1] /= 4;
+			
+			drawLinearOnCanvas(movedDistance, brush, cursorPositions);
+		}
+		else {
+			cursorPositions[0] = cursorPositions[1];
+			cursorPositions[1] = cursorPositions[3] - cursorPositions[2];
+			cursorPositions[2] = cursorPositions[3];
+			cursorPositions[3] = newPos;
+
+			cursorPositions[1] += cursorPositions[3] - cursorPositions[2];
+			cursorPositions[1] /= 4;
+
+			auto bezierFct = getBezier(cursorPositions);
+
+			float dist = 0.0f;
+//#pragma omp parallel for
+			for (int i = 1 ; i <= 20; i++) {
+				dist += distance(bezierFct((i - 1) / 20.0f), bezierFct(i / 20.0f));
+			}
+			int steps = (int)std::floorf(dist / brush.stepsize);
+
+			sf::Vector2f oldPos = sf::Vector2f(cursorPositions[2]);
+			sf::Vector2f drawingPos;
+
+			float offset = 0;
+//#pragma omp parallel for
+			for (int i = 0; i < steps; i++) {
+				drawingPos = bezierFct(offset + 1.0f / steps);
+				float dist = distance(oldPos, drawingPos);
+				offset += 1.0f / steps * brush.stepsize / dist;
+				drawingPos = bezierFct(offset);
+				drawBrushAt(brush, oldPos);
+				movedDistance -= distance(oldPos, drawingPos);
+				oldPos = drawingPos;
+			}
+
+			cursorPositions[2] = sf::Vector2i(drawingPos);
+		}
+	}
 }
 
 inline void Layer::drawBrushAt(Brush& brush, sf::Vector2f& cursorPos)
@@ -112,3 +170,16 @@ inline void Layer::drawBrushAt(Brush& brush, sf::Vector2f& cursorPos)
 Layer::~Layer()
 {
 }
+
+inline std::function<sf::Vector2f(float)> Layer::getBezier(std::vector<sf::Vector2i>& cursorPositions)
+{
+	return [&](float x) {
+		return (
+			pow(1 - x, 3) * sf::Vector2f(cursorPositions[2]) +
+			pow(x, 3) * sf::Vector2f(cursorPositions[3]) +
+			3 * pow(1 - x, 2) * x * sf::Vector2f(cursorPositions[2] + cursorPositions[0]) +
+			3 * (1 - x) * pow(x, 2) * sf::Vector2f(cursorPositions[3] - cursorPositions[1])
+		);
+	};
+}
+

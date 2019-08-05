@@ -56,7 +56,7 @@ Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH, brushWindow);
 Layer mainLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow);
 
 
-sf::Texture backgroundTex;
+sf::Texture backgroundTexture;
 std::vector<sf::Texture> textureBuffer;
 std::vector<sf::Texture>::iterator textureIter;
 sf::Sprite backgroundSprite;
@@ -64,7 +64,7 @@ sf::Sprite backgroundSprite;
 sf::RenderStates state;
 
 //Buffer for cursor positions
-std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0) };
+std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
 
 int SETTINGS = 0;
 int MOUSE_IS_HELD = 1<<1;
@@ -92,12 +92,12 @@ int main() {
 	currentbrush.color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
 	currentbrush.setBrushsize(brushSize);
 
-	backgroundTex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
-	backgroundTex.update(mainWindow);
-	backgroundSprite.setTexture(backgroundTex);
+	backgroundTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	backgroundTexture.update(mainWindow);
+	backgroundSprite.setTexture(backgroundTexture);
 
 	textureBuffer.reserve(10);
-	textureBuffer.push_back(backgroundTex);
+	textureBuffer.push_back(backgroundTexture);
 	textureIter = textureBuffer.begin();
 
 	while (mainWindow.isOpen())
@@ -117,7 +117,7 @@ int main() {
 		brushWindowDrawing();
 
 		if (event.type == sf::Event::MouseButtonReleased) {
-			backgroundTex.update(mainWindow);
+			backgroundTexture.update(mainWindow);
 		}
 
 		mainWindow.draw(title);
@@ -132,6 +132,7 @@ void mainWindowDrawing()
 	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 		if (SETTINGS & MOUSE_IS_HELD) {
 			mainLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
+			//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
 			mainWindow.draw(mainLayer.sprite);
 		}
 	}
@@ -207,7 +208,7 @@ void mainWindowEventHandling()
 					sf::Uint8 alpha = brushColour.a;
 					sf::Vector2i pos = sf::Mouse::getPosition(mainWindow);
 
-					brushColour = backgroundTex.copyToImage().getPixel(pos.x, pos.y);
+					brushColour = backgroundTexture.copyToImage().getPixel(pos.x, pos.y);
 					brushColour.a = alpha;
 
 					col[0] = brushColour.r;
@@ -229,9 +230,12 @@ void mainWindowEventHandling()
 				sf::Vector2i newPos = sf::Mouse::getPosition(mainWindow);
 				cursorPositions[0] = newPos;
 				cursorPositions[1] = newPos;
+				cursorPositions[2] = newPos;
+				cursorPositions[3] = newPos;
 				sf::Vector2f currentPos = sf::Vector2f(newPos);
 
 				mainLayer.drawBrushAt(currentbrush, currentPos);
+				mainLayer.counter = 0;
 				//No need to draw the window here, it gets drawn because the lmb is held later
 			}
 		}
@@ -241,12 +245,12 @@ void mainWindowEventHandling()
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 				mainWindow.draw(backgroundSprite);
 				mainWindow.draw(mainLayer.sprite);
-				backgroundTex.update(mainWindow);
+				backgroundTexture.update(mainWindow);
 			}
 			if (textureBuffer.size() >= 10) {
 				textureBuffer.erase(textureBuffer.begin());
 			}
-			textureBuffer.push_back(backgroundTex);
+			textureBuffer.push_back(backgroundTexture);
 			textureIter = textureBuffer.end() - 1;
 			SETTINGS ^= MOUSE_IS_HELD;
 		}
@@ -255,7 +259,7 @@ void mainWindowEventHandling()
 		switch (event.key.code) {
 		case(sf::Keyboard::Q): {
 			mainWindow.clear(sf::Color(255, 255, 255, 255));
-			backgroundTex.update(mainWindow);
+			backgroundTexture.update(mainWindow);
 			break;
 		}
 		case(sf::Keyboard::LAlt) : {
@@ -269,14 +273,14 @@ void mainWindowEventHandling()
 		case(sf::Keyboard::Z): {
 			if (SETTINGS & CTRL_IS_HELD) {
 				if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
-				backgroundTex = *textureIter;
+				backgroundTexture = *textureIter;
 			}
 			break;
 		}
 		case(sf::Keyboard::Y): {
 			if (SETTINGS & CTRL_IS_HELD) {
 				if (textureIter != textureBuffer.end() - 1) std::advance(textureIter, 1);
-				backgroundTex = *textureIter;
+				backgroundTexture = *textureIter;
 			}
 			break;
 		}
