@@ -56,7 +56,7 @@ Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH, brushWindow);
 Layer mainLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow);
 
 
-sf::Texture currentTexture;
+sf::Texture backgroundTex;
 std::vector<sf::Texture> textureBuffer;
 std::vector<sf::Texture>::iterator textureIter;
 sf::Sprite backgroundSprite;
@@ -66,9 +66,10 @@ sf::RenderStates state;
 //Buffer for cursor positions
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0) };
 
-bool mouseIsHeld = false;
-bool ctrlIsPressed = false;
-bool lAltIsPressed = false;
+int SETTINGS = 0;
+int MOUSE_IS_HELD = 1<<1;
+int CTRL_IS_HELD = 1<<2;
+int ALT_IS_HELD = 1<<3;
 
 int main() {
 	//getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -77,7 +78,6 @@ int main() {
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(120);
 	mainWindow.clear(sf::Color::White);
-
 	
 	if (!font.loadFromFile("Arial.ttf")) {
 		std::cout << "Could not find font." << std::endl;
@@ -92,12 +92,12 @@ int main() {
 	currentbrush.color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
 	currentbrush.setBrushsize(brushSize);
 
-	currentTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
-	currentTexture.update(mainWindow);
-	backgroundSprite.setTexture(currentTexture);
+	backgroundTex.create(SCREEN_WIDTH, SCREEN_HEIGHT);
+	backgroundTex.update(mainWindow);
+	backgroundSprite.setTexture(backgroundTex);
 
 	textureBuffer.reserve(10);
-	textureBuffer.push_back(currentTexture);
+	textureBuffer.push_back(backgroundTex);
 	textureIter = textureBuffer.begin();
 
 	while (mainWindow.isOpen())
@@ -117,7 +117,7 @@ int main() {
 		brushWindowDrawing();
 
 		if (event.type == sf::Event::MouseButtonReleased) {
-			currentTexture.update(mainWindow);
+			backgroundTex.update(mainWindow);
 		}
 
 		mainWindow.draw(title);
@@ -130,8 +130,8 @@ int main() {
 void mainWindowDrawing()
 {
 	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-		if (mouseIsHeld) {
-			mainLayer.drawOnCanvas(movedDistance, currentbrush, cursorPositions);
+		if (SETTINGS & MOUSE_IS_HELD) {
+			mainLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
 			mainWindow.draw(mainLayer.sprite);
 		}
 	}
@@ -140,9 +140,9 @@ void mainWindowDrawing()
 void brushWindowDrawing()
 {
 	if (brushWindow.hasFocus()) {
-		if (mouseIsHeld) {
+		if (SETTINGS & MOUSE_IS_HELD) {
 			std::cout << "Drawing in Brush Window" << std::endl;
-			brushLayer.drawOnCanvas(movedDistance, currentbrush, cursorPositions);
+			brushLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
 			brushWindow.draw(brushLayer.sprite);
 		}
 	}
@@ -202,12 +202,12 @@ void mainWindowEventHandling()
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			mainLayer.clearLayer();
 
-			if (lAltIsPressed) {
+			if (SETTINGS & ALT_IS_HELD) {
 				if (event.mouseButton.button == sf::Mouse::Left) {
 					sf::Uint8 alpha = brushColour.a;
 					sf::Vector2i pos = sf::Mouse::getPosition(mainWindow);
 
-					brushColour = currentTexture.copyToImage().getPixel(pos.x, pos.y);
+					brushColour = backgroundTex.copyToImage().getPixel(pos.x, pos.y);
 					brushColour.a = alpha;
 
 					col[0] = brushColour.r;
@@ -224,7 +224,7 @@ void mainWindowEventHandling()
 					}
 				}
 				movedDistance = 0.0f;
-				mouseIsHeld = true;
+				SETTINGS |= MOUSE_IS_HELD;
 
 				sf::Vector2i newPos = sf::Mouse::getPosition(mainWindow);
 				cursorPositions[0] = newPos;
@@ -232,7 +232,7 @@ void mainWindowEventHandling()
 				sf::Vector2f currentPos = sf::Vector2f(newPos);
 
 				mainLayer.drawBrushAt(currentbrush, currentPos);
-				//No need to dra the window here, it gets drawn because the lmb is held
+				//No need to draw the window here, it gets drawn because the lmb is held later
 			}
 		}
 	}
@@ -241,42 +241,42 @@ void mainWindowEventHandling()
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 				mainWindow.draw(backgroundSprite);
 				mainWindow.draw(mainLayer.sprite);
-				currentTexture.update(mainWindow);
+				backgroundTex.update(mainWindow);
 			}
 			if (textureBuffer.size() >= 10) {
 				textureBuffer.erase(textureBuffer.begin());
 			}
-			textureBuffer.push_back(currentTexture);
+			textureBuffer.push_back(backgroundTex);
 			textureIter = textureBuffer.end() - 1;
-			mouseIsHeld = false;
+			SETTINGS ^= MOUSE_IS_HELD;
 		}
 	}
 	if (event.type == sf::Event::KeyPressed) {
 		switch (event.key.code) {
 		case(sf::Keyboard::Q): {
 			mainWindow.clear(sf::Color(255, 255, 255, 255));
-			currentTexture.update(mainWindow);
+			backgroundTex.update(mainWindow);
 			break;
 		}
 		case(sf::Keyboard::LAlt) : {
-			lAltIsPressed = true;
+			SETTINGS |= ALT_IS_HELD;
 			break;
 		}
 		case(sf::Keyboard::LControl): {
-			ctrlIsPressed = true;
+			SETTINGS |= CTRL_IS_HELD;
 			break;
 		}
 		case(sf::Keyboard::Z): {
-			if (ctrlIsPressed) {
+			if (SETTINGS & CTRL_IS_HELD) {
 				if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
-				currentTexture = *textureIter;
+				backgroundTex = *textureIter;
 			}
 			break;
 		}
 		case(sf::Keyboard::Y): {
-			if (ctrlIsPressed) {
+			if (SETTINGS & CTRL_IS_HELD) {
 				if (textureIter != textureBuffer.end() - 1) std::advance(textureIter, 1);
-				currentTexture = *textureIter;
+				backgroundTex = *textureIter;
 			}
 			break;
 		}
@@ -289,11 +289,11 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::KeyReleased) {
 		switch (event.key.code) {
 		case(sf::Keyboard::LAlt): {
-			lAltIsPressed = false;
+			SETTINGS ^= ALT_IS_HELD;
 			break;
 		}
 		case(sf::Keyboard::LControl): {
-			ctrlIsPressed = false;
+			SETTINGS ^= CTRL_IS_HELD;
 			break;
 		}
 		}
@@ -305,7 +305,7 @@ void brushWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.key.code == sf::Mouse::Left) {
 			movedDistance = 0.0f;
-			mouseIsHeld = true;
+			SETTINGS |= MOUSE_IS_HELD;
 
 			sf::Vector2i newPos = sf::Mouse::getPosition(brushWindow);
 			cursorPositions[0] = newPos;
@@ -317,7 +317,7 @@ void brushWindowEventHandling()
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.key.code == sf::Mouse::Left) {
-			mouseIsHeld = false;
+			SETTINGS ^= MOUSE_IS_HELD;
 		}
 	}
 	if (event.type == sf::Event::KeyPressed) {

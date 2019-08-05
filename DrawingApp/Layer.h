@@ -34,7 +34,8 @@ public:
 		sprite.setTexture(tex);
 	}
 
-	void drawOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
+	void drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
+	void drawCubicOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
 	void drawBrushAt(Brush& brush, sf::Vector2f& cursorPos);
 
 	~Layer();
@@ -47,10 +48,10 @@ private:
 	}
 };
 
-inline void Layer::drawOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions)
+inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions)
 {
 	sf::Vector2i currentPos = sf::Mouse::getPosition(window);
-	movedDistance += distance(cursorPositions[1], currentPos);
+	movedDistance = distance(cursorPositions[0], currentPos);
 	cursorPositions[1] = currentPos;
 
 	if (movedDistance > brush.stepsize) {
@@ -74,6 +75,11 @@ inline void Layer::drawOnCanvas(float& movedDistance, Brush& brush, std::vector<
 
 		movedDistance -= brush.stepsize * steps;
 	}
+}
+
+inline void Layer::drawCubicOnCanvas(float & movedDistance, Brush & brush, std::vector<sf::Vector2i>& cursorPositions)
+{
+	//TODO: Implement Bezier curves
 }
 
 inline void Layer::drawBrushAt(Brush& brush, sf::Vector2f& cursorPos)
