@@ -127,17 +127,6 @@ int main() {
 	return 0;
 }
 
-void initialiseTitle()
-{
-	title.setFont(font);
-	title.setString(sf::String("Baole Drawing App"));
-	title.setFillColor(sf::Color::Black);
-	title.setCharacterSize(24);
-	sf::FloatRect rec = title.getGlobalBounds();
-	title.setOrigin(rec.width / 2, rec.height / 2);
-	title.setPosition(SCREEN_WIDTH / 2, 10);
-}
-
 void mainWindowDrawing()
 {
 	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
@@ -337,6 +326,17 @@ void brushWindowEventHandling()
 			brushWindow.close();
 		}
 	}
+}
+
+void initialiseTitle()
+{
+	title.setFont(font);
+	title.setString(sf::String("Baole Drawing App"));
+	title.setFillColor(sf::Color::Black);
+	title.setCharacterSize(24);
+	sf::FloatRect rec = title.getGlobalBounds();
+	title.setOrigin(rec.width / 2, rec.height / 2);
+	title.setPosition(SCREEN_WIDTH / 2, 10);
 }
 
 void getDesktopResolution(int& horizontal, int& vertical) {

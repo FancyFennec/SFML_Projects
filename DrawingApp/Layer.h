@@ -89,9 +89,9 @@ inline void Layer::drawBrushAt(Brush& brush, sf::Vector2f& cursorPos)
 			if (xPos >= 0 && yPos >= 0 && xPos < image.getSize().x && yPos < image.getSize().y) {
 				if (image.getPixel(xPos, yPos).a < brush.image.getPixel(i, j).a * brush.opacity / 255.0f) {
 
-					newColour.r = brush.color.r * brush.opacity / 255;
-					newColour.g = brush.color.g * brush.opacity / 255;
-					newColour.b = brush.color.b * brush.opacity / 255;
+					newColour.r = brush.color.r;
+					newColour.g = brush.color.g;
+					newColour.b = brush.color.b;
 					newColour.a = brush.opacity;
 					image.setPixel(xPos, yPos, newColour);
 				}
