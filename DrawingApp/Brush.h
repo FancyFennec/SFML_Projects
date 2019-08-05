@@ -15,7 +15,6 @@ public:
 
 	void setBrushsize(int newsize) {
 		if (9 > newsize && newsize >= 0) {
-			std::cout << images.size() << std::endl;
 			image = images[8 - newsize];
 		}
 	}
@@ -24,6 +23,32 @@ public:
 		images.push_back(image);
 		createBrushes();
 	};
+
+	Brush(int brush_width) {
+		for (int i = 0; i < brush_width; i++) {
+			for (int j = 0; j < brush_width; j++) {
+				float x = i - brush_width / 2;
+				float y = j - brush_width / 2;
+
+				int count = 0;
+
+				for (float k = 0.0f; k < 4; k++) {
+					for (float l = 0.0f; l < 4; l++) {
+						if ((x + k / 4.0f + l / 4.0f) * (x + k / 4.0f + l / 4.0f) +
+							(y + k / 4.0f + l / 4.0f) * (y + k / 4.0f + l / 4.0f) < 100 * 100) {
+							count++;
+						}
+					}
+				}
+
+				sf::Color pixelColour = sf::Color::Black;
+				pixelColour.a = sf::Uint8((255 * count) / 16);
+				image.setPixel(i, j, pixelColour);
+			}
+		}
+		images.push_back(image);
+		createBrushes();
+	}
 
 	Brush(int brush_width, const char* filePath) {
 		image.create(brush_width, brush_width);

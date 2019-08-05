@@ -14,36 +14,47 @@
 #include "Layer.h"
 using json = nlohmann::json;
 
-void mainWindowEventHandling();
-void brushWindowRendering();
-void brushWindowEventHandling();
 void createBrushWindow();
 void brushGUIRendering();
+void brushWindowRendering();
 void mainWindowDrawing();
+void initialiseTitle();
 void brushWindowDrawing();
+void mainWindowEventHandling();
+void brushWindowEventHandling();
 void getDesktopResolution(int& horizontal, int& vertical);
+
 float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
 	return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
 }
 
-sf::Clock deltaClock;
+static const float PI = 3.14159265358979323846f;
 
+sf::Clock deltaClock;
+sf::Text title;
+sf::Font font;
+
+//Brush initialisation
+int BRUSH_WIDTH = 512;
+Brush currentbrush(BRUSH_WIDTH, "newBrush.png");
+float movedDistance = 0;
+int brushSize = 4;
+float stepsize = 2.0f;
+int alpha = 100;
+static float col[3] = { 0.5f,0.0f,0.5f };
+static sf::Color brushColour((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
+
+//Window initialisation
 int SCREEN_WIDTH = 800;
 int SCREEN_HEIGHT = 800;
-const float PI = 3.14159265358979323846f;
-
-sf::Text title;
-
 sf::RenderWindow mainWindow;
 sf::RenderWindow brushWindow;
 sf::Event event;
 
-int BRUSH_WIDTH = 512;
-
-sf::Image defaultBrush;
-
+//Layers for drawing in the respective windows
 Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH, brushWindow);
 Layer mainLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow);
+
 
 sf::Texture currentTexture;
 std::vector<sf::Texture> textureBuffer;
@@ -52,20 +63,12 @@ sf::Sprite backgroundSprite;
 
 sf::RenderStates state;
 
-Brush currentbrush(BRUSH_WIDTH, "newBrush.png");
-int brushSize = 4;
-float stepsize = 2.0f;
-float movedDistance = 0;
-
+//Buffer for cursor positions
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0) };
 
 bool mouseIsHeld = false;
 bool ctrlIsPressed = false;
 bool lAltIsPressed = false;
-
-int alpha = 100;
-static float col[3] = { 0.5f,0.0f,0.5f };
-static sf::Color brushColour((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
 
 int main() {
 	//getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -75,15 +78,14 @@ int main() {
 	mainWindow.setFramerateLimit(120);
 	mainWindow.clear(sf::Color::White);
 
-	sf::Font font;
-	font.loadFromFile("Arial.ttf");
-	title.setFont(font);
-	title.setString(sf::String("Baole Drawing App"));
-	title.setFillColor(sf::Color::Black);
-	title.setCharacterSize(24);
-	sf::FloatRect rec = title.getGlobalBounds();
-	title.setOrigin(rec.width / 2, rec.height / 2);
-	title.setPosition(SCREEN_WIDTH / 2, 10);
+	
+	if (!font.loadFromFile("Arial.ttf")) {
+		std::cout << "Could not find font." << std::endl;
+		return -1;
+	}
+	else {
+		initialiseTitle();
+	}
 
 	ImGui::SFML::Init(mainWindow);
 
@@ -123,6 +125,17 @@ int main() {
 		mainWindow.display();
 	}
 	return 0;
+}
+
+void initialiseTitle()
+{
+	title.setFont(font);
+	title.setString(sf::String("Baole Drawing App"));
+	title.setFillColor(sf::Color::Black);
+	title.setCharacterSize(24);
+	sf::FloatRect rec = title.getGlobalBounds();
+	title.setOrigin(rec.width / 2, rec.height / 2);
+	title.setPosition(SCREEN_WIDTH / 2, 10);
 }
 
 void mainWindowDrawing()
@@ -175,31 +188,6 @@ void createBrushWindow()
 	brushWindow.clear(sf::Color::White);
 	brushWindow.setPosition(mainWindow.getPosition() +
 		sf::Vector2i(SCREEN_WIDTH / 2 - BRUSH_WIDTH / 2, SCREEN_HEIGHT / 2 - BRUSH_WIDTH / 2));
-
-	//TODO: This might be useful for something else
-	/*for (int i = 0; i < BRUSH_WIDTH; i++) {
-		for (int j = 0; j < BRUSH_WIDTH; j++) {
-			float x = i - BRUSH_WIDTH / 2;
-			float y = j - BRUSH_WIDTH / 2;
-
-			int count = 0;
-
-			for (float k = 0.0f; k < 4; k++) {
-				for (float l = 0.0f; l < 4; l++) {
-					if ((x + k / 4.0f + l / 4.0f) * (x + k / 4.0f + l / 4.0f) +
-						(y + k / 4.0f + l / 4.0f) * (y + k / 4.0f + l / 4.0f) < 100 * 100) {
-						count++;
-					}
-				}
-			}
-
-			sf::Color pixelColour = sf::Color::Black;
-			pixelColour.a = sf::Uint8((255 * count) / 16);
-			brushImage.setPixel(i, j, pixelColour);
-		}
-	}
-	brushTex.update(brushImage);
-	brushSprite.setTexture(brushTex);*/
 }
 
 void brushWindowRendering()
