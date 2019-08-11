@@ -2,25 +2,14 @@
 
 int main() {
 
-	int a;
-	int b;
+	int test = 1 << 3;
+	int a = 1 << 1;
 
-	std::cout << "Please enter a number" << std::endl;
-	std::cin >> a;
-	int counter = 0;
-	for (int i = 2; i < a; a++) {
-		if (a%i == 0) {
-			counter++;
-		}
-	}
+	test = a;
 
-	if (0 != counter) {
-		std::cout << "This number is not prime!" << std::endl;
-		return -1;
-	}
-	else {
-		std::cout << "This number is prime, hooray" << std::endl;
-		return 0;
-	}
+
+	std::cout << test;
+
+	return 0;
 	
 }

@@ -98,7 +98,7 @@ inline void Layer::drawCubicOnCanvas(float & movedDistance, Brush & brush, std::
 			cursorPositions[3] = newPos;
 
 			cursorPositions[1] += cursorPositions[3] - cursorPositions[2];
-			cursorPositions[1] /= 4;
+			cursorPositions[1] /= 3;
 			
 			drawLinearOnCanvas(movedDistance, brush, cursorPositions);
 		}
@@ -109,28 +109,28 @@ inline void Layer::drawCubicOnCanvas(float & movedDistance, Brush & brush, std::
 			cursorPositions[3] = newPos;
 
 			cursorPositions[1] += cursorPositions[3] - cursorPositions[2];
-			cursorPositions[1] /= 4;
+			cursorPositions[1] /= 3;
 
 			auto bezierFct = getBezier(cursorPositions);
 
-			float dist = 0.0f;
-//#pragma omp parallel for
-			for (int i = 1 ; i <= 20; i++) {
-				dist += distance(bezierFct((i - 1) / 20.0f), bezierFct(i / 20.0f));
-			}
-			int steps = (int)std::floorf(dist / brush.stepsize);
+			int steps = (int)std::floorf(movedDistance / brush.stepsize);
 
 			sf::Vector2f oldPos = sf::Vector2f(cursorPositions[2]);
 			sf::Vector2f drawingPos;
 
 			float offset = 0;
-//#pragma omp parallel for
 			for (int i = 0; i < steps; i++) {
-				drawingPos = bezierFct(offset + 1.0f / steps);
+				float step = 1.0f / steps;
+
+				//One step of linear interpolation to adjust the moved distance
+				drawingPos = bezierFct(offset + step);
 				float dist = distance(oldPos, drawingPos);
-				offset += 1.0f / steps * brush.stepsize / dist;
-				drawingPos = bezierFct(offset);
-				drawBrushAt(brush, oldPos);
+				step *= brush.stepsize / dist;
+				drawingPos = bezierFct(offset + step);
+
+				drawBrushAt(brush, drawingPos);
+
+				offset += step;
 				movedDistance -= distance(oldPos, drawingPos);
 				oldPos = drawingPos;
 			}
