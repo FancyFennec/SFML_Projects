@@ -52,9 +52,8 @@ sf::RenderWindow mainWindow;
 sf::RenderWindow brushWindow;
 sf::Event event;
 
-//Layers for drawing in the respective windows
 Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH, brushWindow);
-Layer mainLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow);
+Layer currentLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow);
 Layer backGroundLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow, sf::Color::White);
 
 std::vector<sf::Texture> textureBuffer;
@@ -66,9 +65,13 @@ sf::RenderStates state;
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
 
 int main() {
-	//getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
-	//window.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
-	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
+	getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
+	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
+
+	currentLayer.updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	backGroundLayer.updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	//mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(120);
 	mainWindow.clear(sf::Color::White);
@@ -93,7 +96,7 @@ int main() {
 	while (mainWindow.isOpen())
 	{
 		
-		mainWindow.draw(backGroundLayer.sprite);
+		backGroundLayer.drawLayer();
 
 		while (mainWindow.pollEvent(event))
 		{
@@ -108,7 +111,7 @@ int main() {
 		brushWindowDrawing();
 
 		if (event.type == sf::Event::MouseButtonReleased) {
-			backGroundLayer.tex.update(mainWindow);
+			backGroundLayer.updateLayer();
 		}
 
 		mainWindow.draw(title);
@@ -122,9 +125,9 @@ void mainWindowDrawing()
 {
 	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 		if (isMouseHeld()) {
-			mainLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
+			currentLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
 			//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
-			mainWindow.draw(mainLayer.sprite);
+			currentLayer.drawLayer();
 		}
 	}
 }
@@ -135,7 +138,7 @@ void brushWindowDrawing()
 		if (isMouseHeld()) {
 			std::cout << "Drawing in Brush Window" << std::endl;
 			brushLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
-			brushWindow.draw(brushLayer.sprite);
+			brushLayer.drawLayer();
 		}
 	}
 }
@@ -181,7 +184,7 @@ void brushWindowRendering()
 			brushWindowEventHandling();
 		}
 		brushWindow.clear(sf::Color::White);
-		brushWindow.draw(brushLayer.sprite);
+		brushLayer.drawLayer();
 		brushWindow.display();
 	}
 }
@@ -192,7 +195,7 @@ void mainWindowEventHandling()
 		mainWindow.close();
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			mainLayer.clearLayer();
+			currentLayer.clearLayer();
 
 			if (isAltHeld()) {
 				if (event.mouseButton.button == sf::Mouse::Left) {
@@ -225,8 +228,8 @@ void mainWindowEventHandling()
 				cursorPositions[3] = newPos;
 				sf::Vector2f currentPos = sf::Vector2f(newPos);
 
-				mainLayer.drawBrushAt(currentbrush, currentPos);
-				mainLayer.counter = 0;
+				currentLayer.drawBrushAt(currentbrush, currentPos);
+				currentLayer.counter = 0;
 				//No need to draw the window here, it gets drawn because the lmb is held later
 			}
 		}
@@ -234,9 +237,9 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-				mainWindow.draw(backGroundLayer.sprite);
-				mainWindow.draw(mainLayer.sprite);
-				backGroundLayer.tex.update(mainWindow);
+				backGroundLayer.drawLayer();
+				currentLayer.drawLayer();
+				backGroundLayer.updateLayer();
 			}
 			if (textureBuffer.size() >= 10) {
 				textureBuffer.erase(textureBuffer.begin());
@@ -250,7 +253,7 @@ void mainWindowEventHandling()
 		switch (event.key.code) {
 		case(sf::Keyboard::Q): {
 			mainWindow.clear(sf::Color(255, 255, 255, 255));
-			backGroundLayer.tex.update(mainWindow);
+			backGroundLayer.updateLayer();
 			break;
 		}
 		case(sf::Keyboard::LAlt) : {

@@ -38,10 +38,30 @@ public:
 		sprite.setTexture(tex);
 	};
 
+	void updateSize(int width, int height) {
+		sf::Color color = image.getPixel(1, 1);
+		image = sf::Image();
+		tex = sf::Texture();
+		sprite = sf::Sprite();
+
+		image.create(width, height, color);
+		tex.create(width, height);
+		tex.update(image);
+		sprite.setTexture(tex);
+	}
+
 	void clearLayer() {
 		image.create(image.getSize().x, image.getSize().y, sf::Color(0, 0, 0, 0));
 		tex.update(image);
 		sprite.setTexture(tex);
+	}
+
+	void updateLayer() {
+		tex.update(window);
+	}
+
+	void drawLayer() {
+		window.draw(sprite);
 	}
 
 	void drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
