@@ -14,8 +14,7 @@ void setMouseIsHeld() {
 }
 
 void setMouseNotHeld() {
-	SETTINGS |= MOUSE_IS_HELD;
-	SETTINGS ^= MOUSE_IS_HELD;
+	SETTINGS &= ~MOUSE_IS_HELD;
 }
 
 bool isCtrlHeld() {
@@ -27,8 +26,7 @@ void setCtrlIsHeld() {
 }
 
 void setCtrlNotHeld() {
-	SETTINGS |= CTRL_IS_HELD;
-	SETTINGS ^= CTRL_IS_HELD;
+	SETTINGS &= ~CTRL_IS_HELD;
 }
 
 bool isAltHeld() {
@@ -40,6 +38,5 @@ void setAltIsHeld() {
 }
 
 void setAltNotHeld() {
-	SETTINGS |= ALT_IS_HELD;
-	SETTINGS ^= ALT_IS_HELD;
+	SETTINGS &= ~ALT_IS_HELD;
 }
