@@ -30,6 +30,14 @@ public:
 		sprite.setTexture(tex);
 	};
 
+	Layer(int width, int height, sf::RenderWindow& window, sf::Color color) :
+		window(window) {
+		image.create(width, height, color);
+		tex.create(width, height);
+		tex.update(image);
+		sprite.setTexture(tex);
+	};
+
 	void clearLayer() {
 		image.create(image.getSize().x, image.getSize().y, sf::Color(0, 0, 0, 0));
 		tex.update(image);

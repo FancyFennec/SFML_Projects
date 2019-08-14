@@ -55,22 +55,15 @@ sf::Event event;
 //Layers for drawing in the respective windows
 Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH, brushWindow);
 Layer mainLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow);
+Layer backGroundLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow, sf::Color::White);
 
-
-sf::Texture backgroundTexture;
 std::vector<sf::Texture> textureBuffer;
 std::vector<sf::Texture>::iterator textureIter;
-sf::Sprite backgroundSprite;
 
 sf::RenderStates state;
 
 //Buffer for cursor positions
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
-
-//int SETTINGS = 0;
-//int MOUSE_IS_HELD = 1<<1;
-//int CTRL_IS_HELD = 1<<2;
-//int ALT_IS_HELD = 1<<3;
 
 int main() {
 	//getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -93,17 +86,14 @@ int main() {
 	currentbrush.color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
 	currentbrush.setBrushsize(brushSize);
 
-	backgroundTexture.create(SCREEN_WIDTH, SCREEN_HEIGHT);
-	backgroundTexture.update(mainWindow);
-	backgroundSprite.setTexture(backgroundTexture);
-
 	textureBuffer.reserve(10);
-	textureBuffer.push_back(backgroundTexture);
+	textureBuffer.push_back(backGroundLayer.tex);
 	textureIter = textureBuffer.begin();
 
 	while (mainWindow.isOpen())
 	{
-		mainWindow.draw(backgroundSprite);
+		
+		mainWindow.draw(backGroundLayer.sprite);
 
 		while (mainWindow.pollEvent(event))
 		{
@@ -118,7 +108,7 @@ int main() {
 		brushWindowDrawing();
 
 		if (event.type == sf::Event::MouseButtonReleased) {
-			backgroundTexture.update(mainWindow);
+			backGroundLayer.tex.update(mainWindow);
 		}
 
 		mainWindow.draw(title);
@@ -209,7 +199,7 @@ void mainWindowEventHandling()
 					sf::Uint8 alpha = currentbrush.color.a;
 					sf::Vector2i pos = sf::Mouse::getPosition(mainWindow);
 
-					currentbrush.color = backgroundTexture.copyToImage().getPixel(pos.x, pos.y);
+					currentbrush.color = backGroundLayer.tex.copyToImage().getPixel(pos.x, pos.y);
 					currentbrush.color.a = alpha;
 
 					col[0] = currentbrush.color.r;
@@ -244,14 +234,14 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-				mainWindow.draw(backgroundSprite);
+				mainWindow.draw(backGroundLayer.sprite);
 				mainWindow.draw(mainLayer.sprite);
-				backgroundTexture.update(mainWindow);
+				backGroundLayer.tex.update(mainWindow);
 			}
 			if (textureBuffer.size() >= 10) {
 				textureBuffer.erase(textureBuffer.begin());
 			}
-			textureBuffer.push_back(backgroundTexture);
+			textureBuffer.push_back(backGroundLayer.tex);
 			textureIter = textureBuffer.end() - 1;
 			setMouseNotHeld();
 		}
@@ -260,7 +250,7 @@ void mainWindowEventHandling()
 		switch (event.key.code) {
 		case(sf::Keyboard::Q): {
 			mainWindow.clear(sf::Color(255, 255, 255, 255));
-			backgroundTexture.update(mainWindow);
+			backGroundLayer.tex.update(mainWindow);
 			break;
 		}
 		case(sf::Keyboard::LAlt) : {
@@ -274,14 +264,14 @@ void mainWindowEventHandling()
 		case(sf::Keyboard::Z): {
 			if (isCtrlHeld()) {
 				if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
-				backgroundTexture = *textureIter;
+				backGroundLayer.tex = *textureIter;
 			}
 			break;
 		}
 		case(sf::Keyboard::Y): {
 			if (isCtrlHeld()) {
 				if (textureIter != textureBuffer.end() - 1) std::advance(textureIter, 1);
-				backgroundTexture = *textureIter;
+				backGroundLayer.tex = *textureIter;
 			}
 			break;
 		}
