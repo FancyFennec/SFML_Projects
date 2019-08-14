@@ -1,0 +1,40 @@
+﻿
+Renamed 'currentLayer' to 'drawingLayer':
+-----------------------------------------
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(56, 7)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(73, 2)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(130, 4)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(132, 4)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(199, 4)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(232, 5)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(233, 5)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(241, 5)
+
+Renamed 'backGroundLayers' to 'layers':
+---------------------------------------
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(57, 20)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(74, 2)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(95, 26)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(101, 3)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(116, 4)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(206, 27)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(242, 5)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(247, 28)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(256, 4)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(270, 5)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(277, 5)
+
+Renamed 'counter' to 'firstDrawFlag':
+-------------------------------------
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Layer.h(15, 15)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Layer.h(129, 7)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Layer.h(130, 4)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(236, 18)
+
+Renamed 'firstDrawFlag' to 'drawFlag':
+--------------------------------------
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Layer.h(73, 25)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Layer.h(82, 15)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Layer.h(131, 7)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Layer.h(132, 4)
+C:\Users\JonasAllemann\Desktop\Learnings\CPP\TerrainGenerator\DrawingApp\Source.cpp(236, 18)

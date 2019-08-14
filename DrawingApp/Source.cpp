@@ -46,15 +46,19 @@ int alpha = 100;
 static float col[3] = { 0.5f,0.0f,0.5f };
 
 //Window initialisation
-int SCREEN_WIDTH = 800;
+int SCREEN_WIDTH = 1200;
 int SCREEN_HEIGHT = 800;
 sf::RenderWindow mainWindow;
 sf::RenderWindow brushWindow;
 sf::Event event;
 
 Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH, brushWindow);
-Layer currentLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow);
-Layer backGroundLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow, sf::Color::White);
+Layer drawingLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow);
+
+std::vector<Layer> layers = { 
+	Layer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow, sf::Color::White)
+};
+std::vector<Layer>::iterator currentLayer = layers.begin();
 
 std::vector<sf::Texture> textureBuffer;
 std::vector<sf::Texture>::iterator textureIter;
@@ -65,13 +69,13 @@ sf::RenderStates state;
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
 
 int main() {
-	getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
+	/*getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
 	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
 
-	currentLayer.updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-	backGroundLayer.updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	drawingLayer.updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	currentLayer->updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);*/
 
-	//mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
+	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(120);
 	mainWindow.clear(sf::Color::White);
@@ -90,13 +94,15 @@ int main() {
 	currentbrush.setBrushsize(brushSize);
 
 	textureBuffer.reserve(11);
-	textureBuffer.push_back(backGroundLayer.tex);
+	textureBuffer.push_back(currentLayer->tex);
 	textureIter = textureBuffer.begin();
 
 	while (mainWindow.isOpen())
 	{
-		
-		backGroundLayer.drawLayer();
+		for (auto layer : layers) {
+			layer.drawLayer();
+		}
+		//currentLayer->drawLayer();
 
 		while (mainWindow.pollEvent(event))
 		{
@@ -106,13 +112,33 @@ int main() {
 
 		brushWindowRendering();
 		brushGUIRendering();
+		ImGui::Begin("Layers");
+		{
+			if (ImGui::Button("New Layer")) {
+				layers.push_back(Layer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow));
+				currentLayer = layers.end() - 1;
+			}
+			int layerNumber = layers.size();
+			for (auto iter = layers.end() -1 ; iter >= layers.begin(); std::advance(iter, -1)) {
+				ImGui::Image(iter->sprite, sf::Vector2f(30,30));
+				ImGui::SameLine();
+				std::string layerName = "Layer";
+				layerName.append(std::to_string(layerNumber));
+				if (ImGui::Button(layerName.data())) {
+					currentLayer = iter;
+				}
+				//TODO: Fix this
+				/*ImGui::SameLine();
+				if (ImGui::Button("Del")) {
+					layers.erase(iter);
+				}*/
+				layerNumber--;
+			}
+		}
+		ImGui::End();
 
 		mainWindowDrawing();
 		brushWindowDrawing();
-
-		if (event.type == sf::Event::MouseButtonReleased) {
-			backGroundLayer.updateLayer();
-		}
 
 		mainWindow.draw(title);
 		ImGui::SFML::Render(mainWindow);
@@ -125,9 +151,9 @@ void mainWindowDrawing()
 {
 	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 		if (isMouseHeld()) {
-			currentLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
+			drawingLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
 			//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
-			currentLayer.drawLayer();
+			drawingLayer.drawLayer();
 		}
 	}
 }
@@ -194,14 +220,14 @@ void mainWindowEventHandling()
 		mainWindow.close();
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			currentLayer.clearLayer();
+			drawingLayer.clearLayer();
 
 			if (isAltHeld()) {
 				if (event.mouseButton.button == sf::Mouse::Left) {
 					sf::Uint8 alpha = currentbrush.color.a;
 					sf::Vector2i pos = sf::Mouse::getPosition(mainWindow);
 
-					currentbrush.color = backGroundLayer.tex.copyToImage().getPixel(pos.x, pos.y);
+					currentbrush.color = currentLayer->tex.copyToImage().getPixel(pos.x, pos.y);
 					currentbrush.color.a = alpha;
 
 					col[0] = currentbrush.color.r;
@@ -227,8 +253,8 @@ void mainWindowEventHandling()
 				cursorPositions[3] = newPos;
 				sf::Vector2f currentPos = sf::Vector2f(newPos);
 
-				currentLayer.drawBrushAt(currentbrush, currentPos);
-				currentLayer.counter = 0;
+				drawingLayer.drawBrushAt(currentbrush, currentPos);
+				drawingLayer.resetDrawFlag();
 				//No need to draw the window here, it gets drawn because the lmb is held later
 			}
 		}
@@ -236,13 +262,12 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-				currentLayer.drawLayer();
-				backGroundLayer.updateLayer();
+				currentLayer->updateLayer(drawingLayer);
 			}
 			if (textureBuffer.size() >= 10) {
 				textureBuffer.erase(textureBuffer.begin());
 			}
-			textureBuffer.push_back(backGroundLayer.tex);
+			textureBuffer.push_back(currentLayer->tex);
 			textureIter = textureBuffer.end() - 1;
 			setMouseNotHeld();
 		}
@@ -251,7 +276,7 @@ void mainWindowEventHandling()
 		switch (event.key.code) {
 		case(sf::Keyboard::Q): {
 			mainWindow.clear(sf::Color(255, 255, 255, 255));
-			backGroundLayer.updateLayer();
+			currentLayer->updateLayer();
 			break;
 		}
 		case(sf::Keyboard::LAlt) : {
@@ -265,14 +290,14 @@ void mainWindowEventHandling()
 		case(sf::Keyboard::Z): {
 			if (isCtrlHeld()) {
 				if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
-				backGroundLayer.tex = *textureIter;
+				currentLayer->tex = *textureIter;
 			}
 			break;
 		}
 		case(sf::Keyboard::Y): {
 			if (isCtrlHeld()) {
 				if (textureIter != textureBuffer.end() - 1) std::advance(textureIter, 1);
-				backGroundLayer.tex = *textureIter;
+				currentLayer->tex = *textureIter;
 			}
 			break;
 		}

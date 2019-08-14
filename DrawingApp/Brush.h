@@ -7,6 +7,8 @@ class Brush
 {
 public:
 	sf::Image image;
+	sf::Texture tex;
+	sf::Sprite sprite;
 	sf::Color color = sf::Color::Black;
 
 	float stepsize = 2.0f;
@@ -16,6 +18,11 @@ public:
 	void setBrushsize(int newsize) {
 		if (9 > newsize && newsize >= 0) {
 			image = images[8 - newsize];
+			tex.create(image.getSize().x, image.getSize().y);
+			tex.update(image);
+			sprite.setTexture(tex);
+			sprite.setOrigin(sf::Vector2f(image.getSize().x / 2, image.getSize().y / 2));
+			//sprite.setColor(brush.color);
 		}
 	}
 

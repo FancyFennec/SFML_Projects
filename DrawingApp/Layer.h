@@ -5,21 +5,23 @@
 class Layer
 {
 public:
-
 	sf::Image image;
 	sf::Texture tex;
 	sf::Sprite sprite;
 
-	unsigned int counter = 0;
+	unsigned static int layerCount;
 
 	Layer(sf::RenderWindow& window) :
-		window(window) {};
+		window(window) {
+		layerCount++; 
+	};
 
 	Layer(sf::Image image, sf::Texture tex, sf::Sprite sprite, sf::RenderWindow& window) :
 		image(image),
 		tex(tex),
 		sprite(sprite),
 		window(window) {
+		layerCount++;
 	};
 
 	Layer(int width, int height, sf::RenderWindow& window) :
@@ -28,6 +30,7 @@ public:
 		tex.create(width, height);
 		tex.update(image);
 		sprite.setTexture(tex);
+		layerCount++;
 	};
 
 	Layer(int width, int height, sf::RenderWindow& window, sf::Color color) :
@@ -36,6 +39,7 @@ public:
 		tex.create(width, height);
 		tex.update(image);
 		sprite.setTexture(tex);
+		//layerCount++;
 	};
 
 	void updateSize(int width, int height) {
@@ -60,9 +64,21 @@ public:
 		tex.update(window);
 	}
 
+	void updateLayer(Layer& newLayer) {
+		sf::RenderTexture rTex;
+		rTex.create(image.getSize().x, image.getSize().y);
+		rTex.draw(sprite);
+		rTex.display();
+		rTex.draw(newLayer.sprite);
+		rTex.display();
+		tex = rTex.getTexture();
+	}
+
 	void drawLayer() {
 		window.draw(sprite);
 	}
+
+	void resetDrawFlag() { drawFlag = 0; };
 
 	void drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
 	void drawCubicOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
@@ -71,6 +87,7 @@ public:
 	~Layer();
 
 private:
+	unsigned int drawFlag = 0;
 	sf::RenderWindow& window;
 
 	std::function<sf::Vector2f (float)> getBezier(std::vector<sf::Vector2i>& cursorPositions);
@@ -86,6 +103,8 @@ private:
 	}
 };
 
+unsigned int Layer::layerCount = 0;
+
 inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions)
 {
 	cursorPositions[3] = sf::Mouse::getPosition(window);
@@ -98,17 +117,27 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 		sf::Vector2f direction = sf::Vector2f(cursorPositions[3] - cursorPositions[2]) / distance(cursorPositions[3], cursorPositions[2]);
 		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
 
+		sf::RenderTexture renderTex;
+		renderTex.create(image.getSize().x, image.getSize().y);
+		renderTex.draw(sprite);
+		renderTex.display();
 
-#pragma omp parallel for
+//#pragma omp parallel for
 		for (int i = 0; i < steps; i++) {
 			sf::Vector2f drawingPos = circlePos + (i + 1) * brush.stepsize * direction;
-			drawBrushAt(brush, drawingPos);
+			brush.sprite.setPosition(circlePos);
+			renderTex.draw(brush.sprite);
+			renderTex.display();
+			//drawBrushAt(brush, drawingPos);
 		}
 		circlePos += steps * brush.stepsize * direction;
-
 		cursorPositions[2] = sf::Vector2i(circlePos);
-
 		movedDistance -= brush.stepsize * steps;
+
+		
+		tex = renderTex.getTexture();
+		//tex.update(image);
+		sprite.setTexture(tex);
 	}
 }
 
@@ -119,8 +148,8 @@ inline void Layer::drawCubicOnCanvas(float & movedDistance, Brush & brush, std::
 	movedDistance = distance(newPos, cursorPositions[3]);
 
 	if (movedDistance > brush.stepsize) {
-		if (counter == 0) {
-			counter++;
+		if (drawFlag == 0) {
+			drawFlag++;
 			cursorPositions[1] = cursorPositions[3] - cursorPositions[2];
 			cursorPositions[2] = cursorPositions[3];
 			cursorPositions[3] = newPos;
@@ -190,9 +219,6 @@ inline void Layer::drawBrushAt(Brush& brush, sf::Vector2f& cursorPos)
 			}
 		}
 	}
-
-	tex.update(image);
-	sprite.setTexture(tex);
 }
 
 Layer::~Layer()
