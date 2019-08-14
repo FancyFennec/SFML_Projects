@@ -89,7 +89,7 @@ int main() {
 	currentbrush.color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
 	currentbrush.setBrushsize(brushSize);
 
-	textureBuffer.reserve(10);
+	textureBuffer.reserve(11);
 	textureBuffer.push_back(backGroundLayer.tex);
 	textureIter = textureBuffer.begin();
 
@@ -136,7 +136,6 @@ void brushWindowDrawing()
 {
 	if (brushWindow.hasFocus()) {
 		if (isMouseHeld()) {
-			std::cout << "Drawing in Brush Window" << std::endl;
 			brushLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
 			brushLayer.drawLayer();
 		}
@@ -237,7 +236,6 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-				backGroundLayer.drawLayer();
 				currentLayer.drawLayer();
 				backGroundLayer.updateLayer();
 			}
