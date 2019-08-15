@@ -79,7 +79,7 @@ int main() {
 	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(120);
-	mainWindow.clear(sf::Color::White);
+	mainWindow.clear(sf::Color::Red);
 	
 	if (!font.loadFromFile("Arial.ttf")) {
 		std::cout << "Could not find font." << std::endl;
@@ -176,7 +176,7 @@ void layerGUI()
 	{
 		if (ImGui::Button("New Layer")) {
 			layers.push_back(Layer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow));
-			currentLayer = layers.end() - 1;
+			//currentLayer = layers.end() - 1;
 		}
 		int layerNumber = layers.size();
 		for (auto iter = layers.end() - 1; iter >= layers.begin(); std::advance(iter, -1)) {
@@ -184,6 +184,7 @@ void layerGUI()
 			ImGui::SameLine();
 			std::string layerName = "Layer";
 			layerName.append(std::to_string(layerNumber));
+
 			if (ImGui::Button(layerName.data())) {
 				currentLayer = iter;
 			}
@@ -232,14 +233,17 @@ void mainWindowEventHandling()
 
 			if (isAltHeld()) {
 				if (event.mouseButton.button == sf::Mouse::Left) {
-					sf::Uint8 alpha = currentbrush.color.a;
 					sf::Vector2i pos = sf::Mouse::getPosition(mainWindow);
+					
+					sf::Texture newTex;
+					newTex.create(mainWindow.getSize().x, mainWindow.getSize().y);
+					newTex.update(mainWindow);
+					newTex.copyToImage();
+					currentbrush.color = newTex.copyToImage().getPixel(pos.x, pos.y);
 
-					currentbrush.color = currentLayer->tex.copyToImage().getPixel(pos.x, pos.y);
-
-					col[0] = currentbrush.color.r;
-					col[1] = currentbrush.color.g;
-					col[2] = currentbrush.color.b;
+					col[0] = currentbrush.color.r / 255.0f;
+					col[1] = currentbrush.color.g / 255.0f;
+					col[2] = currentbrush.color.b / 255.0f;
 				}
 			} else {
 				if (textureIter != std::prev(textureBuffer.end())) {

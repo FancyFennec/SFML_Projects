@@ -39,7 +39,7 @@ public:
 		tex.create(width, height);
 		tex.update(image);
 		sprite.setTexture(tex);
-		//layerCount++;
+		layerCount++;
 	};
 
 	void updateSize(int width, int height) {
