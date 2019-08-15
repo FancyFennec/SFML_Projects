@@ -11,30 +11,27 @@ public:
 
 	unsigned static int layerCount;
 
-	Layer(sf::RenderWindow& window) :
-		window(window) {
+	Layer() {
 		layerCount++; 
 	};
 
-	Layer(sf::Image image, sf::Texture tex, sf::Sprite sprite, sf::RenderWindow& window) :
+	Layer(sf::Image image, sf::Texture tex, sf::Sprite sprite) :
 		image(image),
 		tex(tex),
-		sprite(sprite),
-		window(window) {
+		sprite(sprite)
+	{
 		layerCount++;
 	};
 
-	Layer(int width, int height, sf::RenderWindow& window) :
-		window(window) {
-		image.create(width, height, sf::Color(0, 0, 0, 0));
+	Layer(int width, int height) {
+		image.create(width, height, sf::Color(255, 255, 255, 0));
 		tex.create(width, height);
 		tex.update(image);
 		sprite.setTexture(tex);
 		layerCount++;
 	};
 
-	Layer(int width, int height, sf::RenderWindow& window, sf::Color color) :
-		window(window) {
+	Layer(int width, int height, sf::Color color) {
 		image.create(width, height, color);
 		tex.create(width, height);
 		tex.update(image);
@@ -55,52 +52,41 @@ public:
 	}
 
 	void clearLayer() {
-		image.create(image.getSize().x, image.getSize().y, sf::Color(0, 0, 0, 0));
+		image.create(image.getSize().x, image.getSize().y, sf::Color(255, 255, 255, 0));
 		tex.update(image);
 		sprite.setTexture(tex);
 	}
 
-	void updateLayer() {
+	void updateLayer(sf::RenderWindow &window) {
 		tex.update(window);
 	}
 
 	void updateLayer(Layer& newLayer) {
 		sf::RenderTexture rTex;
-
 		rTex.create(image.getSize().x, image.getSize().y);
-		rTex.draw(sprite);
-		rTex.display();
-		rTex.draw(newLayer.sprite);
+		rTex.clear(sf::Color(255, 255, 255, 0));
+
+		rTex.draw(sprite, sf::BlendAlpha);
+		rTex.draw(newLayer.sprite, sf::BlendAlpha);
 		rTex.display();
 
 		tex = rTex.getTexture();
 		sprite.setTexture(tex);
 	}
 
-	void updateLayer(Layer& newLayer, Brush brush) {
-		sf::RenderTexture rTex;
-		rTex.create(image.getSize().x, image.getSize().y);
-		rTex.draw(sprite);
-		rTex.display();
-		rTex.draw(newLayer.sprite);
-		rTex.display();
-		tex = rTex.getTexture();
-	}
-
-	void drawLayer() {
+	void drawLayer(sf::RenderWindow& window) {
 		window.draw(sprite);
 	}
 
 	void resetDrawFlag() { drawFlag = 0; };
 
-	void drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
+	void drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window);
 	//void drawCubicOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
 
 	~Layer();
 
 private:
 	unsigned int drawFlag = 0;
-	sf::RenderWindow& window;
 
 	std::function<sf::Vector2f (float)> getBezier(std::vector<sf::Vector2i>& cursorPositions);
 	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
@@ -117,7 +103,7 @@ private:
 
 unsigned int Layer::layerCount = 0;
 
-inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions)
+inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window)
 {
 	cursorPositions[3] = sf::Mouse::getPosition(window);
 	movedDistance = distance(cursorPositions[2], cursorPositions[3]);

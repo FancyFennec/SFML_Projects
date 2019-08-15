@@ -12,25 +12,24 @@ public:
 	sf::Color color = sf::Color::Black;
 
 	float stepsize = 2.0f;
-	int brushsize = 8;
+	float brushsize = 0.3f;
 	int opacity = 100;
 
-	void setBrushsize(int newsize) {
-		if (9 > newsize && newsize >= 0) {
-			image = images[8 - newsize];
-			tex.create(image.getSize().x, image.getSize().y);
-			tex.update(image);
-			sprite.setTexture(tex);
-			sprite.setOrigin(sf::Vector2f(image.getSize().x / 2, image.getSize().y / 2));
-			sprite.setColor(color);
-		}
+	void setBrushSize(float brushSize) {
+		this->brushsize = brushSize;
+		sprite.setScale(sf::Vector2f(brushSize, brushSize));
+		sprite.setOrigin(sprite.getLocalBounds().width/2, sprite.getLocalBounds().height/2);
 	}
 
-	Brush(sf::Image image) : image(image) {
-		images.push_back(image);
-		createBrushes();
-	};
+	Brush(sf::Image image) : 
+		image(image) {
+		tex.create(image.getSize().x, image.getSize().y);
+		tex.update(image);
+		sprite.setTexture(tex);
+		setBrushSize();
+	}
 
+	//This constructor is not needed right now and is mainly here as a backup
 	Brush(int brush_width) {
 		for (int i = 0; i < brush_width; i++) {
 			for (int j = 0; j < brush_width; j++) {
@@ -48,57 +47,43 @@ public:
 					}
 				}
 
-				sf::Color pixelColour = sf::Color::Black;
+				sf::Color pixelColour = sf::Color::White;
 				pixelColour.a = sf::Uint8((255 * count) / 16);
 				image.setPixel(i, j, pixelColour);
 			}
 		}
-		images.push_back(image);
-		createBrushes();
+		tex.create(image.getSize().x, image.getSize().y);
+		tex.update(image);
+		sprite.setTexture(tex);
+		setBrushSize();
 	}
 
 	Brush(int brush_width, const char* filePath) {
 		image.create(brush_width, brush_width);
 		image.loadFromFile(filePath);
-		images.push_back(image);
-		createBrushes();
+		tex.create(image.getSize().x, image.getSize().y);
+		tex.update(image);
+		sprite.setTexture(tex);
+		setBrushSize();
 	}
 
 	Brush(int brush_width, const char* filePath, sf::Color color) :
-		color(color) 
+		color(color)
 	{
 		image.create(brush_width, brush_width);
 		image.loadFromFile(filePath);
-		images.push_back(image);
-		createBrushes();
+		tex.create(image.getSize().x, image.getSize().y);
+		tex.update(image);
+		sprite.setTexture(tex);
+		setBrushSize();
 	}
 
 	~Brush() {};
 
 private:
-	std::vector<sf::Image> images = {};
-
-	void createBrushes();
+	void setBrushSize() {
+		sprite.setScale(sf::Vector2f(brushsize, brushsize));
+		sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
+	}
 };
 
-inline void Brush::createBrushes() {
-
-	for (int k = 0; k < 8; k++) {
-		sf::Image newBrush;
-		sf::Vector2u size = images.back().getSize();
-
-		newBrush.create(size.x / 2, size.y / 2, sf::Color(0, 0, 0, 0));
-
-		for (int j = 0; j < size.y / 2; j++) {
-			for (int i = 0; i < size.x / 2; i++) {
-				sf::Color newColour = images.back().getPixel(2 * i, 2 * j);
-				newColour += images.back().getPixel(2 * i + 1, 2 * j);
-				newColour += images.back().getPixel(2 * i, 2 * j + 1);
-				newColour += images.back().getPixel(2 * i + 1, 2 * j + 1);
-
-				newBrush.setPixel(i, j, newColour);
-			}
-		}
-		images.push_back(newBrush);
-	}
-}

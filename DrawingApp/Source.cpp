@@ -40,7 +40,7 @@ sf::Font font;
 //Brush initialisation
 int BRUSH_WIDTH = 512;
 float movedDistance = 0;
-int brushSize = 4;
+float brushSize = 0.3f;
 float stepsize = 2.0f;
 int alpha = 100;
 static float col[3] = { 0.5f,0.0f,0.5f };
@@ -53,13 +53,14 @@ sf::RenderWindow mainWindow;
 sf::RenderWindow brushWindow;
 sf::Event event;
 
-Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH, brushWindow);
-Layer drawingLayer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow);
+Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH);
+Layer drawingLayer(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-std::vector<Layer> layers = { 
-	Layer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow, sf::Color::White)
+std::vector<Layer*> layers = { 
+	new Layer(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color::White),
+	new Layer(SCREEN_WIDTH, SCREEN_HEIGHT)
 };
-std::vector<Layer>::iterator currentLayer = layers.begin();
+std::vector<Layer*>::iterator currentLayer = layers.end() - 1;
 
 std::vector<sf::Texture> textureBuffer;
 std::vector<sf::Texture>::iterator textureIter;
@@ -79,7 +80,6 @@ int main() {
 	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(120);
-	mainWindow.clear(sf::Color::Red);
 	
 	if (!font.loadFromFile("Arial.ttf")) {
 		std::cout << "Could not find font." << std::endl;
@@ -92,16 +92,23 @@ int main() {
 	ImGui::SFML::Init(mainWindow);
 
 	currentbrush.color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), 255);
-	currentbrush.setBrushsize(brushSize);
+	currentbrush.setBrushSize(brushSize);
 
 	textureBuffer.reserve(11);
-	textureBuffer.push_back(currentLayer->tex);
+	textureBuffer.push_back((*currentLayer)->tex);
 	textureIter = textureBuffer.begin();
 
 	while (mainWindow.isOpen())
 	{
-		for (auto layer : layers) {
-			layer.drawLayer();
+		mainWindow.clear(sf::Color(0, 0, 0, 0));
+		for (auto iter = layers.begin(); iter < layers.end(); std::advance(iter, 1)) {
+			if (iter != layers.begin()) {
+				mainWindow.draw((*iter)->sprite);
+			}
+			else {
+				mainWindow.draw((*iter)->sprite);
+			}
+			
 		}
 
 		while (mainWindow.pollEvent(event))
@@ -129,10 +136,10 @@ void mainWindowDrawing()
 {
 	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 		if (isMouseHeld()) {
-			drawingLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
+			drawingLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions, mainWindow);
 			//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
 			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, currentbrush.opacity));
-			drawingLayer.drawLayer();
+			mainWindow.draw(drawingLayer.sprite);
 			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
 		}
 	}
@@ -142,8 +149,8 @@ void brushWindowDrawing()
 {
 	if (brushWindow.hasFocus()) {
 		if (isMouseHeld()) {
-			brushLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
-			brushLayer.drawLayer();
+			brushLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions, brushWindow);
+			brushLayer.drawLayer(brushWindow);
 		}
 	}
 }
@@ -159,8 +166,8 @@ void brushGUI()
 		currentbrush.color.b = (sf::Uint8)(col[2] * 255);
 	}
 	ImGui::SliderFloat("Spacing", &currentbrush.stepsize, 0, 50);
-	if (ImGui::SliderInt("Radius", &brushSize, 0, 8)) {
-		currentbrush.setBrushsize(brushSize);
+	if (ImGui::SliderFloat("Radius", &brushSize, 0, 1)) {
+		currentbrush.setBrushSize(brushSize);
 	}
 	if (ImGui::SliderInt("Opacity", &currentbrush.opacity, 0, 255)) {
 	}
@@ -175,18 +182,25 @@ void layerGUI()
 	ImGui::Begin("Layers");
 	{
 		if (ImGui::Button("New Layer")) {
-			layers.push_back(Layer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow));
+			layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
 			//currentLayer = layers.end() - 1;
 		}
 		int layerNumber = layers.size();
 		for (auto iter = layers.end() - 1; iter >= layers.begin(); std::advance(iter, -1)) {
-			ImGui::Image(iter->sprite, sf::Vector2f(30, 30));
+			ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30));
+
 			ImGui::SameLine();
-			std::string layerName = "Layer";
-			layerName.append(std::to_string(layerNumber));
+			std::string layerName;
+			if (iter != layers.begin()) {
+				layerName = "Layer";
+				layerName.append(std::to_string(layerNumber - 1));
+			}
+			else {
+				layerName = "Background";
+			}
 
 			if (ImGui::Button(layerName.data())) {
-				currentLayer = iter;
+				if (iter != layers.begin()) currentLayer = iter;
 			}
 			//TODO: Fix this
 			/*ImGui::SameLine();
@@ -218,7 +232,7 @@ void brushWindowRendering()
 			brushWindowEventHandling();
 		}
 		brushWindow.clear(sf::Color::White);
-		brushLayer.drawLayer();
+		brushLayer.drawLayer(brushWindow);
 		brushWindow.display();
 	}
 }
@@ -272,12 +286,13 @@ void mainWindowEventHandling()
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 				drawingLayer.sprite.setColor(sf::Color(255, 255, 255, currentbrush.opacity));
-				currentLayer->updateLayer(drawingLayer);
+				(*currentLayer)->updateLayer(drawingLayer);
+				drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
 			}
 			if (textureBuffer.size() >= 10) {
 				textureBuffer.erase(textureBuffer.begin());
 			}
-			textureBuffer.push_back(currentLayer->tex);
+			textureBuffer.push_back((*currentLayer)->tex);
 			textureIter = textureBuffer.end() - 1;
 			setMouseNotHeld();
 		}
@@ -286,7 +301,7 @@ void mainWindowEventHandling()
 		switch (event.key.code) {
 		case(sf::Keyboard::Q): {
 			mainWindow.clear(sf::Color(255, 255, 255, 255));
-			currentLayer->updateLayer();
+			(*currentLayer)->updateLayer(mainWindow);
 			break;
 		}
 		case(sf::Keyboard::LAlt) : {
@@ -300,14 +315,14 @@ void mainWindowEventHandling()
 		case(sf::Keyboard::Z): {
 			if (isCtrlHeld()) {
 				if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
-				currentLayer->tex = *textureIter;
+				(*currentLayer)->tex = *textureIter;
 			}
 			break;
 		}
 		case(sf::Keyboard::Y): {
 			if (isCtrlHeld()) {
 				if (textureIter != textureBuffer.end() - 1) std::advance(textureIter, 1);
-				currentLayer->tex = *textureIter;
+				(*currentLayer)->tex = *textureIter;
 			}
 			break;
 		}
