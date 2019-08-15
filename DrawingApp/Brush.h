@@ -22,7 +22,7 @@ public:
 			tex.update(image);
 			sprite.setTexture(tex);
 			sprite.setOrigin(sf::Vector2f(image.getSize().x / 2, image.getSize().y / 2));
-			//sprite.setColor(brush.color);
+			sprite.setColor(color);
 		}
 	}
 
@@ -58,6 +58,15 @@ public:
 	}
 
 	Brush(int brush_width, const char* filePath) {
+		image.create(brush_width, brush_width);
+		image.loadFromFile(filePath);
+		images.push_back(image);
+		createBrushes();
+	}
+
+	Brush(int brush_width, const char* filePath, sf::Color color) :
+		color(color) 
+	{
 		image.create(brush_width, brush_width);
 		image.loadFromFile(filePath);
 		images.push_back(image);

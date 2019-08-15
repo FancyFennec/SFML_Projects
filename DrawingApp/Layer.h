@@ -66,6 +66,19 @@ public:
 
 	void updateLayer(Layer& newLayer) {
 		sf::RenderTexture rTex;
+
+		rTex.create(image.getSize().x, image.getSize().y);
+		rTex.draw(sprite);
+		rTex.display();
+		rTex.draw(newLayer.sprite);
+		rTex.display();
+
+		tex = rTex.getTexture();
+		sprite.setTexture(tex);
+	}
+
+	void updateLayer(Layer& newLayer, Brush brush) {
+		sf::RenderTexture rTex;
 		rTex.create(image.getSize().x, image.getSize().y);
 		rTex.draw(sprite);
 		rTex.display();
@@ -81,8 +94,7 @@ public:
 	void resetDrawFlag() { drawFlag = 0; };
 
 	void drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
-	void drawCubicOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
-	void drawBrushAt(Brush& brush, sf::Vector2f& cursorPos);
+	//void drawCubicOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
 
 	~Layer();
 
@@ -110,7 +122,26 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 	cursorPositions[3] = sf::Mouse::getPosition(window);
 	movedDistance = distance(cursorPositions[2], cursorPositions[3]);
 
-	if (movedDistance > brush.stepsize) {
+	if (drawFlag == 0) {
+		drawFlag = 1;
+
+		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
+
+		sf::RenderTexture renderTex;
+		renderTex.create(image.getSize().x, image.getSize().y);
+		renderTex.draw(sprite);
+		renderTex.display();
+
+		brush.sprite.setColor(brush.color);
+		brush.sprite.setPosition(circlePos);
+
+		renderTex.draw(brush.sprite);
+		renderTex.display();
+
+		tex = renderTex.getTexture();
+		sprite.setTexture(tex);
+
+	} else if (movedDistance > brush.stepsize) {
 
 		int steps = (int)std::floorf(movedDistance / brush.stepsize);
 
@@ -122,104 +153,79 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 		renderTex.draw(sprite);
 		renderTex.display();
 
-//#pragma omp parallel for
+		brush.sprite.setColor(brush.color);
+
 		for (int i = 0; i < steps; i++) {
 			sf::Vector2f drawingPos = circlePos + (i + 1) * brush.stepsize * direction;
-			brush.sprite.setPosition(circlePos);
+			brush.sprite.setPosition(drawingPos);
 			renderTex.draw(brush.sprite);
 			renderTex.display();
-			//drawBrushAt(brush, drawingPos);
 		}
+
 		circlePos += steps * brush.stepsize * direction;
 		cursorPositions[2] = sf::Vector2i(circlePos);
 		movedDistance -= brush.stepsize * steps;
-
 		
 		tex = renderTex.getTexture();
-		//tex.update(image);
 		sprite.setTexture(tex);
 	}
 }
 
-inline void Layer::drawCubicOnCanvas(float & movedDistance, Brush & brush, std::vector<sf::Vector2i>& cursorPositions)
-{
-	//TODO: This isn't working properly yet
-	sf::Vector2i newPos = sf::Mouse::getPosition(window);
-	movedDistance = distance(newPos, cursorPositions[3]);
-
-	if (movedDistance > brush.stepsize) {
-		if (drawFlag == 0) {
-			drawFlag++;
-			cursorPositions[1] = cursorPositions[3] - cursorPositions[2];
-			cursorPositions[2] = cursorPositions[3];
-			cursorPositions[3] = newPos;
-
-			cursorPositions[1] += cursorPositions[3] - cursorPositions[2];
-			cursorPositions[1] /= 3;
-			
-			drawLinearOnCanvas(movedDistance, brush, cursorPositions);
-		}
-		else {
-			cursorPositions[0] = cursorPositions[1];
-			cursorPositions[1] = cursorPositions[3] - cursorPositions[2];
-			cursorPositions[2] = cursorPositions[3];
-			cursorPositions[3] = newPos;
-
-			cursorPositions[1] += cursorPositions[3] - cursorPositions[2];
-			cursorPositions[1] /= 3;
-
-			auto bezierFct = getBezier(cursorPositions);
-
-			int steps = (int)std::floorf(movedDistance / brush.stepsize);
-
-			sf::Vector2f oldPos = sf::Vector2f(cursorPositions[2]);
-			sf::Vector2f drawingPos;
-
-			float offset = 0;
-			for (int i = 0; i < steps; i++) {
-				float step = 1.0f / steps;
-
-				//One step of linear interpolation to adjust the moved distance
-				drawingPos = bezierFct(offset + step);
-				float dist = distance(oldPos, drawingPos);
-				step *= brush.stepsize / dist;
-				drawingPos = bezierFct(offset + step);
-
-				drawBrushAt(brush, drawingPos);
-
-				offset += step;
-				movedDistance -= distance(oldPos, drawingPos);
-				oldPos = drawingPos;
-			}
-
-			cursorPositions[2] = sf::Vector2i(drawingPos);
-		}
-	}
-}
-
-inline void Layer::drawBrushAt(Brush& brush, sf::Vector2f& cursorPos)
-{
-	sf::Color newColour;
-
-	for (int i = 0; i < brush.image.getSize().x; i++) {
-		for (int j = 0; j < brush.image.getSize().y; j++) {
-
-			int xPos = cursorPos.x - brush.image.getSize().x / 2 + i;
-			int yPos = cursorPos.y - brush.image.getSize().y / 2 + j;
-
-			if (xPos >= 0 && yPos >= 0 && xPos < image.getSize().x && yPos < image.getSize().y) {
-				if (image.getPixel(xPos, yPos).a < brush.image.getPixel(i, j).a * brush.opacity / 255.0f) {
-
-					newColour.r = brush.color.r;
-					newColour.g = brush.color.g;
-					newColour.b = brush.color.b;
-					newColour.a = brush.opacity;
-					image.setPixel(xPos, yPos, newColour);
-				}
-			}
-		}
-	}
-}
+//inline void Layer::drawCubicOnCanvas(float & movedDistance, Brush & brush, std::vector<sf::Vector2i>& cursorPositions)
+//{
+//	//TODO: This isn't working properly yet
+//	sf::Vector2i newPos = sf::Mouse::getPosition(window);
+//	movedDistance = distance(newPos, cursorPositions[3]);
+//
+//	if (movedDistance > brush.stepsize) {
+//		if (drawFlag == 0) {
+//			drawFlag++;
+//			cursorPositions[1] = cursorPositions[3] - cursorPositions[2];
+//			cursorPositions[2] = cursorPositions[3];
+//			cursorPositions[3] = newPos;
+//
+//			cursorPositions[1] += cursorPositions[3] - cursorPositions[2];
+//			cursorPositions[1] /= 3;
+//			
+//			drawLinearOnCanvas(movedDistance, brush, cursorPositions);
+//		}
+//		else {
+//			cursorPositions[0] = cursorPositions[1];
+//			cursorPositions[1] = cursorPositions[3] - cursorPositions[2];
+//			cursorPositions[2] = cursorPositions[3];
+//			cursorPositions[3] = newPos;
+//
+//			cursorPositions[1] += cursorPositions[3] - cursorPositions[2];
+//			cursorPositions[1] /= 3;
+//
+//			auto bezierFct = getBezier(cursorPositions);
+//
+//			int steps = (int)std::floorf(movedDistance / brush.stepsize);
+//
+//			sf::Vector2f oldPos = sf::Vector2f(cursorPositions[2]);
+//			sf::Vector2f drawingPos;
+//
+//			float offset = 0;
+//			for (int i = 0; i < steps; i++) {
+//				float step = 1.0f / steps;
+//
+//				//One step of linear interpolation to adjust the moved distance
+//				drawingPos = bezierFct(offset + step);
+//				float dist = distance(oldPos, drawingPos);
+//				step *= brush.stepsize / dist;
+//				drawingPos = bezierFct(offset + step);
+//
+//				drawBrushAt(brush, drawingPos);
+//
+//				offset += step;
+//				movedDistance -= distance(oldPos, drawingPos);
+//				oldPos = drawingPos;
+//			}
+//
+//			cursorPositions[2] = sf::Vector2i(drawingPos);
+//		}
+//	}
+//}
 
 Layer::~Layer()
 {

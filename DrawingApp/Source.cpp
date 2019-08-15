@@ -17,9 +17,10 @@
 using json = nlohmann::json;
 
 void createBrushWindow();
-void brushGUIRendering();
+void brushGUI();
 void brushWindowRendering();
 void mainWindowDrawing();
+void layerGUI();
 void initialiseTitle();
 void brushWindowDrawing();
 void mainWindowEventHandling();
@@ -38,12 +39,12 @@ sf::Font font;
 
 //Brush initialisation
 int BRUSH_WIDTH = 512;
-Brush currentbrush(BRUSH_WIDTH, "newBrush.png");
 float movedDistance = 0;
 int brushSize = 4;
 float stepsize = 2.0f;
 int alpha = 100;
 static float col[3] = { 0.5f,0.0f,0.5f };
+Brush currentbrush(BRUSH_WIDTH, "newBrush2.png", sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255));
 
 //Window initialisation
 int SCREEN_WIDTH = 1200;
@@ -90,7 +91,7 @@ int main() {
 
 	ImGui::SFML::Init(mainWindow);
 
-	currentbrush.color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), alpha);
+	currentbrush.color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), 255);
 	currentbrush.setBrushsize(brushSize);
 
 	textureBuffer.reserve(11);
@@ -102,7 +103,6 @@ int main() {
 		for (auto layer : layers) {
 			layer.drawLayer();
 		}
-		//currentLayer->drawLayer();
 
 		while (mainWindow.pollEvent(event))
 		{
@@ -110,32 +110,8 @@ int main() {
 			mainWindowEventHandling();
 		}
 
-		brushWindowRendering();
-		brushGUIRendering();
-		ImGui::Begin("Layers");
-		{
-			if (ImGui::Button("New Layer")) {
-				layers.push_back(Layer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow));
-				currentLayer = layers.end() - 1;
-			}
-			int layerNumber = layers.size();
-			for (auto iter = layers.end() -1 ; iter >= layers.begin(); std::advance(iter, -1)) {
-				ImGui::Image(iter->sprite, sf::Vector2f(30,30));
-				ImGui::SameLine();
-				std::string layerName = "Layer";
-				layerName.append(std::to_string(layerNumber));
-				if (ImGui::Button(layerName.data())) {
-					currentLayer = iter;
-				}
-				//TODO: Fix this
-				/*ImGui::SameLine();
-				if (ImGui::Button("Del")) {
-					layers.erase(iter);
-				}*/
-				layerNumber--;
-			}
-		}
-		ImGui::End();
+		brushGUI();
+		layerGUI();
 
 		mainWindowDrawing();
 		brushWindowDrawing();
@@ -143,6 +119,8 @@ int main() {
 		mainWindow.draw(title);
 		ImGui::SFML::Render(mainWindow);
 		mainWindow.display();
+
+		brushWindowRendering();
 	}
 	return 0;
 }
@@ -153,7 +131,9 @@ void mainWindowDrawing()
 		if (isMouseHeld()) {
 			drawingLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions);
 			//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
+			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, currentbrush.opacity));
 			drawingLayer.drawLayer();
+			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
 		}
 	}
 }
@@ -168,7 +148,7 @@ void brushWindowDrawing()
 	}
 }
 
-void brushGUIRendering()
+void brushGUI()
 {
 	ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
@@ -186,6 +166,34 @@ void brushGUIRendering()
 	}
 	if (ImGui::SmallButton("New Brush")) {
 		createBrushWindow();
+	}
+	ImGui::End();
+}
+
+void layerGUI()
+{
+	ImGui::Begin("Layers");
+	{
+		if (ImGui::Button("New Layer")) {
+			layers.push_back(Layer(SCREEN_WIDTH, SCREEN_HEIGHT, mainWindow));
+			currentLayer = layers.end() - 1;
+		}
+		int layerNumber = layers.size();
+		for (auto iter = layers.end() - 1; iter >= layers.begin(); std::advance(iter, -1)) {
+			ImGui::Image(iter->sprite, sf::Vector2f(30, 30));
+			ImGui::SameLine();
+			std::string layerName = "Layer";
+			layerName.append(std::to_string(layerNumber));
+			if (ImGui::Button(layerName.data())) {
+				currentLayer = iter;
+			}
+			//TODO: Fix this
+			/*ImGui::SameLine();
+			if (ImGui::Button("Del")) {
+			layers.erase(iter);
+			}*/
+			layerNumber--;
+		}
 	}
 	ImGui::End();
 }
@@ -228,7 +236,6 @@ void mainWindowEventHandling()
 					sf::Vector2i pos = sf::Mouse::getPosition(mainWindow);
 
 					currentbrush.color = currentLayer->tex.copyToImage().getPixel(pos.x, pos.y);
-					currentbrush.color.a = alpha;
 
 					col[0] = currentbrush.color.r;
 					col[1] = currentbrush.color.g;
@@ -251,9 +258,7 @@ void mainWindowEventHandling()
 				cursorPositions[1] = newPos;
 				cursorPositions[2] = newPos;
 				cursorPositions[3] = newPos;
-				sf::Vector2f currentPos = sf::Vector2f(newPos);
 
-				drawingLayer.drawBrushAt(currentbrush, currentPos);
 				drawingLayer.resetDrawFlag();
 				//No need to draw the window here, it gets drawn because the lmb is held later
 			}
@@ -262,6 +267,7 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
+				drawingLayer.sprite.setColor(sf::Color(255, 255, 255, currentbrush.opacity));
 				currentLayer->updateLayer(drawingLayer);
 			}
 			if (textureBuffer.size() >= 10) {
@@ -331,9 +337,11 @@ void brushWindowEventHandling()
 			sf::Vector2i newPos = sf::Mouse::getPosition(brushWindow);
 			cursorPositions[0] = newPos;
 			cursorPositions[1] = newPos;
+			cursorPositions[2] = newPos;
+			cursorPositions[3] = newPos;
 
-			sf::Vector2f circlePos = sf::Vector2f(newPos);
-			brushLayer.drawBrushAt(currentbrush, circlePos);
+			drawingLayer.resetDrawFlag();
+			//No need to draw the window here, it gets drawn because the lmb is held later
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
