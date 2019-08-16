@@ -183,10 +183,11 @@ void layerGUI()
 	{
 		if (ImGui::Button("New Layer")) {
 			layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
-			//currentLayer = layers.end() - 1;
 		}
 		int layerNumber = layers.size();
-		for (auto iter = layers.end() - 1; iter >= layers.begin(); std::advance(iter, -1)) {
+
+		//List of all the layers
+		for (auto iter = layers.end() - 1; iter > layers.begin(); std::advance(iter, -1)) {
 			ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30));
 
 			ImGui::SameLine();
@@ -200,13 +201,15 @@ void layerGUI()
 			}
 
 			if (ImGui::Button(layerName.data())) {
-				if (iter != layers.begin()) currentLayer = iter;
+				if (iter != layers.begin()) currentLayer = (std::vector<Layer*>::iterator) iter;
 			}
 			//TODO: Fix this
-			/*ImGui::SameLine();
+			ImGui::SameLine();
 			if (ImGui::Button("Del")) {
-			layers.erase(iter);
-			}*/
+				(*iter) = nullptr;
+				delete(*iter);
+				layers.erase(iter);
+			}
 			layerNumber--;
 		}
 	}

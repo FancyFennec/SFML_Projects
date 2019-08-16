@@ -64,10 +64,17 @@ public:
 	void updateLayer(Layer& newLayer) {
 		sf::RenderTexture rTex;
 		rTex.create(image.getSize().x, image.getSize().y);
-		rTex.clear(sf::Color(255, 255, 255, 0));
+		rTex.clear(sf::Color(255, 255, 255, 255));
 
-		rTex.draw(sprite, sf::BlendAlpha);
-		rTex.draw(newLayer.sprite, sf::BlendAlpha);
+		//TODO: This here doesn't work properly yet
+		rTex.draw(sprite, sf::BlendMode(
+			sf::BlendMode::DstAlpha,
+			sf::BlendMode::OneMinusDstAlpha
+		));
+		rTex.draw(newLayer.sprite, sf::BlendMode(
+			sf::BlendMode::OneMinusSrcAlpha,
+			sf::BlendMode::SrcAlpha
+		));
 		rTex.display();
 
 		tex = rTex.getTexture();
