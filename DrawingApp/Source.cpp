@@ -53,14 +53,12 @@ sf::RenderWindow mainWindow;
 sf::RenderWindow brushWindow;
 sf::Event event;
 
+// Layers on which we are temporarily drawing before we assign the drawing layers content to a layer
 Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH);
 Layer drawingLayer(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-std::vector<Layer*> layers = { 
-	new Layer(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color::White),
-	new Layer(SCREEN_WIDTH, SCREEN_HEIGHT)
-};
-std::vector<Layer*>::iterator currentLayer = layers.end() - 1;
+std::vector<Layer*> layers = {};
+std::vector<Layer*>::iterator currentLayer; // iterator that points to the layer which gets currently updated
 
 std::vector<sf::Texture> textureBuffer;
 std::vector<sf::Texture>::iterator textureIter;
@@ -90,6 +88,11 @@ int main() {
 	}
 
 	ImGui::SFML::Init(mainWindow);
+
+	layers.reserve(21); // Reserve space for 20 Layers
+	layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color::White)); // Background Layer
+	layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT)); // One layer to draw on
+	currentLayer = layers.end() - 1;
 
 	currentbrush.color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), 255);
 	currentbrush.setBrushSize(brushSize);
@@ -180,11 +183,16 @@ void layerGUI()
 	ImGui::Begin("Layers");
 	{
 		if (ImGui::Button("New Layer")) {
-			layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
+			if (layers.size() < 21) {
+				layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
+			}
+			else {
+				std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
+			}
 		}
 		int layerNumber = layers.size();
 
-		//List of all the layers
+		// Draw list of all the layers
 		for (auto iter = layers.end() - 1; iter > layers.begin(); std::advance(iter, -1)) {
 			ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30));
 
@@ -201,13 +209,25 @@ void layerGUI()
 			if (ImGui::Button(layerName.data())) {
 				if (iter != layers.begin()) currentLayer = iter;
 			}
+
 			//TODO: Fix this
 			ImGui::SameLine();
-			if (ImGui::Button("Del")) {
-				(*iter) = nullptr;
+			std::string delButton = "Del##";
+			delButton.append(layerName);
+			if (ImGui::Button(delButton.data())) {
+				//TODO: use the distance to assign the right layer to the current layer after deleting
+				std::cout << std::distance(layers.begin(), currentLayer) << std::endl;
+				currentLayer = layers.begin();
 				delete(*iter);
+				(*iter) = nullptr;
 
-				layers.erase(iter);
+				if (layers.size() == 2) {
+					layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
+				}
+
+				iter = layers.erase(iter);
+				currentLayer = layers.end() - 1;
+				
 				//layers.shrink_to_fit();
 			}
 			layerNumber--;
@@ -315,6 +335,7 @@ void mainWindowEventHandling()
 			setCtrlIsHeld();
 			break;
 		}
+		//TODO: Fix this... Since we now have layers this does not work anymore
 		case(sf::Keyboard::Z): {
 			if (isCtrlHeld()) {
 				if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
