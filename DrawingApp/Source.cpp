@@ -201,14 +201,16 @@ void layerGUI()
 			}
 
 			if (ImGui::Button(layerName.data())) {
-				if (iter != layers.begin()) currentLayer = (std::vector<Layer*>::iterator) iter;
+				if (iter != layers.begin()) currentLayer = iter;
 			}
 			//TODO: Fix this
 			ImGui::SameLine();
 			if (ImGui::Button("Del")) {
 				(*iter) = nullptr;
 				delete(*iter);
+
 				layers.erase(iter);
+				//layers.shrink_to_fit();
 			}
 			layerNumber--;
 		}
@@ -288,9 +290,9 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-				drawingLayer.sprite.setColor(sf::Color(255, 255, 255, currentbrush.opacity));
-				(*currentLayer)->updateLayer(drawingLayer);
-				drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
+				//drawingLayer.sprite.setColor(sf::Color(255, 255, 255, currentbrush.opacity));
+				(*currentLayer)->updateLayer(drawingLayer, currentbrush);
+				//drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
 			}
 			if (textureBuffer.size() >= 10) {
 				textureBuffer.erase(textureBuffer.begin());

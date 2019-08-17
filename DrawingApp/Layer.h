@@ -12,6 +12,7 @@ public:
 	unsigned static int layerCount;
 
 	Layer() {
+		initialize();
 		layerCount++; 
 	};
 
@@ -20,6 +21,7 @@ public:
 		tex(tex),
 		sprite(sprite)
 	{
+		initialize();
 		layerCount++;
 	};
 
@@ -28,6 +30,7 @@ public:
 		tex.create(width, height);
 		tex.update(image);
 		sprite.setTexture(tex);
+		initialize();
 		layerCount++;
 	};
 
@@ -36,6 +39,7 @@ public:
 		tex.create(width, height);
 		tex.update(image);
 		sprite.setTexture(tex);
+		initialize();
 		layerCount++;
 	};
 
@@ -64,17 +68,34 @@ public:
 	void updateLayer(Layer& newLayer) {
 		sf::RenderTexture rTex;
 		rTex.create(image.getSize().x, image.getSize().y);
-		rTex.clear(sf::Color(255, 255, 255, 255));
+		rTex.clear(sf::Color::Transparent);
 
 		//TODO: This here doesn't work properly yet
-		rTex.draw(sprite, sf::BlendMode(
-			sf::BlendMode::DstAlpha,
-			sf::BlendMode::OneMinusDstAlpha
-		));
-		rTex.draw(newLayer.sprite, sf::BlendMode(
-			sf::BlendMode::OneMinusSrcAlpha,
-			sf::BlendMode::SrcAlpha
-		));
+		sf::Shader fragShader;
+
+		if (!fragShader.loadFromFile("fragment_shader.frag", sf::Shader::Fragment))
+			std::cout << "Could not load shader" << std::endl;
+		fragShader.setUniform("texture", sf::Shader::CurrentTexture);
+
+		sf::RenderStates shader(&fragShader);
+
+		rTex.draw(sprite, shader);
+		rTex.draw(newLayer.sprite, shader);
+		rTex.display();
+
+		tex = rTex.getTexture();
+		sprite.setTexture(tex);
+	}
+
+	void updateLayer(Layer& newLayer, Brush& brush) {
+		
+		rTex.clear(sf::Color(255, 255, 255, 0));
+
+		fragShader.setUniform("texture1", tex);
+		fragShader.setUniform("texture2", newLayer.tex);
+		fragShader.setUniform("alpha", brush.opacity / 255.0f);
+
+		rTex.draw(sprite, shader);
 		rTex.display();
 
 		tex = rTex.getTexture();
@@ -94,6 +115,18 @@ public:
 
 private:
 	unsigned int drawFlag = 0;
+	static sf::RenderTexture rTex;
+	static sf::Shader fragShader;
+	static sf::RenderStates shader;
+
+	void initialize() {
+		rTex.create(image.getSize().x, image.getSize().y);
+
+		if (!fragShader.loadFromFile("fragment_shader.frag", sf::Shader::Fragment))
+			std::cout << "Could not load shader" << std::endl;
+
+		shader.blendMode = sf::BlendNone;
+	}
 
 	std::function<sf::Vector2f (float)> getBezier(std::vector<sf::Vector2i>& cursorPositions);
 	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
@@ -109,6 +142,9 @@ private:
 };
 
 unsigned int Layer::layerCount = 0;
+sf::RenderTexture Layer::rTex;
+sf::Shader Layer::fragShader;
+sf::RenderStates Layer::shader(&fragShader);
 
 inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window)
 {
@@ -122,8 +158,7 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 
 		sf::RenderTexture renderTex;
 		renderTex.create(image.getSize().x, image.getSize().y);
-		renderTex.draw(sprite);
-		renderTex.display();
+		renderTex.clear(sf::Color::Transparent);
 
 		brush.sprite.setColor(brush.color);
 		brush.sprite.setPosition(circlePos);
@@ -144,7 +179,6 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 		sf::RenderTexture renderTex;
 		renderTex.create(image.getSize().x, image.getSize().y);
 		renderTex.draw(sprite);
-		renderTex.display();
 
 		brush.sprite.setColor(brush.color);
 
@@ -152,13 +186,13 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 			sf::Vector2f drawingPos = circlePos + (i + 1) * brush.stepsize * direction;
 			brush.sprite.setPosition(drawingPos);
 			renderTex.draw(brush.sprite);
-			renderTex.display();
 		}
 
 		circlePos += steps * brush.stepsize * direction;
 		cursorPositions[2] = sf::Vector2i(circlePos);
 		movedDistance -= brush.stepsize * steps;
 		
+		renderTex.display();
 		tex = renderTex.getTexture();
 		sprite.setTexture(tex);
 	}
