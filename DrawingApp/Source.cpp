@@ -102,13 +102,7 @@ int main() {
 	{
 		mainWindow.clear(sf::Color(0, 0, 0, 0));
 		for (auto iter = layers.begin(); iter < layers.end(); std::advance(iter, 1)) {
-			if (iter != layers.begin()) {
-				mainWindow.draw((*iter)->sprite);
-			}
-			else {
-				mainWindow.draw((*iter)->sprite);
-			}
-			
+			if(iter <= currentLayer) mainWindow.draw((*iter)->sprite);
 		}
 
 		while (mainWindow.pollEvent(event))
@@ -122,6 +116,10 @@ int main() {
 
 		mainWindowDrawing();
 		brushWindowDrawing();
+
+		for (auto iter = layers.begin(); iter < layers.end(); std::advance(iter, 1)) {
+			if (iter > currentLayer) mainWindow.draw((*iter)->sprite);
+		}
 
 		mainWindow.draw(title);
 		ImGui::SFML::Render(mainWindow);
