@@ -61,8 +61,17 @@ Layer drawingLayer(SCREEN_WIDTH, SCREEN_HEIGHT);
 std::vector<Layer*> layers = {};
 std::vector<Layer*>::iterator currentLayer; // iterator that points to the layer which gets currently updated
 
-std::vector<sf::Texture> textureBuffer;
-std::vector<sf::Texture>::iterator textureIter;
+struct LayerTex{
+	LayerTex(Layer* layerPntr, sf::Texture &tex) :
+	layerPntr(layerPntr),
+	tex(tex){}
+
+	Layer* layerPntr;
+	sf::Texture tex;
+};
+
+std::vector<LayerTex> textureBuffer = {};
+std::vector<LayerTex>::iterator textureIter;
 
 sf::RenderStates state;
 
@@ -99,7 +108,7 @@ int main() {
 	currentbrush.setBrushSize(brushSize);
 
 	textureBuffer.reserve(11);
-	textureBuffer.push_back((*currentLayer)->tex);
+	textureBuffer.push_back(LayerTex(*currentLayer, (*currentLayer)->tex));
 	textureIter = textureBuffer.begin();
 
 	while (mainWindow.isOpen())
@@ -194,7 +203,7 @@ void layerGUI()
 		int layerNumber = layers.size();
 
 		// Draw list of all the layers
-		for (auto iter = layers.end() - 1; iter > layers.begin(); std::advance(iter, -1)) {
+		for (auto iter = std::prev(layers.end()); iter > layers.begin(); std::advance(iter, -1)) {
 			
 			if (iter == currentLayer) {
 				ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color::White);
@@ -232,16 +241,16 @@ void layerGUI()
 				if (layers.size() == 2) {
 					layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
 					iter = layers.erase(iter);
-					currentLayer = layers.end() - 1;
+					currentLayer = std::prev(layers.end());
 				}
 				else { // This makes sure that we continue working on the layer we were before deleting
 					bool isCurrentLayerBelowIter = layers.begin() + iterDist < iter;
 					iter = layers.erase(iter);
 					if (isCurrentLayerBelowIter) {
-						currentLayer += iterDist;
+						std::advance(currentLayer, iterDist);
 					}
 					else {
-						currentLayer += iterDist - 1;
+						std::advance(currentLayer, iterDist - 1);
 					}
 				}
 			}
@@ -302,7 +311,7 @@ void mainWindowEventHandling()
 					auto lastIter = std::prev(textureBuffer.end());
 
 					while (textureIter != lastIter) {
-						textureBuffer.erase(lastIter);
+						lastIter = textureBuffer.erase(lastIter);
 						std::advance(lastIter, -1);
 					}
 				}
@@ -330,7 +339,7 @@ void mainWindowEventHandling()
 			if (textureBuffer.size() >= 10) {
 				textureBuffer.erase(textureBuffer.begin());
 			}
-			textureBuffer.push_back((*currentLayer)->tex);
+			textureBuffer.push_back(LayerTex(*currentLayer, (*currentLayer)->tex));
 			textureIter = textureBuffer.end() - 1;
 			setMouseNotHeld();
 		}
@@ -354,14 +363,14 @@ void mainWindowEventHandling()
 		case(sf::Keyboard::Z): {
 			if (isCtrlHeld()) {
 				if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
-				(*currentLayer)->tex = *textureIter;
+				(*textureIter).layerPntr->tex = (*textureIter).tex;
 			}
 			break;
 		}
 		case(sf::Keyboard::Y): {
 			if (isCtrlHeld()) {
 				if (textureIter != textureBuffer.end() - 1) std::advance(textureIter, 1);
-				(*currentLayer)->tex = *textureIter;
+				(*textureIter).layerPntr->tex = (*textureIter).tex;
 			}
 			break;
 		}
