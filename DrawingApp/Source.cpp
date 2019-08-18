@@ -44,7 +44,8 @@ float brushSize = 0.3f;
 float stepsize = 2.0f;
 int alpha = 100;
 static float col[3] = { 0.5f,0.0f,0.5f };
-Brush currentbrush(BRUSH_WIDTH, "newBrush2.png", sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255));
+//Brush currentbrush(BRUSH_WIDTH, "newBrush2.png", sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255));
+Brush currentbrush(BRUSH_WIDTH, "circle-xxl.png", sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255));
 
 //Window initialisation
 int SCREEN_WIDTH = 1200;
@@ -194,8 +195,15 @@ void layerGUI()
 
 		// Draw list of all the layers
 		for (auto iter = layers.end() - 1; iter > layers.begin(); std::advance(iter, -1)) {
+			
+			if (iter == currentLayer) {
+				ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color::White);
+			}
+			else {
+				ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color(150,150,150));
+			}
 			ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30));
-
+			
 			ImGui::SameLine();
 			std::string layerName;
 			if (iter != layers.begin()) {
@@ -215,20 +223,27 @@ void layerGUI()
 			std::string delButton = "Del##";
 			delButton.append(layerName);
 			if (ImGui::Button(delButton.data())) {
-				//TODO: use the distance to assign the right layer to the current layer after deleting
-				std::cout << std::distance(layers.begin(), currentLayer) << std::endl;
+				auto iterDist = std::distance(layers.begin(), currentLayer);
 				currentLayer = layers.begin();
-				delete(*iter);
+
+				delete(*iter); // Free memory
 				(*iter) = nullptr;
 
 				if (layers.size() == 2) {
 					layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
+					iter = layers.erase(iter);
+					currentLayer = layers.end() - 1;
 				}
-
-				iter = layers.erase(iter);
-				currentLayer = layers.end() - 1;
-				
-				//layers.shrink_to_fit();
+				else { // This makes sure that we continue working on the layer we were before deleting
+					bool isCurrentLayerBelowIter = layers.begin() + iterDist < iter;
+					iter = layers.erase(iter);
+					if (isCurrentLayerBelowIter) {
+						currentLayer += iterDist;
+					}
+					else {
+						currentLayer += iterDist - 1;
+					}
+				}
 			}
 			layerNumber--;
 		}

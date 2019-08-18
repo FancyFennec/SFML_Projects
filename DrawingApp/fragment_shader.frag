@@ -11,7 +11,7 @@ void main()
 	pixel2.a = pixel2.a * alpha;
 
 	float delta = 0;
-	vec3 col = vec3(0,0,0);
+	vec3 col = vec3(255,255,255);
 
 	if(!(pixel1.a == 0 && pixel2.a == 0)) {
 		delta = pixel2.a + pixel1.a - pixel2.a * pixel1.a;
