@@ -195,6 +195,7 @@ void layerGUI()
 		if (ImGui::Button("New Layer")) {
 			if (layers.size() < 21) {
 				layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
+				textureBuffer.push_back(LayerTex(layers.back(), layers.back()->tex));
 			}
 			else {
 				std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
@@ -230,7 +231,7 @@ void layerGUI()
 			//TODO: Fix this
 			ImGui::SameLine();
 			std::string delButton = "Del##";
-			delButton.append(layerName);
+			delButton.append(layerName); // If we don't append the layer name imgui is confused when we press the button
 			if (ImGui::Button(delButton.data())) {
 				auto iterDist = std::distance(layers.begin(), currentLayer);
 				currentLayer = layers.begin();
@@ -238,7 +239,7 @@ void layerGUI()
 				delete(*iter); // Free memory
 				(*iter) = nullptr;
 
-				if (layers.size() == 2) {
+				if (layers.size() == 2) { // Create a new Layer if There are none left
 					layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
 					iter = layers.erase(iter);
 					currentLayer = std::prev(layers.end());
