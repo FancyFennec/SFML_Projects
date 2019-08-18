@@ -158,7 +158,7 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 
 		sf::RenderTexture renderTex;
 		renderTex.create(image.getSize().x, image.getSize().y);
-		renderTex.clear(sf::Color::Transparent);
+		renderTex.clear(sf::Color(brush.color.r, brush.color.g, brush.color.b, 0));
 
 		brush.sprite.setColor(brush.color);
 		brush.sprite.setPosition(circlePos);
@@ -178,6 +178,7 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 
 		sf::RenderTexture renderTex;
 		renderTex.create(image.getSize().x, image.getSize().y);
+		renderTex.clear(sf::Color(brush.color.r, brush.color.g, brush.color.b, 0));
 		renderTex.draw(sprite);
 
 		brush.sprite.setColor(brush.color);

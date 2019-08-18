@@ -20,6 +20,7 @@ void createBrushWindow();
 void brushGUI();
 void brushWindowRendering();
 void mainWindowDrawing();
+void mainMenuGUI();
 void layerGUI();
 void initialiseTitle();
 void brushWindowDrawing();
@@ -124,6 +125,8 @@ int main() {
 			mainWindowEventHandling();
 		}
 
+		ImGui::SFML::Update(mainWindow, deltaClock.restart());
+		mainMenuGUI();
 		brushGUI();
 		layerGUI();
 
@@ -166,11 +169,19 @@ void brushWindowDrawing()
 	}
 }
 
+void mainMenuGUI()
+{
+	ImGui::SetNextWindowSize(ImVec2(SCREEN_WIDTH, 50));
+	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	ImGui::Begin("Main Menu");
+	ImGui::End();
+}
+
 void brushGUI()
 {
-	ImGui::SFML::Update(mainWindow, deltaClock.restart());
-
+	ImGui::SetNextWindowPos(ImVec2(0, 50));
 	ImGui::Begin("Brush Settings");
+
 	if (ImGui::ColorPicker3("Brush Colour", col)) {
 		currentbrush.color.r = (sf::Uint8)(col[0] * 255);
 		currentbrush.color.g = (sf::Uint8)(col[1] * 255);
@@ -190,6 +201,8 @@ void brushGUI()
 
 void layerGUI()
 {
+	ImGui::SetNextWindowSize(ImVec2(150, SCREEN_HEIGHT / 2));
+	ImGui::SetNextWindowPos(ImVec2(SCREEN_WIDTH - 150, 50));
 	ImGui::Begin("Layers");
 	{
 		if (ImGui::Button("New Layer")) {
