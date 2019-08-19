@@ -57,11 +57,13 @@ sf::Event event;
 Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH);
 Layer drawingLayer(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-std::vector<std::unique_ptr<Layer>> layers = {};
-std::vector<std::unique_ptr<Layer>>::iterator currentLayer; // iterator that points to the layer which gets currently updated
+typedef std::unique_ptr<Layer> LayerPntr;
+std::vector<LayerPntr> layers = {};
+std::vector<LayerPntr>::iterator currentLayer; // iterator that points to the layer which gets currently updated
 
-std::vector<std::unique_ptr<Brush>> brushes = {};
-std::vector<std::unique_ptr<Brush>>::iterator currentbrush;
+typedef std::unique_ptr<Brush> BrushPntr;
+std::vector<BrushPntr> brushes = {};
+std::vector<BrushPntr>::iterator currentbrush;
 
 //Buffer for cursor positions
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
@@ -187,7 +189,7 @@ void brushGUI()
 		(*currentbrush)->color.g = (sf::Uint8)(col[1] * 255);
 		(*currentbrush)->color.b = (sf::Uint8)(col[2] * 255);
 	}
-	ImGui::SliderFloat("Spacing", &(*currentbrush)->stepsize, 0, 50);
+	ImGui::SliderFloat("Spacing", &(*currentbrush)->stepsize, 0, 250);
 	if (ImGui::SliderFloat("Radius", &brushSize, 0, 1)) {
 		(*currentbrush)->setBrushSize(brushSize);
 	}
@@ -196,6 +198,7 @@ void brushGUI()
 
 	//Button to create a new brush
 	if (ImGui::SmallButton("New Brush")) {
+		brushLayer.clearLayer();
 		createBrushWindow();
 	}
 
