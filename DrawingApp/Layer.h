@@ -65,35 +65,35 @@ public:
 		tex.update(window);
 	}
 
-	void updateLayer(Layer& newLayer) {
-		sf::RenderTexture rTex;
-		rTex.create(image.getSize().x, image.getSize().y);
-		rTex.clear(sf::Color::Transparent);
+	//void updateLayer(Layer& newLayer) {
+	//	sf::RenderTexture rTex;
+	//	rTex.create(image.getSize().x, image.getSize().y);
+	//	rTex.clear(sf::Color::Transparent);
 
-		//TODO: This here doesn't work properly yet
-		sf::Shader fragShader;
+	//	//TODO: This here doesn't work properly yet
+	//	sf::Shader fragShader;
 
-		if (!fragShader.loadFromFile("fragment_shader.frag", sf::Shader::Fragment))
-			std::cout << "Could not load shader" << std::endl;
-		fragShader.setUniform("texture", sf::Shader::CurrentTexture);
+	//	if (!fragShader.loadFromFile("fragment_shader.frag", sf::Shader::Fragment))
+	//		std::cout << "Could not load shader" << std::endl;
+	//	fragShader.setUniform("texture", sf::Shader::CurrentTexture);
 
-		sf::RenderStates shader(&fragShader);
+	//	sf::RenderStates shader(&fragShader);
 
-		rTex.draw(sprite, shader);
-		rTex.draw(newLayer.sprite, shader);
-		rTex.display();
+	//	rTex.draw(sprite, shader);
+	//	rTex.draw(newLayer.sprite, shader);
+	//	rTex.display();
 
-		tex = rTex.getTexture();
-		sprite.setTexture(tex);
-	}
+	//	tex = rTex.getTexture();
+	//	sprite.setTexture(tex);
+	//}
 
-	void updateLayer(Layer& newLayer, Brush& brush) {
+	void updateLayer(Layer& newLayer, std::vector<std::unique_ptr<Brush>>::iterator& brush) {
 		
 		rTex.clear(sf::Color(255, 255, 255, 0));
 
 		fragShader.setUniform("texture1", tex);
 		fragShader.setUniform("texture2", newLayer.tex);
-		fragShader.setUniform("alpha", brush.opacity / 255.0f);
+		fragShader.setUniform("alpha", (*brush)->opacity / 255.0f);
 
 		rTex.draw(sprite, shader);
 		rTex.display();
@@ -108,7 +108,7 @@ public:
 
 	void resetDrawFlag() { drawFlag = 0; };
 
-	void drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window);
+	void drawLinearOnCanvas(float& movedDistance, std::vector<std::unique_ptr<Brush>>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window);
 	//void drawCubicOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
 
 	~Layer();
@@ -146,7 +146,7 @@ sf::RenderTexture Layer::rTex;
 sf::Shader Layer::fragShader;
 sf::RenderStates Layer::shader(&fragShader);
 
-inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window)
+inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<std::unique_ptr<Brush>>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window)
 {
 	cursorPositions[3] = sf::Mouse::getPosition(window);
 	movedDistance = distance(cursorPositions[2], cursorPositions[3]);
@@ -158,40 +158,40 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, Brush& brush, std::v
 
 		sf::RenderTexture renderTex;
 		renderTex.create(image.getSize().x, image.getSize().y);
-		renderTex.clear(sf::Color(brush.color.r, brush.color.g, brush.color.b, 0));
+		renderTex.clear(sf::Color((*brush)->color.r, (*brush)->color.g, (*brush)->color.b, 0));
 
-		brush.sprite.setColor(brush.color);
-		brush.sprite.setPosition(circlePos);
+		(*brush)->sprite.setColor((*brush)->color);
+		(*brush)->sprite.setPosition(circlePos);
 
-		renderTex.draw(brush.sprite);
+		renderTex.draw((*brush)->sprite);
 		renderTex.display();
 
 		tex = renderTex.getTexture();
 		sprite.setTexture(tex);
 
-	} else if (movedDistance > brush.stepsize) {
+	} else if (movedDistance > (*brush)->stepsize) {
 
-		int steps = (int)std::floorf(movedDistance / brush.stepsize);
+		int steps = (int)std::floorf(movedDistance / (*brush)->stepsize);
 
 		sf::Vector2f direction = sf::Vector2f(cursorPositions[3] - cursorPositions[2]) / distance(cursorPositions[3], cursorPositions[2]);
 		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
 
 		sf::RenderTexture renderTex;
 		renderTex.create(image.getSize().x, image.getSize().y);
-		renderTex.clear(sf::Color(brush.color.r, brush.color.g, brush.color.b, 0));
+		renderTex.clear(sf::Color((*brush)->color.r, (*brush)->color.g, (*brush)->color.b, 0));
 		renderTex.draw(sprite);
 
-		brush.sprite.setColor(brush.color);
+		(*brush)->sprite.setColor((*brush)->color);
 
 		for (int i = 0; i < steps; i++) {
-			sf::Vector2f drawingPos = circlePos + (i + 1) * brush.stepsize * direction;
-			brush.sprite.setPosition(drawingPos);
-			renderTex.draw(brush.sprite);
+			sf::Vector2f drawingPos = circlePos + (i + 1) * (*brush)->stepsize * direction;
+			(*brush)->sprite.setPosition(drawingPos);
+			renderTex.draw((*brush)->sprite);
 		}
 
-		circlePos += steps * brush.stepsize * direction;
+		circlePos += steps * (*brush)->stepsize * direction;
 		cursorPositions[2] = sf::Vector2i(circlePos);
-		movedDistance -= brush.stepsize * steps;
+		movedDistance -= (*brush)->stepsize * steps;
 		
 		renderTex.display();
 		tex = renderTex.getTexture();

@@ -45,8 +45,6 @@ float brushSize = 0.3f;
 float stepsize = 2.0f;
 int alpha = 100;
 static float col[3] = { 0.5f,0.0f,0.5f };
-//Brush currentbrush(BRUSH_WIDTH, "newBrush2.png", sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255));
-Brush currentbrush(BRUSH_WIDTH, "circle-xxl.png", sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255));
 
 //Window initialisation
 int SCREEN_WIDTH = 1200;
@@ -59,22 +57,11 @@ sf::Event event;
 Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH);
 Layer drawingLayer(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-std::vector<Layer*> layers = {};
-std::vector<Layer*>::iterator currentLayer; // iterator that points to the layer which gets currently updated
+std::vector<std::unique_ptr<Layer>> layers = {};
+std::vector<std::unique_ptr<Layer>>::iterator currentLayer; // iterator that points to the layer which gets currently updated
 
-struct LayerTex{
-	LayerTex(Layer* layerPntr, sf::Texture &tex) :
-	layerPntr(layerPntr),
-	tex(tex){}
-
-	Layer* layerPntr;
-	sf::Texture tex;
-};
-
-std::vector<LayerTex> textureBuffer = {};
-std::vector<LayerTex>::iterator textureIter;
-
-sf::RenderStates state;
+std::vector<std::unique_ptr<Brush>> brushes = {};
+std::vector<std::unique_ptr<Brush>>::iterator currentbrush;
 
 //Buffer for cursor positions
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
@@ -86,7 +73,7 @@ int main() {
 	drawingLayer.updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 	currentLayer->updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);*/
 
-	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App");
+	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Titlebar);
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(120);
 	
@@ -101,16 +88,19 @@ int main() {
 	ImGui::SFML::Init(mainWindow);
 
 	layers.reserve(21); // Reserve space for 20 Layers
-	layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color::White)); // Background Layer
-	layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT)); // One layer to draw on
-	currentLayer = layers.end() - 1;
+	layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color::White)); // Background Layer
+	layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT)); // One layer to draw on
+	currentLayer = std::prev(layers.end());
 
-	currentbrush.color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), 255);
-	currentbrush.setBrushSize(brushSize);
-
-	textureBuffer.reserve(11);
-	textureBuffer.push_back(LayerTex(*currentLayer, (*currentLayer)->tex));
-	textureIter = textureBuffer.begin();
+	brushes.reserve(20);
+	brushes.push_back(std::make_unique<Brush>(
+		BRUSH_WIDTH, 
+		"circle-xxl.png", 
+		sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255)
+		));
+	currentbrush = brushes.begin();
+	(*currentbrush)->color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), 255);
+	(*currentbrush)->setBrushSize(brushSize);
 
 	while (mainWindow.isOpen())
 	{
@@ -152,7 +142,7 @@ void mainWindowDrawing()
 		if (isMouseHeld()) {
 			drawingLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions, mainWindow);
 			//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
-			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, currentbrush.opacity));
+			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, (*currentbrush)->opacity));
 			mainWindow.draw(drawingLayer.sprite);
 			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
 		}
@@ -173,28 +163,103 @@ void mainMenuGUI()
 {
 	ImGui::SetNextWindowSize(ImVec2(SCREEN_WIDTH, 50));
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
-	ImGui::Begin("Main Menu");
+
+	bool windowFlag = true;
+	ImGui::Begin("##Main Menu", &windowFlag, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+	ImGui::Dummy(ImVec2(0, 5));
+	if (ImGui::Button("File")) {
+	}
+	ImGui::SameLine();
+	if (ImGui::Button("Edit")) {
+	}
 	ImGui::End();
 }
 
 void brushGUI()
 {
+	ImGui::SetNextWindowSize(ImVec2(250, SCREEN_HEIGHT - 250));
 	ImGui::SetNextWindowPos(ImVec2(0, 50));
-	ImGui::Begin("Brush Settings");
+	bool windowFlag = true;
+	ImGui::Begin("Brush Settings", &windowFlag, ImGuiWindowFlags_NoResize);
 
-	if (ImGui::ColorPicker3("Brush Colour", col)) {
-		currentbrush.color.r = (sf::Uint8)(col[0] * 255);
-		currentbrush.color.g = (sf::Uint8)(col[1] * 255);
-		currentbrush.color.b = (sf::Uint8)(col[2] * 255);
+	if (ImGui::ColorPicker3("Colour", col)) {
+		(*currentbrush)->color.r = (sf::Uint8)(col[0] * 255);
+		(*currentbrush)->color.g = (sf::Uint8)(col[1] * 255);
+		(*currentbrush)->color.b = (sf::Uint8)(col[2] * 255);
 	}
-	ImGui::SliderFloat("Spacing", &currentbrush.stepsize, 0, 50);
+	ImGui::SliderFloat("Spacing", &(*currentbrush)->stepsize, 0, 50);
 	if (ImGui::SliderFloat("Radius", &brushSize, 0, 1)) {
-		currentbrush.setBrushSize(brushSize);
+		(*currentbrush)->setBrushSize(brushSize);
 	}
-	if (ImGui::SliderInt("Opacity", &currentbrush.opacity, 0, 255)) {
+	if (ImGui::SliderInt("Opacity", &(*currentbrush)->opacity, 0, 255)) {
 	}
+
+	//Button to create a new brush
 	if (ImGui::SmallButton("New Brush")) {
 		createBrushWindow();
+	}
+
+	// Draw list of all brushes
+	int brushNumber = 1;
+	if (brushes.begin() == currentbrush) {
+		ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color::White);
+	}
+	else {
+		ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color(150, 150, 150));
+	}
+	ImGui::Image((*brushes.begin())->sprite, sf::Vector2f(30, 30));
+
+	ImGui::SameLine();
+	std::string brushName = "Brush";
+	brushName.append(std::to_string(brushNumber));
+
+	//Button that sets the current brush to the current iterator
+	if (ImGui::Button(brushName.data())) {
+		currentbrush = brushes.begin();
+	}
+	brushNumber++;
+	for (auto iter = std::prev(brushes.end()); iter > brushes.begin() ; std::advance(iter, -1)) {
+
+		//Image of the brush with white border if it is selected
+		if (iter == currentbrush) {
+			ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color::White);
+		}
+		else {
+			ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color(150, 150, 150));
+		}
+		ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30));
+
+		ImGui::SameLine();
+		std::string brushName = "Brush";
+		brushName.append(std::to_string(brushNumber));
+
+		//Button that sets the current brush to the current iterator
+		if (ImGui::Button(brushName.data())) {
+			currentbrush = iter;
+		}
+
+		//Delete button
+		if (iter != brushes.begin()) {
+			ImGui::SameLine();
+			std::string delButton = "Del##";
+			delButton.append(brushName); // If we don't append the brush name imgui is confused when we press the button
+
+			if (ImGui::Button(delButton.data())) {
+				auto iterDist = std::distance(brushes.begin(), currentbrush);
+				currentbrush = brushes.begin();
+
+				// This makes sure that we continue working on the brush we were before deleting
+				bool isCurrentBrushBelowIter = brushes.begin() + iterDist < iter;
+				iter = brushes.erase(iter);
+				if (isCurrentBrushBelowIter) {
+					std::advance(currentbrush, iterDist);
+				}
+				else {
+					std::advance(currentbrush, iterDist - 1);
+				}
+			}
+		}
+		brushNumber++;
 	}
 	ImGui::End();
 }
@@ -203,12 +268,13 @@ void layerGUI()
 {
 	ImGui::SetNextWindowSize(ImVec2(150, SCREEN_HEIGHT / 2));
 	ImGui::SetNextWindowPos(ImVec2(SCREEN_WIDTH - 150, 50));
-	ImGui::Begin("Layers");
+	bool windowFlag = true;
+	ImGui::Begin("Layers", &windowFlag, ImGuiWindowFlags_NoResize);
 	{
+		//Button to create a new Layer
 		if (ImGui::Button("New Layer")) {
 			if (layers.size() < 21) {
-				layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
-				textureBuffer.push_back(LayerTex(layers.back(), layers.back()->tex));
+				layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT));
 			}
 			else {
 				std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
@@ -219,6 +285,7 @@ void layerGUI()
 		// Draw list of all the layers
 		for (auto iter = std::prev(layers.end()); iter > layers.begin(); std::advance(iter, -1)) {
 			
+			//Image of the layer with white border if it is selected
 			if (iter == currentLayer) {
 				ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color::White);
 			}
@@ -227,6 +294,7 @@ void layerGUI()
 			}
 			ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30));
 			
+			//Button that sets the current Layer to the current iterator
 			ImGui::SameLine();
 			std::string layerName;
 			if (iter != layers.begin()) {
@@ -236,12 +304,11 @@ void layerGUI()
 			else {
 				layerName = "Background";
 			}
-
 			if (ImGui::Button(layerName.data())) {
 				if (iter != layers.begin()) currentLayer = iter;
 			}
 
-			//TODO: Fix this
+			//Delete button
 			ImGui::SameLine();
 			std::string delButton = "Del##";
 			delButton.append(layerName); // If we don't append the layer name imgui is confused when we press the button
@@ -249,11 +316,8 @@ void layerGUI()
 				auto iterDist = std::distance(layers.begin(), currentLayer);
 				currentLayer = layers.begin();
 
-				delete(*iter); // Free memory
-				(*iter) = nullptr;
-
 				if (layers.size() == 2) { // Create a new Layer if There are none left
-					layers.push_back(new Layer(SCREEN_WIDTH, SCREEN_HEIGHT));
+					layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT));
 					iter = layers.erase(iter);
 					currentLayer = std::prev(layers.end());
 				}
@@ -278,7 +342,7 @@ void createBrushWindow()
 {
 	brushWindow.create(sf::VideoMode(BRUSH_WIDTH, BRUSH_WIDTH), "Define Brush", sf::Style::Titlebar);
 	brushWindow.setFramerateLimit(120);
-	brushWindow.clear(sf::Color::White);
+	brushWindow.clear(sf::Color::Black);
 	brushWindow.setPosition(mainWindow.getPosition() +
 		sf::Vector2i(SCREEN_WIDTH / 2 - BRUSH_WIDTH / 2, SCREEN_HEIGHT / 2 - BRUSH_WIDTH / 2));
 }
@@ -292,7 +356,7 @@ void brushWindowRendering()
 				brushWindow.close();
 			brushWindowEventHandling();
 		}
-		brushWindow.clear(sf::Color::White);
+		brushWindow.clear(sf::Color::Black);
 		brushLayer.drawLayer(brushWindow);
 		brushWindow.display();
 	}
@@ -314,21 +378,13 @@ void mainWindowEventHandling()
 					newTex.create(mainWindow.getSize().x, mainWindow.getSize().y);
 					newTex.update(mainWindow);
 					newTex.copyToImage();
-					currentbrush.color = newTex.copyToImage().getPixel(pos.x, pos.y);
+					(*currentbrush)->color = newTex.copyToImage().getPixel(pos.x, pos.y);
 
-					col[0] = currentbrush.color.r / 255.0f;
-					col[1] = currentbrush.color.g / 255.0f;
-					col[2] = currentbrush.color.b / 255.0f;
+					col[0] = (*currentbrush)->color.r / 255.0f;
+					col[1] = (*currentbrush)->color.g / 255.0f;
+					col[2] = (*currentbrush)->color.b / 255.0f;
 				}
 			} else {
-				if (textureIter != std::prev(textureBuffer.end())) {
-					auto lastIter = std::prev(textureBuffer.end());
-
-					while (textureIter != lastIter) {
-						lastIter = textureBuffer.erase(lastIter);
-						std::advance(lastIter, -1);
-					}
-				}
 				movedDistance = 0.0f;
 				setMouseIsHeld();
 
@@ -339,22 +395,15 @@ void mainWindowEventHandling()
 				cursorPositions[3] = newPos;
 
 				drawingLayer.resetDrawFlag();
-				//No need to draw the window here, it gets drawn because the lmb is held later
+				//No need to draw the window here, it gets drawn because the lmb is being held later
 			}
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-				//drawingLayer.sprite.setColor(sf::Color(255, 255, 255, currentbrush.opacity));
 				(*currentLayer)->updateLayer(drawingLayer, currentbrush);
-				//drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
 			}
-			if (textureBuffer.size() >= 10) {
-				textureBuffer.erase(textureBuffer.begin());
-			}
-			textureBuffer.push_back(LayerTex(*currentLayer, (*currentLayer)->tex));
-			textureIter = textureBuffer.end() - 1;
 			setMouseNotHeld();
 		}
 	}
@@ -376,15 +425,11 @@ void mainWindowEventHandling()
 		//TODO: Fix this... Since we now have layers this does not work anymore
 		case(sf::Keyboard::Z): {
 			if (isCtrlHeld()) {
-				if (textureIter != textureBuffer.begin()) std::advance(textureIter, -1);
-				(*textureIter).layerPntr->tex = (*textureIter).tex;
 			}
 			break;
 		}
 		case(sf::Keyboard::Y): {
 			if (isCtrlHeld()) {
-				if (textureIter != textureBuffer.end() - 1) std::advance(textureIter, 1);
-				(*textureIter).layerPntr->tex = (*textureIter).tex;
 			}
 			break;
 		}
@@ -432,7 +477,21 @@ void brushWindowEventHandling()
 	}
 	if (event.type == sf::Event::KeyPressed) {
 		if (event.key.code == sf::Keyboard::Escape) {
-			//brushImage.saveToFile("newBrush.png");
+			sf::RenderTexture renderTex;
+			renderTex.create(brushLayer.image.getSize().x, brushLayer.image.getSize().y);
+			renderTex.clear(sf::Color(255, 255, 255, 0));
+
+			renderTex.draw(brushLayer.sprite);
+			renderTex.display();
+
+			renderTex.getTexture().copyToImage().saveToFile("BrushWindow.png");
+
+			brushes.push_back(std::make_unique<Brush>(
+				BRUSH_WIDTH,
+				"BrushWindow.png",
+				sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255)
+				));
+
 			brushWindow.close();
 		}
 	}
