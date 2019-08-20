@@ -179,8 +179,8 @@ void brushGUI()
 	ImGui::SetNextWindowSize(ImVec2(250, SCREEN_HEIGHT - 250));
 	ImGui::SetNextWindowPos(ImVec2(0, 50));
 	bool windowFlag = true;
-	ImGui::Begin("Brush Settings", &windowFlag, ImGuiWindowFlags_NoResize);
 
+	ImGui::Begin("Brush Settings", &windowFlag, ImGuiWindowFlags_NoResize);
 	if (ImGui::CollapsingHeader("Colour Picker")) {
 		if (ImGui::ColorPicker3("Colour", col)) {
 			(*currentBrush)->color.r = (sf::Uint8)(col[0] * 255);
