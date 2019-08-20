@@ -140,14 +140,30 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 		renderTex.create(image.getSize().x, image.getSize().y);
 		renderTex.clear(sf::Color((*brush)->color.r, (*brush)->color.g, (*brush)->color.b, 0));
 
-		(*brush)->sprite.setColor((*brush)->color);
+		(*brush)->sprite.setColor(sf::Color(
+			(*brush)->color.r,
+			(*brush)->color.g,
+			(*brush)->color.b,
+			(*brush)->flow));
 		(*brush)->sprite.setPosition(circlePos);
 
-		renderTex.draw((*brush)->sprite);
+		sf::RenderStates state;
+		float scale = 1.0f + (*brush)->scaterScale * (rand() % 20 - 10) / 10.0f;
+		state.transform.scale(
+			scale, scale, circlePos.x, circlePos.y);
+		state.transform.rotate((*brush)->scaterAngle * (rand() % 20 - 10) / 10.0f, circlePos);
+		state.transform.translate(
+			(*brush)->brushsize * (*brush)->scaterPos * (rand() % 20 - 10) / 10.0f,
+			(*brush)->brushsize * (*brush)->scaterPos * (rand() % 20 - 10) / 10.0f);
+		renderTex.draw((*brush)->sprite, state);
+
+		//renderTex.draw((*brush)->sprite);
 		renderTex.display();
 
 		tex = renderTex.getTexture();
 		sprite.setTexture(tex);
+
+		(*brush)->sprite.setColor((*brush)->color);
 
 	} else if (movedDistance > (*brush)->stepsize) {
 
@@ -161,12 +177,27 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 		renderTex.clear(sf::Color((*brush)->color.r, (*brush)->color.g, (*brush)->color.b, 0));
 		renderTex.draw(sprite);
 
-		(*brush)->sprite.setColor((*brush)->color);
+		(*brush)->sprite.setColor(sf::Color(
+			(*brush)->color.r,
+			(*brush)->color.g,
+			(*brush)->color.b,
+			(*brush)->flow));
+		(*brush)->sprite.setPosition(circlePos);
 
 		for (int i = 0; i < steps; i++) {
 			sf::Vector2f drawingPos = circlePos + (i + 1) * (*brush)->stepsize * direction;
 			(*brush)->sprite.setPosition(drawingPos);
-			renderTex.draw((*brush)->sprite);
+
+			sf::RenderStates state;
+			float scale = 1.0f + (*brush)->scaterScale * (rand() % 20 - 10) / 10.0f;
+			state.transform.scale(
+				scale, scale, drawingPos.x, drawingPos.y);
+			state.transform.rotate((*brush)->scaterAngle * (rand() % 20 - 10) / 10.0f, drawingPos);
+			state.transform.translate(
+				(*brush)->brushsize * (*brush)->scaterPos * (rand() % 20 - 10) / 10.0f,
+				(*brush)->brushsize * (*brush)->scaterPos * (rand() % 20 - 10) / 10.0f);
+			renderTex.draw((*brush)->sprite, state);
+			//renderTex.draw((*brush)->sprite);
 		}
 
 		circlePos += steps * (*brush)->stepsize * direction;
@@ -176,6 +207,8 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 		renderTex.display();
 		tex = renderTex.getTexture();
 		sprite.setTexture(tex);
+
+		(*brush)->sprite.setColor((*brush)->color);
 	}
 }
 

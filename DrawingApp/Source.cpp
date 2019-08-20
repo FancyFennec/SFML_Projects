@@ -22,7 +22,6 @@ void brushWindowRendering();
 void mainWindowDrawing();
 void mainMenuGUI();
 void layerGUI();
-void initialiseTitle();
 void brushWindowDrawing();
 void mainWindowEventHandling();
 void brushWindowEventHandling();
@@ -35,8 +34,6 @@ float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
 static const float PI = 3.14159265358979323846f;
 
 sf::Clock deltaClock;
-sf::Text title;
-sf::Font font;
 
 //Brush initialisation
 int BRUSH_WIDTH = 512;
@@ -63,7 +60,7 @@ std::vector<LayerPntr>::iterator currentLayer; // iterator that points to the la
 
 typedef std::unique_ptr<Brush> BrushPntr;
 std::vector<BrushPntr> brushes = {};
-std::vector<BrushPntr>::iterator currentbrush;
+std::vector<BrushPntr>::iterator currentBrush;
 
 //Buffer for cursor positions
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
@@ -79,14 +76,6 @@ int main() {
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(120);
 	
-	if (!font.loadFromFile("Arial.ttf")) {
-		std::cout << "Could not find font." << std::endl;
-		return -1;
-	}
-	else {
-		initialiseTitle();
-	}
-
 	ImGui::SFML::Init(mainWindow);
 
 	layers.reserve(21); // Reserve space for 20 Layers
@@ -100,9 +89,9 @@ int main() {
 		"circle-xxl.png", 
 		sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255)
 		));
-	currentbrush = brushes.begin();
-	(*currentbrush)->color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), 255);
-	(*currentbrush)->setBrushSize(brushSize);
+	currentBrush = brushes.begin();
+	(*currentBrush)->color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), 255);
+	(*currentBrush)->setBrushSize(brushSize);
 
 	while (mainWindow.isOpen())
 	{
@@ -129,7 +118,6 @@ int main() {
 			if (iter > currentLayer) mainWindow.draw((*iter)->sprite);
 		}
 
-		mainWindow.draw(title);
 		ImGui::SFML::Render(mainWindow);
 		mainWindow.display();
 
@@ -142,9 +130,9 @@ void mainWindowDrawing()
 {
 	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 		if (isMouseHeld()) {
-			drawingLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions, mainWindow);
+			drawingLayer.drawLinearOnCanvas(movedDistance, currentBrush, cursorPositions, mainWindow);
 			//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
-			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, (*currentbrush)->opacity));
+			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, (*currentBrush)->opacity));
 			mainWindow.draw(drawingLayer.sprite);
 			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
 		}
@@ -154,9 +142,18 @@ void mainWindowDrawing()
 void brushWindowDrawing()
 {
 	if (brushWindow.hasFocus()) {
-		if (isMouseHeld()) {
-			brushLayer.drawLinearOnCanvas(movedDistance, currentbrush, cursorPositions, brushWindow);
-			brushLayer.drawLayer(brushWindow);
+		if (sf::Mouse::getPosition(brushWindow).x >= 0 && sf::Mouse::getPosition(brushWindow).y >= 0) {
+			if (isMouseHeld()) {
+				brushLayer.drawLinearOnCanvas(movedDistance, currentBrush, cursorPositions, brushWindow);
+				brushLayer.drawLayer(brushWindow);
+			}
+		}
+		/*else {
+			mainWindow.requestFocus();
+		}*/
+	} else {
+		if (sf::Mouse::getPosition(brushWindow).x >= 0 && sf::Mouse::getPosition(brushWindow).y >= 0) {
+			brushWindow.requestFocus();
 		}
 	}
 }
@@ -184,16 +181,23 @@ void brushGUI()
 	bool windowFlag = true;
 	ImGui::Begin("Brush Settings", &windowFlag, ImGuiWindowFlags_NoResize);
 
-	if (ImGui::ColorPicker3("Colour", col)) {
-		(*currentbrush)->color.r = (sf::Uint8)(col[0] * 255);
-		(*currentbrush)->color.g = (sf::Uint8)(col[1] * 255);
-		(*currentbrush)->color.b = (sf::Uint8)(col[2] * 255);
+	if (ImGui::CollapsingHeader("Colour Picker")) {
+		if (ImGui::ColorPicker3("Colour", col)) {
+			(*currentBrush)->color.r = (sf::Uint8)(col[0] * 255);
+			(*currentBrush)->color.g = (sf::Uint8)(col[1] * 255);
+			(*currentBrush)->color.b = (sf::Uint8)(col[2] * 255);
+		}
 	}
-	ImGui::SliderFloat("Spacing", &(*currentbrush)->stepsize, 0, 250);
-	if (ImGui::SliderFloat("Radius", &brushSize, 0, 1)) {
-		(*currentbrush)->setBrushSize(brushSize);
+	if (ImGui::CollapsingHeader("Settings")) {
+		ImGui::SliderFloat("Spacing", &(*currentBrush)->stepsize, 0, 100);
+		if (ImGui::SliderFloat("Size", &brushSize, 0, 1)) (*currentBrush)->setBrushSize(brushSize);
+		ImGui::SliderInt("Opacity", &(*currentBrush)->opacity, 0, 255);
+		ImGui::SliderInt("Flow", &(*currentBrush)->flow, 0, 255);
 	}
-	if (ImGui::SliderInt("Opacity", &(*currentbrush)->opacity, 0, 255)) {
+	if (ImGui::CollapsingHeader("Scatter")) {
+		ImGui::SliderFloat("S-Scatter", &(*currentBrush)->scaterScale, 0, 1);
+		ImGui::SliderFloat("P-Scatter", &(*currentBrush)->scaterPos, 0, 2000);
+		ImGui::SliderFloat("A-Scatter", &(*currentBrush)->scaterAngle, 0, 180);
 	}
 
 	//Button to create a new brush
@@ -204,7 +208,7 @@ void brushGUI()
 
 	// Draw list of all brushes
 	int brushNumber = 1;
-	if (brushes.begin() == currentbrush) {
+	if (brushes.begin() == currentBrush) {
 		ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color::White);
 	}
 	else {
@@ -218,13 +222,13 @@ void brushGUI()
 
 	//Button that sets the current brush to the current iterator
 	if (ImGui::Button(brushName.data())) {
-		currentbrush = brushes.begin();
+		currentBrush = brushes.begin();
 	}
 	brushNumber++;
 	for (auto iter = std::prev(brushes.end()); iter > brushes.begin() ; std::advance(iter, -1)) {
 
 		//Image of the brush with white border if it is selected
-		if (iter == currentbrush) {
+		if (iter == currentBrush) {
 			ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color::White);
 		}
 		else {
@@ -238,7 +242,7 @@ void brushGUI()
 
 		//Button that sets the current brush to the current iterator
 		if (ImGui::Button(brushName.data())) {
-			currentbrush = iter;
+			currentBrush = iter;
 		}
 
 		//Delete button
@@ -248,17 +252,17 @@ void brushGUI()
 			delButton.append(brushName); // If we don't append the brush name imgui is confused when we press the button
 
 			if (ImGui::Button(delButton.data())) {
-				auto iterDist = std::distance(brushes.begin(), currentbrush);
-				currentbrush = brushes.begin();
+				auto iterDist = std::distance(brushes.begin(), currentBrush);
+				currentBrush = brushes.begin();
 
 				// This makes sure that we continue working on the brush we were before deleting
 				bool isCurrentBrushBelowIter = brushes.begin() + iterDist < iter;
 				iter = brushes.erase(iter);
 				if (isCurrentBrushBelowIter) {
-					std::advance(currentbrush, iterDist);
+					std::advance(currentBrush, iterDist);
 				}
 				else {
-					std::advance(currentbrush, iterDist - 1);
+					std::advance(currentBrush, iterDist - 1);
 				}
 			}
 		}
@@ -381,11 +385,11 @@ void mainWindowEventHandling()
 					newTex.create(mainWindow.getSize().x, mainWindow.getSize().y);
 					newTex.update(mainWindow);
 					newTex.copyToImage();
-					(*currentbrush)->color = newTex.copyToImage().getPixel(pos.x, pos.y);
+					(*currentBrush)->color = newTex.copyToImage().getPixel(pos.x, pos.y);
 
-					col[0] = (*currentbrush)->color.r / 255.0f;
-					col[1] = (*currentbrush)->color.g / 255.0f;
-					col[2] = (*currentbrush)->color.b / 255.0f;
+					col[0] = (*currentBrush)->color.r / 255.0f;
+					col[1] = (*currentBrush)->color.g / 255.0f;
+					col[2] = (*currentBrush)->color.b / 255.0f;
 				}
 			} else {
 				movedDistance = 0.0f;
@@ -405,7 +409,7 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-				(*currentLayer)->updateLayer(drawingLayer, currentbrush);
+				(*currentLayer)->updateLayer(drawingLayer, currentBrush);
 			}
 			setMouseNotHeld();
 		}
@@ -498,17 +502,6 @@ void brushWindowEventHandling()
 			brushWindow.close();
 		}
 	}
-}
-
-void initialiseTitle()
-{
-	title.setFont(font);
-	title.setString(sf::String("Baole Drawing App"));
-	title.setFillColor(sf::Color::Black);
-	title.setCharacterSize(24);
-	sf::FloatRect rec = title.getGlobalBounds();
-	title.setOrigin(rec.width / 2, rec.height / 2);
-	title.setPosition(SCREEN_WIDTH / 2, 10);
 }
 
 void getDesktopResolution(int& horizontal, int& vertical) {

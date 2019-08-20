@@ -2,6 +2,10 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <random>
+#include <numeric>
+#include <iostream>
+
 
 class Brush
 {
@@ -14,6 +18,11 @@ public:
 	float stepsize = 2.0f;
 	float brushsize = 0.3f;
 	int opacity = 100;
+	int flow = 100;
+
+	float scaterScale = 0.0f;
+	float scaterPos = 0.0f;
+	float scaterAngle = 0.0f;
 
 	void setBrushSize(float brushSize) {
 		this->brushsize = brushSize;
