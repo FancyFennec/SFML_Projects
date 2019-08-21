@@ -119,12 +119,15 @@ private:
 	float scalarProd(const sf::Vector2f& vec1, const sf::Vector2f& vec2) {
 		return vec1.x * vec2.x + vec1.y + vec2.y;
 	}
+
+	sf::RenderStates getRenderState(std::vector<BrushPntr>::iterator & brush, sf::Vector2f &drawingPos);
 };
 
 unsigned int Layer::layerCount = 0;
 sf::RenderTexture Layer::rTex;
 sf::Shader Layer::fragShader;
 sf::RenderStates Layer::shader(&fragShader);
+
 
 inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window)
 {
@@ -144,18 +147,10 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 			(*brush)->color.r,
 			(*brush)->color.g,
 			(*brush)->color.b,
-			(*brush)->flow));
+			(*brush)->pressure * (*brush)->flow));
 		(*brush)->sprite.setPosition(circlePos);
 
-		sf::RenderStates state;
-		float scale = 1.0f + (*brush)->scaterScale * (rand() % 20 - 10) / 10.0f;
-		state.transform.scale(
-			scale, scale, circlePos.x, circlePos.y);
-		state.transform.rotate((*brush)->scaterAngle * (rand() % 20 - 10) / 10.0f, circlePos);
-		state.transform.translate(
-			(*brush)->brushsize * (*brush)->scaterPos * (rand() % 20 - 10) / 10.0f,
-			(*brush)->brushsize * (*brush)->scaterPos * (rand() % 20 - 10) / 10.0f);
-		renderTex.draw((*brush)->sprite, state);
+		renderTex.draw((*brush)->sprite, getRenderState(brush, circlePos));
 
 		//renderTex.draw((*brush)->sprite);
 		renderTex.display();
@@ -165,9 +160,9 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 
 		(*brush)->sprite.setColor((*brush)->color);
 
-	} else if (movedDistance > (*brush)->stepsize) {
+	} else if (movedDistance > (*brush)->stepsize * (*brush)->brushsize * (*brush)->pressure) {
 
-		int steps = (int)std::floorf(movedDistance / (*brush)->stepsize);
+		int steps = (int)std::floorf(movedDistance / ((*brush)->stepsize * (*brush)->brushsize * (*brush)->pressure));
 
 		sf::Vector2f direction = sf::Vector2f(cursorPositions[3] - cursorPositions[2]) / distance(cursorPositions[3], cursorPositions[2]);
 		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
@@ -181,28 +176,20 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 			(*brush)->color.r,
 			(*brush)->color.g,
 			(*brush)->color.b,
-			(*brush)->flow));
+			(*brush)->pressure * (*brush)->flow));
 		(*brush)->sprite.setPosition(circlePos);
 
 		for (int i = 0; i < steps; i++) {
-			sf::Vector2f drawingPos = circlePos + (i + 1) * (*brush)->stepsize * direction;
+			sf::Vector2f drawingPos = circlePos + (i + 1) * (*brush)->stepsize * (*brush)->brushsize * (*brush)->pressure * direction;
 			(*brush)->sprite.setPosition(drawingPos);
 
-			sf::RenderStates state;
-			float scale = 1.0f + (*brush)->scaterScale * (rand() % 20 - 10) / 10.0f;
-			state.transform.scale(
-				scale, scale, drawingPos.x, drawingPos.y);
-			state.transform.rotate((*brush)->scaterAngle * (rand() % 20 - 10) / 10.0f, drawingPos);
-			state.transform.translate(
-				(*brush)->brushsize * (*brush)->scaterPos * (rand() % 20 - 10) / 10.0f,
-				(*brush)->brushsize * (*brush)->scaterPos * (rand() % 20 - 10) / 10.0f);
-			renderTex.draw((*brush)->sprite, state);
+			renderTex.draw((*brush)->sprite, getRenderState(brush, drawingPos));
 			//renderTex.draw((*brush)->sprite);
 		}
 
-		circlePos += steps * (*brush)->stepsize * direction;
+		circlePos += steps * (*brush)->stepsize * (*brush)->brushsize * (*brush)->pressure * direction;
 		cursorPositions[2] = sf::Vector2i(circlePos);
-		movedDistance -= (*brush)->stepsize * steps;
+		movedDistance -= (*brush)->stepsize * (*brush)->brushsize * (*brush)->pressure * steps;
 		
 		renderTex.display();
 		tex = renderTex.getTexture();
@@ -210,6 +197,21 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 
 		(*brush)->sprite.setColor((*brush)->color);
 	}
+}
+
+sf::RenderStates Layer::getRenderState(std::vector<BrushPntr>::iterator & brush, sf::Vector2f &drawingPos)
+{
+	sf::RenderStates state;
+
+	float scale = (*brush)->pressure * (1.0f + (*brush)->scaterScale * (rand() % 20 - 10) / 10.0f);
+	state.transform.scale(
+		scale, scale, drawingPos.x, drawingPos.y);
+	state.transform.rotate((*brush)->scaterAngle * (rand() % 20 - 10) / 10.0f, drawingPos);
+	state.transform.translate(
+		(*brush)->brushsize * (*brush)->scaterPos * (rand() % 20 - 10) / 10.0f,
+		(*brush)->brushsize * (*brush)->scaterPos * (rand() % 20 - 10) / 10.0f);
+
+	return state;
 }
 
 //inline void Layer::drawCubicOnCanvas(float & movedDistance, Brush & brush, std::vector<sf::Vector2i>& cursorPositions)

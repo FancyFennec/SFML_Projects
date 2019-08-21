@@ -1,12 +1,9 @@
 #include <SFML/Graphics.hpp>
-#include "wtypes.h"
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <string>
-#include <map>
-#include <ctime>
-#include <cstdlib> 
+
+#include <Windows.h>
 
 #include "Imgui/imgui.h"
 #include "Imgui/imgui-SFML.h"
@@ -24,14 +21,9 @@ void mainMenuGUI();
 void layerGUI();
 void brushWindowDrawing();
 void mainWindowEventHandling();
+void lmbPressed();
 void brushWindowEventHandling();
 void getDesktopResolution(int& horizontal, int& vertical);
-
-float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
-	return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
-}
-
-static const float PI = 3.14159265358979323846f;
 
 sf::Clock deltaClock;
 
@@ -75,7 +67,14 @@ int main() {
 	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Titlebar);
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(120);
-	
+
+	/*sf::Window test;
+	test.create(sf::VideoMode(0, 0), "Hidden Window", sf::Style::None);*/
+
+	MSG msg;
+	sf::WindowHandle handle = mainWindow.getSystemHandle();
+	POINTER_PEN_INFO penInfo;
+
 	ImGui::SFML::Init(mainWindow);
 
 	layers.reserve(21); // Reserve space for 20 Layers
@@ -100,6 +99,14 @@ int main() {
 			if(iter <= currentLayer) mainWindow.draw((*iter)->sprite);
 		}
 
+		if (PeekMessageW(&msg, handle, 0, 0, PM_NOREMOVE)) {
+			UINT32 pointerId = GET_POINTERID_WPARAM(msg.wParam);
+			if (GetPointerPenInfo(pointerId, &penInfo)) {
+				(*currentBrush)->pressure = penInfo.pressure / 1024.0f;
+				std::cout << penInfo.pressure << std::endl;
+				//lmbPressed();
+			}
+		}
 		while (mainWindow.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
@@ -122,6 +129,7 @@ int main() {
 		mainWindow.display();
 
 		brushWindowRendering();
+
 	}
 	return 0;
 }
@@ -189,7 +197,7 @@ void brushGUI()
 		}
 	}
 	if (ImGui::CollapsingHeader("Settings")) {
-		ImGui::SliderFloat("Spacing", &(*currentBrush)->stepsize, 0, 100);
+		ImGui::SliderFloat("Spacing", &(*currentBrush)->stepsize, 0, 500);
 		if (ImGui::SliderFloat("Size", &brushSize, 0, 1)) (*currentBrush)->setBrushSize(brushSize);
 		ImGui::SliderInt("Opacity", &(*currentBrush)->opacity, 0, 255);
 		ImGui::SliderInt("Flow", &(*currentBrush)->flow, 0, 255);
@@ -375,35 +383,7 @@ void mainWindowEventHandling()
 		mainWindow.close();
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			drawingLayer.clearLayer();
-
-			if (isAltHeld()) {
-				if (event.mouseButton.button == sf::Mouse::Left) {
-					sf::Vector2i pos = sf::Mouse::getPosition(mainWindow);
-					
-					sf::Texture newTex;
-					newTex.create(mainWindow.getSize().x, mainWindow.getSize().y);
-					newTex.update(mainWindow);
-					newTex.copyToImage();
-					(*currentBrush)->color = newTex.copyToImage().getPixel(pos.x, pos.y);
-
-					col[0] = (*currentBrush)->color.r / 255.0f;
-					col[1] = (*currentBrush)->color.g / 255.0f;
-					col[2] = (*currentBrush)->color.b / 255.0f;
-				}
-			} else {
-				movedDistance = 0.0f;
-				setMouseIsHeld();
-
-				sf::Vector2i newPos = sf::Mouse::getPosition(mainWindow);
-				cursorPositions[0] = newPos;
-				cursorPositions[1] = newPos;
-				cursorPositions[2] = newPos;
-				cursorPositions[3] = newPos;
-
-				drawingLayer.resetDrawFlag();
-				//No need to draw the window here, it gets drawn because the lmb is being held later
-			}
+			lmbPressed();
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
@@ -457,6 +437,40 @@ void mainWindowEventHandling()
 			break;
 		}
 		}
+	}
+}
+
+void lmbPressed()
+{
+	drawingLayer.clearLayer();
+
+	if (isAltHeld()) {
+		if (event.mouseButton.button == sf::Mouse::Left) {
+			sf::Vector2i pos = sf::Mouse::getPosition(mainWindow);
+
+			sf::Texture newTex;
+			newTex.create(mainWindow.getSize().x, mainWindow.getSize().y);
+			newTex.update(mainWindow);
+			newTex.copyToImage();
+			(*currentBrush)->color = newTex.copyToImage().getPixel(pos.x, pos.y);
+
+			col[0] = (*currentBrush)->color.r / 255.0f;
+			col[1] = (*currentBrush)->color.g / 255.0f;
+			col[2] = (*currentBrush)->color.b / 255.0f;
+		}
+	}
+	else {
+		movedDistance = 0.0f;
+		setMouseIsHeld();
+
+		sf::Vector2i newPos = sf::Mouse::getPosition(mainWindow);
+		cursorPositions[0] = newPos;
+		cursorPositions[1] = newPos;
+		cursorPositions[2] = newPos;
+		cursorPositions[3] = newPos;
+
+		drawingLayer.resetDrawFlag();
+		//No need to draw the window here, it gets drawn because the lmb is being held later
 	}
 }
 

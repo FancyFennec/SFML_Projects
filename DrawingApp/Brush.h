@@ -19,6 +19,7 @@ public:
 	float brushsize = 0.3f;
 	int opacity = 100;
 	int flow = 100;
+	float pressure = 1.0f;
 
 	float scaterScale = 0.0f;
 	float scaterPos = 0.0f;
