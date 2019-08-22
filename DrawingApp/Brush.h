@@ -15,10 +15,10 @@ public:
 	sf::Sprite sprite;
 	sf::Color color = sf::Color::Black;
 
-	float stepsize = 2.0f;
+	float stepsize = 33.0f;
 	float brushsize = 0.3f;
-	int opacity = 100;
-	int flow = 100;
+	int opacity = 170;
+	int flow = 70;
 	float pressure = 1.0f;
 
 	float scaterScale = 0.0f;

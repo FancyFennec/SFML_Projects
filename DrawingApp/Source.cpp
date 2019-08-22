@@ -2,7 +2,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-
 #include <Windows.h>
 
 #include "Imgui/imgui.h"
@@ -13,16 +12,18 @@
 
 using json = nlohmann::json;
 
-void createBrushWindow();
-void brushGUI();
-void brushWindowRendering();
-void mainWindowDrawing();
+void initialize();
 void mainMenuGUI();
+void brushGUI();
 void layerGUI();
-void brushWindowDrawing();
 void mainWindowEventHandling();
-void lmbPressed();
 void brushWindowEventHandling();
+void lmbPressed();
+void mainWindowDrawing();
+void brushWindowDrawing();
+void createMainWindow();
+void createBrushWindow();
+void brushWindowRendering();
 void getDesktopResolution(int& horizontal, int& vertical);
 
 sf::Clock deltaClock;
@@ -42,6 +43,10 @@ sf::RenderWindow mainWindow;
 sf::RenderWindow brushWindow;
 sf::Event event;
 
+MSG msg;
+UINT32 pointerId;
+POINTER_PEN_INFO penInfo;
+
 // Layers on which we are temporarily drawing before we assign the drawing layers content to a layer
 Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH);
 Layer drawingLayer(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -58,39 +63,8 @@ std::vector<BrushPntr>::iterator currentBrush;
 std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
 
 int main() {
-	/*getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
-	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
-
-	drawingLayer.updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-	currentLayer->updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);*/
-
-	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Titlebar);
-	mainWindow.setMouseCursorVisible(false);
-	mainWindow.setFramerateLimit(120);
-
-	/*sf::Window test;
-	test.create(sf::VideoMode(0, 0), "Hidden Window", sf::Style::None);*/
-
-	MSG msg;
-	sf::WindowHandle handle = mainWindow.getSystemHandle();
-	POINTER_PEN_INFO penInfo;
-
-	ImGui::SFML::Init(mainWindow);
-
-	layers.reserve(21); // Reserve space for 20 Layers
-	layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color::White)); // Background Layer
-	layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT)); // One layer to draw on
-	currentLayer = std::prev(layers.end());
-
-	brushes.reserve(20);
-	brushes.push_back(std::make_unique<Brush>(
-		BRUSH_WIDTH, 
-		"circle-xxl.png", 
-		sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255)
-		));
-	currentBrush = brushes.begin();
-	(*currentBrush)->color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), 255);
-	(*currentBrush)->setBrushSize(brushSize);
+	createMainWindow();
+	initialize();
 
 	while (mainWindow.isOpen())
 	{
@@ -99,12 +73,18 @@ int main() {
 			if(iter <= currentLayer) mainWindow.draw((*iter)->sprite);
 		}
 
-		if (PeekMessageW(&msg, handle, 0, 0, PM_NOREMOVE)) {
-			UINT32 pointerId = GET_POINTERID_WPARAM(msg.wParam);
+		if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
+			pointerId = GET_POINTERID_WPARAM(msg.wParam);
 			if (GetPointerPenInfo(pointerId, &penInfo)) {
+				//TODO: This has to be cleaned up and made sure that we don't skrew up
+				/*if (!wasLMBPressed() && !isMouseHeld()) {
+					setLMBPressed();
+					lmbPressed();
+				} else if(wasLMBPressed() && !isMouseHeld()) {
+					setMouseIsHeld();
+					setLMBNotPressed();
+				}*/
 				(*currentBrush)->pressure = penInfo.pressure / 1024.0f;
-				std::cout << penInfo.pressure << std::endl;
-				//lmbPressed();
 			}
 		}
 		while (mainWindow.pollEvent(event))
@@ -134,36 +114,24 @@ int main() {
 	return 0;
 }
 
-void mainWindowDrawing()
+void initialize()
 {
-	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-		if (isMouseHeld()) {
-			drawingLayer.drawLinearOnCanvas(movedDistance, currentBrush, cursorPositions, mainWindow);
-			//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
-			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, (*currentBrush)->opacity));
-			mainWindow.draw(drawingLayer.sprite);
-			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
-		}
-	}
-}
+	ImGui::SFML::Init(mainWindow);
 
-void brushWindowDrawing()
-{
-	if (brushWindow.hasFocus()) {
-		if (sf::Mouse::getPosition(brushWindow).x >= 0 && sf::Mouse::getPosition(brushWindow).y >= 0) {
-			if (isMouseHeld()) {
-				brushLayer.drawLinearOnCanvas(movedDistance, currentBrush, cursorPositions, brushWindow);
-				brushLayer.drawLayer(brushWindow);
-			}
-		}
-		/*else {
-			mainWindow.requestFocus();
-		}*/
-	} else {
-		if (sf::Mouse::getPosition(brushWindow).x >= 0 && sf::Mouse::getPosition(brushWindow).y >= 0) {
-			brushWindow.requestFocus();
-		}
-	}
+	layers.reserve(21); // Reserve space for 20 Layers
+	layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color::White)); // Background Layer
+	layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT)); // One layer to draw on
+	currentLayer = std::prev(layers.end());
+
+	brushes.reserve(20);
+	brushes.push_back(std::make_unique<Brush>(
+		BRUSH_WIDTH,
+		"circle-xxl.png",
+		sf::Color(col[0] * 255, col[0] * 255, col[0] * 255, 255)
+		));
+	currentBrush = brushes.begin();
+	(*currentBrush)->color = sf::Color((sf::Uint8)(col[0] * 255), (sf::Uint8)(col[1] * 255), (sf::Uint8)(col[2] * 255), 255);
+	(*currentBrush)->setBrushSize(brushSize);
 }
 
 void mainMenuGUI()
@@ -178,6 +146,10 @@ void mainMenuGUI()
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Edit")) {
+	}
+	ImGui::SameLine(SCREEN_WIDTH - 50);
+	if (ImGui::Button("Close")) {
+		mainWindow.close();
 	}
 	ImGui::End();
 }
@@ -353,30 +325,6 @@ void layerGUI()
 	ImGui::End();
 }
 
-void createBrushWindow()
-{
-	brushWindow.create(sf::VideoMode(BRUSH_WIDTH, BRUSH_WIDTH), "Define Brush", sf::Style::Titlebar);
-	brushWindow.setFramerateLimit(120);
-	brushWindow.clear(sf::Color::Black);
-	brushWindow.setPosition(mainWindow.getPosition() +
-		sf::Vector2i(SCREEN_WIDTH / 2 - BRUSH_WIDTH / 2, SCREEN_HEIGHT / 2 - BRUSH_WIDTH / 2));
-}
-
-void brushWindowRendering()
-{
-	if (brushWindow.isOpen() && brushWindow.hasFocus()) {
-		while (brushWindow.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-				brushWindow.close();
-			brushWindowEventHandling();
-		}
-		brushWindow.clear(sf::Color::Black);
-		brushLayer.drawLayer(brushWindow);
-		brushWindow.display();
-	}
-}
-
 void mainWindowEventHandling()
 {
 	if (event.type == sf::Event::Closed)
@@ -515,6 +463,76 @@ void brushWindowEventHandling()
 
 			brushWindow.close();
 		}
+	}
+}
+
+void mainWindowDrawing()
+{
+	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
+		if (isMouseHeld()) {
+			drawingLayer.drawLinearOnCanvas(movedDistance, currentBrush, cursorPositions, mainWindow);
+			//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
+			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, (*currentBrush)->opacity));
+			mainWindow.draw(drawingLayer.sprite);
+			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
+		}
+	}
+}
+
+void brushWindowDrawing()
+{
+	if (brushWindow.hasFocus()) {
+		if (sf::Mouse::getPosition(brushWindow).x >= 0 && sf::Mouse::getPosition(brushWindow).y >= 0) {
+			if (isMouseHeld()) {
+				brushLayer.drawLinearOnCanvas(movedDistance, currentBrush, cursorPositions, brushWindow);
+				brushLayer.drawLayer(brushWindow);
+			}
+		}
+		/*else {
+			mainWindow.requestFocus();
+		}*/
+	}
+	else {
+		if (sf::Mouse::getPosition(brushWindow).x >= 0 && sf::Mouse::getPosition(brushWindow).y >= 0) {
+			brushWindow.requestFocus();
+		}
+	}
+}
+
+void createMainWindow()
+{
+	/*getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
+	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
+
+	drawingLayer.updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);
+	currentLayer->updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);*/
+
+	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Titlebar);
+	mainWindow.setMouseCursorVisible(false);
+	mainWindow.setFramerateLimit(120);
+}
+
+void createBrushWindow()
+{
+	brushWindow.create(sf::VideoMode(BRUSH_WIDTH, BRUSH_WIDTH), "Define Brush", sf::Style::Titlebar);
+	brushWindow.setFramerateLimit(120);
+	brushWindow.clear(sf::Color::Black);
+	brushWindow.setPosition(mainWindow.getPosition() +
+		sf::Vector2i(SCREEN_WIDTH / 2 - BRUSH_WIDTH / 2, SCREEN_HEIGHT / 2 - BRUSH_WIDTH / 2));
+}
+
+void brushWindowRendering()
+{
+	if (brushWindow.isOpen() && brushWindow.hasFocus()) {
+		while (brushWindow.pollEvent(event))
+		{
+			if (event.type == sf::Event::Closed)
+				brushWindow.close();
+			brushWindowEventHandling();
+		}
+		brushWindow.clear(sf::Color::Black);
+		brushLayer.drawLayer(brushWindow);
+		brushWindow.display();
 	}
 }
 
