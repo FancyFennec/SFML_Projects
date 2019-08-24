@@ -182,8 +182,13 @@ void brushGUI()
 
 	//Button to create a new brush
 	if (ImGui::SmallButton("New Brush")) {
-		brushLayer.clearLayer();
-		createBrushWindow();
+		if (brushes.size() == 20) {
+			std::cout << "ERROR! Maximum number of brushes reached." << std::endl;
+		}
+		else {
+			brushLayer.clearLayer();
+			createBrushWindow();
+		}
 	}
 
 	// Draw list of all brushes
@@ -306,7 +311,6 @@ void layerGUI()
 				if (layers.size() == 2) { // Create a new Layer if There are none left
 					layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT));
 					iter = layers.erase(iter);
-					currentLayer = std::prev(layers.end());
 				}
 				else { // This makes sure that we continue working on the layer we were before deleting
 					bool isCurrentLayerBelowIter = layers.begin() + iterDist < iter;
@@ -318,6 +322,7 @@ void layerGUI()
 						std::advance(currentLayer, iterDist - 1);
 					}
 				}
+				if (currentLayer == layers.begin()) std::advance(currentLayer, 1);
 			}
 			layerNumber--;
 		}

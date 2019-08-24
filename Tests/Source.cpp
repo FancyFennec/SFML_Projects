@@ -1,20 +1,35 @@
 #include <iostream>
 #include <vector>
-#include <windows.h>
 
 
 int main() {
 
-	MSG msg;
+	std::vector<int> vec = { 1, 2, 3, 4, 5 ,6 };
 
-	HWND consoleWindow =  GetConsoleWindow();
+	/*auto iter = vec.begin();
+	while(iter != vec.end()){
+		if (*iter % 2 == 1) {
+			iter = vec.erase(iter);
+		}
+		else {
+			iter++;
+		}
 
-	while (GetMessage(&msg, consoleWindow, 0, 0))
-	{
-		std::cout << "abc" << std::endl;
-		std::cout << msg.time << std::endl;
+	}*/
+
+	auto iter = std::prev(vec.end());
+	while (iter != std::prev(vec.begin())) {
+		if (*iter % 2 == 1) {
+			iter = vec.erase(iter);
+		}
+		else {
+			iter--;
+		}
+
 	}
 
-	return 0;
+	for (auto nr : vec) {
+		std::cout << nr << std::endl;
+	}
 	
 }

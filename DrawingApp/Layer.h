@@ -184,7 +184,6 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 			(*brush)->sprite.setPosition(drawingPos);
 
 			renderTex.draw((*brush)->sprite, getRenderState(brush, drawingPos));
-			//renderTex.draw((*brush)->sprite);
 		}
 
 		circlePos += steps * (*brush)->stepsize * (*brush)->brushsize * (*brush)->pressure * direction;
