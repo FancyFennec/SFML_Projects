@@ -11,6 +11,7 @@ static int LMB_RELEASED = BIT(2);
 static int MOUSE_IS_HELD = BIT(3);
 static int CTRL_IS_HELD = BIT(4);
 static int ALT_IS_HELD = BIT(5);
+static int SPACE_IS_HELD = BIT(6);
 
 bool wasLMBPressed() {
 	return SETTINGS & LMB_PRESSED;
@@ -70,4 +71,16 @@ void setAltIsHeld() {
 
 void setAltNotHeld() {
 	SETTINGS &= ~ALT_IS_HELD;
+}
+
+bool isSpaceHeld() {
+	return SETTINGS & SPACE_IS_HELD;
+}
+
+void setSpaceIsHeld() {
+	SETTINGS |= SPACE_IS_HELD;
+}
+
+void setSpaceNotHeld() {
+	SETTINGS &= ~SPACE_IS_HELD;
 }

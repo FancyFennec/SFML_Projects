@@ -13,12 +13,13 @@ public:
 	sf::Sprite sprite;
 	unsigned int width;
 	unsigned int height;
+	static sf::Vector2i offset;
 
 	unsigned static int layerCount;
 
 	Layer(int width, int height) :
-	width(width),
-	height(height) {
+		width(width),
+		height(height) {
 		image.create(width, height, sf::Color(255, 255, 255, 0));
 		tex.create(width, height);
 		tex.update(image);
@@ -93,6 +94,12 @@ private:
 	static sf::RenderStates shader;
 
 	void initialize() {
+		std::cout << offset.x << std::endl; 
+		std::cout << offset.y << std::endl;
+		if (offset.x == 0 && offset.y ==0) {
+			offset = sf::Vector2i(SCREEN_WIDTH / 2 - width / 2, SCREEN_HEIGHT / 2 - height / 2);
+		}
+
 		rTex.create(image.getSize().x, image.getSize().y);
 
 		if (!fragShader.loadFromFile("fragment_shader.frag", sf::Shader::Fragment))
@@ -120,11 +127,12 @@ unsigned int Layer::layerCount = 0;
 sf::RenderTexture Layer::rTex;
 sf::Shader Layer::fragShader;
 sf::RenderStates Layer::shader(&fragShader);
+sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 
 
 inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window)
 {
-	cursorPositions[3] = sf::Mouse::getPosition(window);
+	cursorPositions[3] = sf::Mouse::getPosition(window) - offset;
 	movedDistance = distance(cursorPositions[2], cursorPositions[3]);
 
 	if (drawFlag == 0) {

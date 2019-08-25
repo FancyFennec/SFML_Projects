@@ -68,9 +68,11 @@ int main() {
 
 	while (mainWindow.isOpen())
 	{
+		sf::RenderStates state;
+		state.transform.translate(sf::Vector2f((*currentLayer)->offset));
 		mainWindow.clear(sf::Color(0, 0, 0, 0));
 		for (auto iter = layers.begin(); iter < layers.end(); std::advance(iter, 1)) {
-			if(iter <= currentLayer) mainWindow.draw((*iter)->sprite);
+			if(iter <= currentLayer) mainWindow.draw((*iter)->sprite, state);
 		}
 
 		if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
@@ -102,14 +104,13 @@ int main() {
 		brushWindowDrawing();
 
 		for (auto iter = layers.begin(); iter < layers.end(); std::advance(iter, 1)) {
-			if (iter > currentLayer) mainWindow.draw((*iter)->sprite);
+			if (iter > currentLayer) mainWindow.draw((*iter)->sprite, state);
 		}
 
 		ImGui::SFML::Render(mainWindow);
 		mainWindow.display();
 
 		brushWindowRendering();
-
 	}
 	return 0;
 }
@@ -373,6 +374,26 @@ void mainWindowEventHandling()
 			}
 			break;
 		}
+		case(sf::Keyboard::Space): {
+			setSpaceIsHeld();
+			break;
+		}
+		case(sf::Keyboard::Up): {
+			(*currentLayer)->offset += sf::Vector2i(0, -10);
+			break;
+		}
+		case(sf::Keyboard::Down): {
+			(*currentLayer)->offset += sf::Vector2i(0, 10);
+			break;
+		}
+		case(sf::Keyboard::Right): {
+			(*currentLayer)->offset += sf::Vector2i(10, 0);
+			break;
+		}
+		case(sf::Keyboard::Left): {
+			(*currentLayer)->offset += sf::Vector2i(-10, 0);
+			break;
+		}
 		case(sf::Keyboard::Escape): {
 			mainWindow.close();
 			break;
@@ -387,6 +408,10 @@ void mainWindowEventHandling()
 		}
 		case(sf::Keyboard::LControl): {
 			setCtrlNotHeld();
+			break;
+		}
+		case(sf::Keyboard::Space): {
+			setSpaceNotHeld();
 			break;
 		}
 		}
@@ -411,12 +436,11 @@ void lmbPressed()
 			col[1] = (*currentBrush)->color.g / 255.0f;
 			col[2] = (*currentBrush)->color.b / 255.0f;
 		}
-	}
-	else {
+	} else {
 		movedDistance = 0.0f;
 		setMouseIsHeld();
 
-		sf::Vector2i newPos = sf::Mouse::getPosition(mainWindow);
+		sf::Vector2i newPos = sf::Mouse::getPosition(mainWindow) - (*currentLayer)->offset;
 		cursorPositions[0] = newPos;
 		cursorPositions[1] = newPos;
 		cursorPositions[2] = newPos;
@@ -477,8 +501,11 @@ void mainWindowDrawing()
 		if (isMouseHeld()) {
 			drawingLayer.drawLinearOnCanvas(movedDistance, currentBrush, cursorPositions, mainWindow);
 			//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
+
+			sf::RenderStates state;
+			state.transform.translate(sf::Vector2f((*currentLayer)->offset));
 			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, (*currentBrush)->opacity));
-			mainWindow.draw(drawingLayer.sprite);
+			mainWindow.draw(drawingLayer.sprite, state);
 			drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
 		}
 	}
