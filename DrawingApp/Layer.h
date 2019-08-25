@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Brush.h"
+#include "Settings.h"
 
 typedef std::unique_ptr<Brush> BrushPntr;
 
@@ -10,24 +11,14 @@ public:
 	sf::Image image;
 	sf::Texture tex;
 	sf::Sprite sprite;
+	unsigned int width;
+	unsigned int height;
 
 	unsigned static int layerCount;
 
-	Layer() {
-		initialize();
-		layerCount++; 
-	};
-
-	Layer(sf::Image image, sf::Texture tex, sf::Sprite sprite) :
-		image(image),
-		tex(tex),
-		sprite(sprite)
-	{
-		initialize();
-		layerCount++;
-	};
-
-	Layer(int width, int height) {
+	Layer(int width, int height) :
+	width(width),
+	height(height) {
 		image.create(width, height, sf::Color(255, 255, 255, 0));
 		tex.create(width, height);
 		tex.update(image);
@@ -36,7 +27,9 @@ public:
 		layerCount++;
 	};
 
-	Layer(int width, int height, sf::Color color) {
+	Layer(int width, int height, sf::Color color) :
+		width(width),
+		height(height) {
 		image.create(width, height, color);
 		tex.create(width, height);
 		tex.update(image);

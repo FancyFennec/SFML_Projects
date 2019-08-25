@@ -37,8 +37,6 @@ int alpha = 100;
 static float col[3] = { 0.5f,0.0f,0.5f };
 
 //Window initialisation
-int SCREEN_WIDTH = 1200;
-int SCREEN_HEIGHT = 800;
 sf::RenderWindow mainWindow;
 sf::RenderWindow brushWindow;
 sf::Event event;
@@ -49,7 +47,9 @@ POINTER_PEN_INFO penInfo;
 
 // Layers on which we are temporarily drawing before we assign the drawing layers content to a layer
 Layer brushLayer(BRUSH_WIDTH, BRUSH_WIDTH);
-Layer drawingLayer(SCREEN_WIDTH, SCREEN_HEIGHT);
+const int LAYER_WIDTH = 800;
+const int LAYER_HEIGHT = 1200;
+Layer drawingLayer(LAYER_WIDTH, LAYER_HEIGHT);
 
 typedef std::unique_ptr<Layer> LayerPntr;
 std::vector<LayerPntr> layers = {};
@@ -119,8 +119,8 @@ void initialize()
 	ImGui::SFML::Init(mainWindow);
 
 	layers.reserve(21); // Reserve space for 20 Layers
-	layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT, sf::Color::White)); // Background Layer
-	layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT)); // One layer to draw on
+	layers.push_back(std::make_unique<Layer>(LAYER_WIDTH, LAYER_HEIGHT, sf::Color::White)); // Background Layer
+	layers.push_back(std::make_unique<Layer>(LAYER_WIDTH, LAYER_HEIGHT)); // One layer to draw on
 	currentLayer = std::prev(layers.end());
 
 	brushes.reserve(20);
@@ -266,7 +266,7 @@ void layerGUI()
 		//Button to create a new Layer
 		if (ImGui::Button("New Layer")) {
 			if (layers.size() < 21) {
-				layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT));
+				layers.push_back(std::make_unique<Layer>(LAYER_WIDTH, LAYER_HEIGHT));
 			}
 			else {
 				std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
@@ -309,7 +309,7 @@ void layerGUI()
 				currentLayer = layers.begin();
 
 				if (layers.size() == 2) { // Create a new Layer if There are none left
-					layers.push_back(std::make_unique<Layer>(SCREEN_WIDTH, SCREEN_HEIGHT));
+					layers.push_back(std::make_unique<Layer>(LAYER_WIDTH, LAYER_HEIGHT));
 					iter = layers.erase(iter);
 				}
 				else { // This makes sure that we continue working on the layer we were before deleting

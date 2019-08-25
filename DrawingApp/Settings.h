@@ -2,12 +2,15 @@
 
 int BIT(int i) { return 1 << i; }
 
-long int SETTINGS = 0;
-int LMB_PRESSED = BIT(1);
-int LMB_RELEASED = BIT(2);
-int MOUSE_IS_HELD = BIT(3);
-int CTRL_IS_HELD = BIT(4);
-int ALT_IS_HELD = BIT(5);
+static int SCREEN_WIDTH = 1200;
+static int SCREEN_HEIGHT = 800;
+
+static long int SETTINGS = 0;
+static int LMB_PRESSED = BIT(1);
+static int LMB_RELEASED = BIT(2);
+static int MOUSE_IS_HELD = BIT(3);
+static int CTRL_IS_HELD = BIT(4);
+static int ALT_IS_HELD = BIT(5);
 
 bool wasLMBPressed() {
 	return SETTINGS & LMB_PRESSED;
