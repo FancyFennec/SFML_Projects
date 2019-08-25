@@ -4,7 +4,6 @@
 #include <vector>
 #include <random>
 #include <numeric>
-#include <iostream>
 
 
 class Brush
