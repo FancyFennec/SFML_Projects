@@ -108,7 +108,7 @@ private:
 		shader.blendMode = sf::BlendNone;
 	}
 
-	std::function<sf::Vector2f (float)> getBezier(std::vector<sf::Vector2i>& cursorPositions);
+	//std::function<sf::Vector2f (float)> getBezier(std::vector<sf::Vector2i>& cursorPositions);
 	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
 		return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
 	}
@@ -274,15 +274,15 @@ Layer::~Layer()
 {
 }
 
-inline std::function<sf::Vector2f(float)> Layer::getBezier(std::vector<sf::Vector2i>& cursorPositions)
-{
-	return [&](float x) {
-		return (
-			pow(1 - x, 3) * sf::Vector2f(cursorPositions[2]) +
-			pow(x, 3) * sf::Vector2f(cursorPositions[3]) +
-			3 * pow(1 - x, 2) * x * sf::Vector2f(cursorPositions[2] + cursorPositions[0]) +
-			3 * (1 - x) * pow(x, 2) * sf::Vector2f(cursorPositions[3] - cursorPositions[1])
-		);
-	};
-}
+//inline std::function<sf::Vector2f(float)> Layer::getBezier(std::vector<sf::Vector2i>& cursorPositions)
+//{
+//	return [&](float x) {
+//		return (
+//			pow(1 - x, 3) * sf::Vector2f(cursorPositions[2]) +
+//			pow(x, 3) * sf::Vector2f(cursorPositions[3]) +
+//			3 * pow(1 - x, 2) * x * sf::Vector2f(cursorPositions[2] + cursorPositions[0]) +
+//			3 * (1 - x) * pow(x, 2) * sf::Vector2f(cursorPositions[3] - cursorPositions[1])
+//		);
+//	};
+//}
 
