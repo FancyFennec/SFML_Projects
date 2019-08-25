@@ -12,14 +12,6 @@ void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene
 void layerGUI(Scene& scene);
 void createBrushWindow(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene);
 
-//sf::RenderWindow& mainWindow;
-//sf::RenderWindow& brushWindow;
-//Scene& scene;
-//
-//void passReferencesToGUI(sf::RenderWindow& mWindow, sf::RenderWindow& bWindow, Scene& scn) {
-//	
-//}
-
 void mainMenuGUI(sf::RenderWindow& mainWindow)
 {
 	ImGui::SetNextWindowSize(ImVec2(SCREEN_WIDTH, 50));

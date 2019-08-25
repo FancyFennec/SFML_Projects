@@ -15,73 +15,25 @@ public:
 	unsigned int height;
 	static sf::Vector2i offset;
 
-	unsigned static int layerCount;
-
 	Layer(int width, int height) :
 		width(width),
 		height(height) {
 		image.create(width, height, sf::Color(255, 255, 255, 0));
-		tex.create(width, height);
-		tex.update(image);
-		sprite.setTexture(tex);
 		initialize();
-		layerCount++;
 	};
 
 	Layer(int width, int height, sf::Color color) :
 		width(width),
 		height(height) {
 		image.create(width, height, color);
-		tex.create(width, height);
-		tex.update(image);
-		sprite.setTexture(tex);
 		initialize();
-		layerCount++;
 	};
 
-	void updateSize(int width, int height) {
-		sf::Color color = image.getPixel(1, 1);
-		image = sf::Image();
-		tex = sf::Texture();
-		sprite = sf::Sprite();
-
-		image.create(width, height, color);
-		tex.create(width, height);
-		tex.update(image);
-		sprite.setTexture(tex);
-	}
-
-	void clearLayer() {
-		image.create(image.getSize().x, image.getSize().y, sf::Color(255, 255, 255, 0));
-		tex.update(image);
-		sprite.setTexture(tex);
-	}
-
-	void updateLayer(sf::RenderWindow &window) {
-		tex.update(window);
-	}
-
-	void updateLayer(Layer& newLayer, std::vector<BrushPntr>::iterator& brush) {
-		
-		rTex.clear(sf::Color(255, 255, 255, 0));
-
-		fragShader.setUniform("texture1", tex);
-		fragShader.setUniform("texture2", newLayer.tex);
-		fragShader.setUniform("alpha", (*brush)->opacity / 255.0f);
-
-		rTex.draw(sprite, shader);
-		rTex.display();
-
-		tex = rTex.getTexture();
-		sprite.setTexture(tex);
-	}
-
-	void drawLayer(sf::RenderWindow& window) {
-		window.draw(sprite);
-	}
-
+	void clearLayer();
+	void updateLayer(sf::RenderWindow &window);
+	void updateLayer(Layer& newLayer, std::vector<BrushPntr>::iterator& brush);
+	void drawLayer(sf::RenderWindow& window);
 	void resetDrawFlag() { drawFlag = 0; };
-
 	void drawLinearOnCanvas(float& movedDistance, std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window);
 	//void drawCubicOnCanvas(float& movedDistance, Brush& brush, std::vector<sf::Vector2i>& cursorPositions);
 
@@ -93,42 +45,60 @@ private:
 	static sf::Shader fragShader;
 	static sf::RenderStates shader;
 
-	void initialize() {
-		std::cout << offset.x << std::endl; 
-		std::cout << offset.y << std::endl;
-		if (offset.x == 0 && offset.y ==0) {
-			offset = sf::Vector2i(SCREEN_WIDTH / 2 - width / 2, SCREEN_HEIGHT / 2 - height / 2);
-		}
-
-		rTex.create(image.getSize().x, image.getSize().y);
-
-		if (!fragShader.loadFromFile("fragment_shader.frag", sf::Shader::Fragment))
-			std::cout << "Could not load shader" << std::endl;
-
-		shader.blendMode = sf::BlendNone;
-	}
-
-	//std::function<sf::Vector2f (float)> getBezier(std::vector<sf::Vector2i>& cursorPositions);
-	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2) {
-		return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
-	}
-	float distance(const sf::Vector2f& vec1, const sf::Vector2f& vec2) {
-		return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
-	}
-
-	float scalarProd(const sf::Vector2f& vec1, const sf::Vector2f& vec2) {
-		return vec1.x * vec2.x + vec1.y + vec2.y;
-	}
-
+	void initialize();
+	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2);
 	sf::RenderStates getRenderState(std::vector<BrushPntr>::iterator & brush, sf::Vector2f &drawingPos);
+	std::function<sf::Vector2f(float)> getBezier(std::vector<sf::Vector2i>& cursorPositions); //Not used right now
 };
 
-unsigned int Layer::layerCount = 0;
 sf::RenderTexture Layer::rTex;
 sf::Shader Layer::fragShader;
 sf::RenderStates Layer::shader(&fragShader);
 sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 
+inline void Layer::clearLayer() {
+	image.create(image.getSize().x, image.getSize().y, sf::Color(255, 255, 255, 0));
+	tex.update(image);
+	sprite.setTexture(tex);
+}
+
+inline void Layer::updateLayer(sf::RenderWindow &window) {
+	tex.update(window);
+}
+
+inline void Layer::updateLayer(Layer& newLayer, std::vector<BrushPntr>::iterator& brush) {
+
+	rTex.clear(sf::Color(255, 255, 255, 0));
+
+	fragShader.setUniform("texture1", tex);
+	fragShader.setUniform("texture2", newLayer.tex);
+	fragShader.setUniform("alpha", (*brush)->opacity / 255.0f);
+
+	rTex.draw(sprite, shader);
+	rTex.display();
+
+	tex = rTex.getTexture();
+	sprite.setTexture(tex);
+}
+inline void Layer::drawLayer(sf::RenderWindow & window) {
+	window.draw(sprite);
+}
+inline void Layer::initialize() {
+	tex.create(width, height);
+	tex.update(image);
+	sprite.setTexture(tex);
+
+	if (offset.x == 0 && offset.y == 0) {
+		offset = sf::Vector2i(SCREEN_WIDTH / 2 - width / 2, SCREEN_HEIGHT / 2 - height / 2);
+	}
+
+	rTex.create(image.getSize().x, image.getSize().y);
+
+	if (!fragShader.loadFromFile("fragment_shader.frag", sf::Shader::Fragment))
+		std::cout << "Could not load shader" << std::endl;
+
+	shader.blendMode = sf::BlendNone;
+}
 
 inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window)
 {
@@ -153,7 +123,6 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 
 		renderTex.draw((*brush)->sprite, getRenderState(brush, circlePos));
 
-		//renderTex.draw((*brush)->sprite);
 		renderTex.display();
 
 		tex = renderTex.getTexture();
@@ -274,15 +243,21 @@ Layer::~Layer()
 {
 }
 
-//inline std::function<sf::Vector2f(float)> Layer::getBezier(std::vector<sf::Vector2i>& cursorPositions)
-//{
-//	return [&](float x) {
-//		return (
-//			pow(1 - x, 3) * sf::Vector2f(cursorPositions[2]) +
-//			pow(x, 3) * sf::Vector2f(cursorPositions[3]) +
-//			3 * pow(1 - x, 2) * x * sf::Vector2f(cursorPositions[2] + cursorPositions[0]) +
-//			3 * (1 - x) * pow(x, 2) * sf::Vector2f(cursorPositions[3] - cursorPositions[1])
-//		);
-//	};
-//}
+inline std::function<sf::Vector2f(float)> Layer::getBezier(std::vector<sf::Vector2i>& cursorPositions)
+{
+	return [&](float x) {
+		return (
+			pow(1 - x, 3) * sf::Vector2f(cursorPositions[2]) +
+			pow(x, 3) * sf::Vector2f(cursorPositions[3]) +
+			3 * pow(1 - x, 2) * x * sf::Vector2f(cursorPositions[2] + cursorPositions[0]) +
+			3 * (1 - x) * pow(x, 2) * sf::Vector2f(cursorPositions[3] - cursorPositions[1])
+		);
+	};
+}
+
+//Not used right now
+
+inline float Layer::distance(const sf::Vector2i & vec1, const sf::Vector2i & vec2) {
+	return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
+}
 

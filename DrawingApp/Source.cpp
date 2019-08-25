@@ -43,10 +43,9 @@ int main() {
 	{
 		sf::RenderStates state;
 		state.transform.translate(sf::Vector2f((*scene.currentLayer)->offset));
+
 		mainWindow.clear(sf::Color(0, 0, 0, 0));
-		for (auto iter = scene.layers.begin(); iter < scene.layers.end(); std::advance(iter, 1)) {
-			if(iter <= scene.currentLayer) mainWindow.draw((*iter)->sprite, state);
-		}
+		ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
 		if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
 			pointerId = GET_POINTERID_WPARAM(msg.wParam);
@@ -60,10 +59,9 @@ int main() {
 			mainWindowEventHandling();
 		}
 
-		ImGui::SFML::Update(mainWindow, deltaClock.restart());
-		mainMenuGUI(mainWindow);
-		brushGUI(mainWindow, brushWindow, scene);
-		layerGUI(scene);
+		for (auto iter = scene.layers.begin(); iter < scene.layers.end(); std::advance(iter, 1)) {
+			if (iter <= scene.currentLayer) mainWindow.draw((*iter)->sprite, state);
+		}
 
 		mainWindowDrawing();
 		brushWindowDrawing();
@@ -71,6 +69,10 @@ int main() {
 		for (auto iter = scene.layers.begin(); iter < scene.layers.end(); std::advance(iter, 1)) {
 			if (iter > scene.currentLayer) mainWindow.draw((*iter)->sprite, state);
 		}
+
+		mainMenuGUI(mainWindow);
+		brushGUI(mainWindow, brushWindow, scene);
+		layerGUI(scene);
 
 		ImGui::SFML::Render(mainWindow);
 		mainWindow.display();
