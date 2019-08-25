@@ -47,6 +47,18 @@ int main() {
 		mainWindow.clear(sf::Color(0, 0, 0, 0));
 		ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
+		for (auto iter = scene.layers.begin(); iter <= scene.currentLayer; std::advance(iter, 1)) {
+			mainWindow.draw((*iter)->sprite, state);
+		}
+
+		mainWindowDrawing();
+		brushWindowDrawing();
+
+		for (auto iter = scene.layers.begin(); iter < scene.layers.end(); std::advance(iter, 1)) {
+			if (iter > scene.currentLayer) mainWindow.draw((*iter)->sprite, state);
+		}
+
+		//TODO: put this pen pressure update somewhere else
 		if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
 			pointerId = GET_POINTERID_WPARAM(msg.wParam);
 			if (GetPointerPenInfo(pointerId, &penInfo)) {
@@ -57,17 +69,6 @@ int main() {
 		{
 			ImGui::SFML::ProcessEvent(event);
 			mainWindowEventHandling();
-		}
-
-		for (auto iter = scene.layers.begin(); iter < scene.layers.end(); std::advance(iter, 1)) {
-			if (iter <= scene.currentLayer) mainWindow.draw((*iter)->sprite, state);
-		}
-
-		mainWindowDrawing();
-		brushWindowDrawing();
-
-		for (auto iter = scene.layers.begin(); iter < scene.layers.end(); std::advance(iter, 1)) {
-			if (iter > scene.currentLayer) mainWindow.draw((*iter)->sprite, state);
 		}
 
 		mainMenuGUI(mainWindow);
@@ -116,7 +117,7 @@ void mainWindowEventHandling()
 			setCtrlIsHeld();
 			break;
 		}
-		//TODO: Fix this... Since we now have layers this does not work anymore
+		//TODO: Implement Ctrl + Z / Y
 		case(sf::Keyboard::Z): {
 			if (isCtrlHeld()) {
 			}
@@ -181,7 +182,7 @@ void lmbPressed()
 		}
 	} else {
 		setMouseIsHeld();
-		scene.resetCursorPositions(mainWindow);
+		scene.resetCursorPositions(mainWindow, scene.drawingLayer);
 		//No need to draw the window here, it gets drawn because the lmb is being held later
 	}
 }
@@ -191,7 +192,7 @@ void brushWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.key.code == sf::Mouse::Left) {
 			setMouseIsHeld();
-			scene.resetCursorPositions(brushWindow);
+			scene.resetCursorPositions(brushWindow, scene.brushLayer);
 			//No need to draw the window here, it gets drawn because the lmb is held later
 		}
 	}

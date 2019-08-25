@@ -40,7 +40,7 @@ void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene
 
 	ImGui::Begin("Brush Settings", &windowFlag, ImGuiWindowFlags_NoResize);
 	if (ImGui::CollapsingHeader("Colour Picker")) {
-		if (ImGui::ColorPicker3("Colour", scene.col)) {
+		if (ImGui::ColorPicker3("Colour", scene.currentColor)) {
 			scene.updateColor();
 		}
 	}
@@ -52,7 +52,7 @@ void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene
 	}
 	if (ImGui::CollapsingHeader("Scatter")) {
 		ImGui::SliderFloat("S-Scatter", &(*scene.currentBrush)->scaterScale, 0, 1);
-		ImGui::SliderFloat("P-Scatter", &(*scene.currentBrush)->scaterPos, 0, 2000);
+		ImGui::SliderFloat("P-Scatter", &(*scene.currentBrush)->scaterPos, 0, 1000);
 		ImGui::SliderFloat("A-Scatter", &(*scene.currentBrush)->scaterAngle, 0, 180);
 	}
 
@@ -164,14 +164,8 @@ void layerGUI(Scene& scene)
 
 			//Button that sets the current Layer to the current iterator
 			ImGui::SameLine();
-			std::string layerName;
-			if (iter != scene.layers.begin()) {
-				layerName = "Layer";
-				layerName.append(std::to_string(layerNumber - 1));
-			}
-			else {
-				layerName = "Background";
-			}
+			std::string layerName = "Layer";
+			layerName.append(std::to_string(layerNumber - 1));
 			if (ImGui::Button(layerName.data())) {
 				if (iter != scene.layers.begin()) scene.currentLayer = iter;
 			}

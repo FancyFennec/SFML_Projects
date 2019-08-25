@@ -28,7 +28,9 @@ public:
 		color(color)
 	{
 		image.create(brush_width, brush_width);
-		image.loadFromFile(filePath);
+		if (!image.loadFromFile(filePath)) {
+			std::cout << "ERROR! unable to find path to file!" << std::endl;
+		}
 		initialize();
 	}
 

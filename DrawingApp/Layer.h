@@ -8,12 +8,17 @@ typedef std::unique_ptr<Brush> BrushPntr;
 class Layer
 {
 public:
+	unsigned int width;
+	unsigned int height;
+
 	sf::Image image;
 	sf::Texture tex;
 	sf::Sprite sprite;
-	unsigned int width;
-	unsigned int height;
+
+	bool useOffset = true;
 	static sf::Vector2i offset;
+
+	static sf::RenderStates renderState;
 
 	Layer(int width, int height) :
 		width(width),
@@ -43,7 +48,6 @@ private:
 	unsigned int drawFlag = 0;
 	static sf::RenderTexture rTex;
 	static sf::Shader fragShader;
-	static sf::RenderStates shader;
 
 	void initialize();
 	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2);
@@ -53,7 +57,7 @@ private:
 
 sf::RenderTexture Layer::rTex;
 sf::Shader Layer::fragShader;
-sf::RenderStates Layer::shader(&fragShader);
+sf::RenderStates Layer::renderState(&fragShader);
 sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 
 inline void Layer::clearLayer() {
@@ -74,7 +78,7 @@ inline void Layer::updateLayer(Layer& newLayer, std::vector<BrushPntr>::iterator
 	fragShader.setUniform("texture2", newLayer.tex);
 	fragShader.setUniform("alpha", (*brush)->opacity / 255.0f);
 
-	rTex.draw(sprite, shader);
+	rTex.draw(sprite, renderState);
 	rTex.display();
 
 	tex = rTex.getTexture();
@@ -97,12 +101,15 @@ inline void Layer::initialize() {
 	if (!fragShader.loadFromFile("fragment_shader.frag", sf::Shader::Fragment))
 		std::cout << "Could not load shader" << std::endl;
 
-	shader.blendMode = sf::BlendNone;
+	renderState.blendMode = sf::BlendNone;
 }
 
 inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window)
 {
-	cursorPositions[3] = sf::Mouse::getPosition(window) - offset;
+	cursorPositions[3] = sf::Mouse::getPosition(window);
+	if (useOffset) {
+		cursorPositions[3] -= offset;
+	}
 	movedDistance = distance(cursorPositions[2], cursorPositions[3]);
 
 	if (drawFlag == 0) {
