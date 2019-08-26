@@ -12,7 +12,7 @@ public:
 	sf::Image image;
 	sf::Texture tex;
 	sf::Sprite sprite;
-	sf::Color color = sf::Color::Black;
+	static sf::Color color;
 
 	float stepsize = 33.0f;
 	float brushsize = 0.3f;
@@ -24,8 +24,7 @@ public:
 	float scaterPos = 0.0f;
 	float scaterAngle = 0.0f;
 
-	Brush(int brush_width, const char* filePath, sf::Color color) :
-		color(color)
+	Brush(int brush_width, const char* filePath)
 	{
 		image.create(brush_width, brush_width);
 		if (!image.loadFromFile(filePath)) {
@@ -35,12 +34,25 @@ public:
 	}
 
 	void setBrushSize(float brushSize);
+	void setBrushColor(){
+		sprite.setColor(sf::Color(
+			color.r,
+			color.g,
+			color.b,
+			pressure * flow));
+	}
+
+	void resetBrushColor() {
+		sprite.setColor(color);
+	}
 
 	~Brush() {};
 
 private:
 	void initialize();
 };
+
+sf::Color Brush::color = sf::Color::Black;
 
 inline void Brush::initialize() {
 	tex.create(image.getSize().x, image.getSize().y);

@@ -70,14 +70,12 @@ inline void Scene::initialize()
 	brushes.reserve(20);
 	brushes.push_back(std::make_unique<Brush>(
 		brushWidth,
-		"./Brushes/StandardBrush.png",
-		sf::Color(currentColor[0] * 255, currentColor[0] * 255, currentColor[0] * 255, 255)
+		"./Brushes/StandardBrush.png"
 		)
 	);
 	brushes.push_back(std::make_unique<Brush>(
 		brushWidth,
-		"./Brushes/FadingBrush.png",
-		sf::Color(currentColor[0] * 255, currentColor[0] * 255, currentColor[0] * 255, 255)
+		"./Brushes/FadingBrush.png"
 		)
 	);
 	currentBrush = brushes.begin();
@@ -132,8 +130,7 @@ inline void Scene::saveBrush() {
 
 	brushes.push_back(std::make_unique<Brush>(
 		brushWidth,
-		"./Brushes/BrushWindow.png",
-		sf::Color(currentColor[0] * 255, currentColor[0] * 255, currentColor[0] * 255, 255)
+		"./Brushes/BrushWindow.png"
 		)
 	);
 }

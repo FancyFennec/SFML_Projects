@@ -42,27 +42,27 @@ int main() {
 	while (mainWindow.isOpen())
 	{
 		sf::RenderStates state;
-		state.transform.translate(sf::Vector2f((*scene.currentLayer)->offset));
+		state.transform.translate(sf::Vector2f((**scene.currentLayer).offset));
 
 		mainWindow.clear(sf::Color(0, 0, 0, 0));
 		ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
 		for (auto iter = scene.layers.begin(); iter <= scene.currentLayer; std::advance(iter, 1)) {
-			mainWindow.draw((*iter)->sprite, state);
+			mainWindow.draw((**iter).sprite, state);
 		}
 
 		mainWindowDrawing();
 		brushWindowDrawing();
 
 		for (auto iter = scene.layers.begin(); iter < scene.layers.end(); std::advance(iter, 1)) {
-			if (iter > scene.currentLayer) mainWindow.draw((*iter)->sprite, state);
+			if (iter > scene.currentLayer) mainWindow.draw((**iter).sprite, state);
 		}
 
 		//TODO: put this pen pressure update somewhere else
 		if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
 			pointerId = GET_POINTERID_WPARAM(msg.wParam);
 			if (GetPointerPenInfo(pointerId, &penInfo)) {
-				(*scene.currentBrush)->pressure = penInfo.pressure / 1024.0f;
+				(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
 			}
 		}
 		while (mainWindow.pollEvent(event))
@@ -97,7 +97,7 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-				(*scene.currentLayer)->updateLayer(scene.drawingLayer, scene.currentBrush);
+				(**scene.currentLayer).updateLayer(scene.drawingLayer, scene.currentBrush);
 			}
 			setMouseNotHeld();
 		}
@@ -106,7 +106,7 @@ void mainWindowEventHandling()
 		switch (event.key.code) {
 		case(sf::Keyboard::Q): {
 			mainWindow.clear(sf::Color(255, 255, 255, 255));
-			(*scene.currentLayer)->updateLayer(mainWindow);
+			(**scene.currentLayer).updateLayer(mainWindow);
 			break;
 		}
 		case(sf::Keyboard::LAlt) : {
@@ -133,19 +133,19 @@ void mainWindowEventHandling()
 			break;
 		}
 		case(sf::Keyboard::Up): {
-			(*scene.currentLayer)->offset += sf::Vector2i(0, -10);
+			(**scene.currentLayer).offset += sf::Vector2i(0, -10);
 			break;
 		}
 		case(sf::Keyboard::Down): {
-			(*scene.currentLayer)->offset += sf::Vector2i(0, 10);
+			(**scene.currentLayer).offset += sf::Vector2i(0, 10);
 			break;
 		}
 		case(sf::Keyboard::Right): {
-			(*scene.currentLayer)->offset += sf::Vector2i(10, 0);
+			(**scene.currentLayer).offset += sf::Vector2i(10, 0);
 			break;
 		}
 		case(sf::Keyboard::Left): {
-			(*scene.currentLayer)->offset += sf::Vector2i(-10, 0);
+			(**scene.currentLayer).offset += sf::Vector2i(-10, 0);
 			break;
 		}
 		case(sf::Keyboard::Escape): {
