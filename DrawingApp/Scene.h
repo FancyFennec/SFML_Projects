@@ -2,9 +2,12 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <filesystem>
 
 #include "Layer.h"
 #include "Brush.h"
+
+namespace fs = std::experimental::filesystem;
 
 typedef std::unique_ptr<Layer> LayerPntr;
 typedef std::unique_ptr<Brush> BrushPntr;
@@ -68,16 +71,15 @@ inline void Scene::initialize()
 
 	brushLayer.useOffset = false;
 	brushes.reserve(20);
-	brushes.push_back(std::make_unique<Brush>(
-		brushWidth,
-		"./Brushes/StandardBrush.png"
-		)
-	);
-	brushes.push_back(std::make_unique<Brush>(
-		brushWidth,
-		"./Brushes/FadingBrush.png"
-		)
-	);
+
+	for (auto p : fs::directory_iterator("Brushes")) {
+		brushes.push_back(std::make_unique<Brush>(
+			brushWidth,
+			p.path().string().data()
+			)
+		);
+	}
+	
 	currentBrush = brushes.begin();
 	(*currentBrush)->color = sf::Color((sf::Uint8)(currentColor[0] * 255), (sf::Uint8)(currentColor[1] * 255), (sf::Uint8)(currentColor[2] * 255), 255);
 	(*currentBrush)->setBrushSize(brushSize);
