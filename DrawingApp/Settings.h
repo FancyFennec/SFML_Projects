@@ -13,6 +13,12 @@ static int CTRL_IS_HELD = BIT(4);
 static int ALT_IS_HELD = BIT(5);
 static int SPACE_IS_HELD = BIT(6);
 
+enum REVERTABLE_ACTION {
+	CREATE_LAYER,
+	DELETE_LAYER,
+	UPDATE_LAYER
+};
+
 bool wasLMBPressed() {
 	return SETTINGS & LMB_PRESSED;
 }

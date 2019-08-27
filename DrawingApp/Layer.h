@@ -20,19 +20,21 @@ public:
 
 	static sf::RenderStates renderState;
 
+	Layer(){}
+
 	Layer(int width, int height) :
 		width(width),
 		height(height) {
 		image.create(width, height, sf::Color(255, 255, 255, 0));
 		initialize();
-	};
+	}
 
 	Layer(int width, int height, sf::Color color) :
 		width(width),
 		height(height) {
 		image.create(width, height, color);
 		initialize();
-	};
+	}
 
 	void clearLayer();
 	void updateLayer(sf::RenderWindow &window);

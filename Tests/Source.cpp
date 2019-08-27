@@ -1,11 +1,34 @@
 #include <iostream>
-#include <vector>
-#include <filesystem>
+#include <thread> 
 
-namespace fs = std::experimental::filesystem;
+int x = 0;
+
+void foo() {
+	while (true) {
+		x++;
+		if (x % 100000 == 0) {
+			std::cout << "Foo" << std::endl;
+		}
+	}
+}
+
+void bar() {
+	while (true) {
+		x++;
+		if (x % 1000000 == 0) {
+			std::cout << "Boo" << std::endl;
+		}
+	}
+}
 
 int main() {
-	for (auto p : fs::directory_iterator("TestFolder")) {
-		std::cout << p.path() << std::endl;
-	}
+	std::thread first(foo);
+	std::thread second(bar);
+
+	first.join();                // pauses until first finishes
+	second.join();
+
+	std::cout << x << std::endl;
+
+	return 0;
 }

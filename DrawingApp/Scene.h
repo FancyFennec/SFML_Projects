@@ -16,12 +16,13 @@ class Scene
 {
 public:
 
-	const unsigned int width;
-	const unsigned int height;
+	unsigned int width;
+	unsigned int height;
 
 	Layer drawingLayer;
-	std::vector<LayerPntr> layers = {};
-	std::vector<LayerPntr>::iterator currentLayer;
+	std::vector<Layer> layers;
+	std::vector<Layer>::iterator currentLayer;
+	std::vector<Layer>::iterator lastActiveLayer;
 	
 	//Brush settings for the current brush
 	int brushWidth = 256;
@@ -32,7 +33,7 @@ public:
 	static float currentColor[3];
 
 	Layer brushLayer;
-	std::vector<BrushPntr> brushes = {};
+	std::vector<BrushPntr> brushes;
 	std::vector<BrushPntr>::iterator currentBrush;
 
 	std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
@@ -40,6 +41,7 @@ public:
 	Scene(unsigned int width, unsigned int height) :
 		width(width),
 		height(height),
+		layers(21),
 		drawingLayer(Layer(width, height)),
 		brushLayer(Layer(brushWidth, brushWidth))
 	{
@@ -64,10 +66,16 @@ float Scene::currentColor[3] = { 0.5f,0.0f,0.5f };
 
 inline void Scene::initialize()
 {
-	layers.reserve(21); // Reserve space for 20 Layers
-	layers.push_back(std::make_unique<Layer>(width, height, sf::Color::White)); // Background Layer
-	layers.push_back(std::make_unique<Layer>(width, height)); // One layer to draw on
-	currentLayer = std::prev(layers.end());
+	//layers.resize(21); // Reserve space for 20 Layers
+	layers[0] = Layer(width, height, sf::Color::White); // Background Layer
+	for (int i = 0; i < 20; i++) {
+		layers[i+1] = Layer(width, height);
+	}
+	for (int i = 1; i < 21; i++) {
+		layers[i].clearLayer();
+	}
+	currentLayer = std::next(layers.begin());
+	lastActiveLayer = currentLayer;
 
 	brushLayer.useOffset = false;
 	brushes.reserve(20);
@@ -109,7 +117,7 @@ inline void Scene::resetCursorPositions(sf::RenderWindow & window, Layer& layer)
 	sf::Vector2i newPos = sf::Mouse::getPosition(window);
 
 	if (layer.useOffset) {
-		newPos -= (*currentLayer)->offset;
+		newPos -= currentLayer->offset;
 	}
 
 	cursorPositions[0] = newPos;
@@ -142,7 +150,7 @@ inline void Scene::drawOnDrawingLayer(sf::RenderWindow & mainWindow) {
 	//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
 
 	sf::RenderStates state;
-	state.transform.translate(sf::Vector2f((*currentLayer)->offset));
+	state.transform.translate(sf::Vector2f(currentLayer->offset));
 	drawingLayer.sprite.setColor(sf::Color(255, 255, 255, (*currentBrush)->opacity));
 	mainWindow.draw(drawingLayer.sprite, state);
 	drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));

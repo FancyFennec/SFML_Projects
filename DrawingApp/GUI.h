@@ -141,8 +141,9 @@ void layerGUI(Scene& scene)
 	{
 		//Button to create a new Layer
 		if (ImGui::Button("New Layer")) {
-			if (scene.layers.size() < 21) {
-				scene.layers.push_back(std::make_unique<Layer>(scene.width, scene.height));
+			if (scene.lastActiveLayer < scene.layers.end()) {
+				std::advance(scene.lastActiveLayer, 1);
+				scene.lastActiveLayer->clearLayer();
 			}
 			else {
 				std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
@@ -151,7 +152,7 @@ void layerGUI(Scene& scene)
 		int layerNumber = scene.layers.size();
 
 		// Draw list of all the layers
-		for (auto iter = std::prev(scene.layers.end()); iter > scene.layers.begin(); std::advance(iter, -1)) {
+		for (auto iter = scene.lastActiveLayer; iter > scene.layers.begin(); std::advance(iter, -1)) {
 
 			//Image of the layer with white border if it is selected
 			if (iter == scene.currentLayer) {
@@ -160,12 +161,12 @@ void layerGUI(Scene& scene)
 			else {
 				ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color(150, 150, 150));
 			}
-			ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30));
+			ImGui::Image(iter->sprite, sf::Vector2f(30, 30));
 
 			//Button that sets the current Layer to the current iterator
 			ImGui::SameLine();
 			std::string layerName = "Layer";
-			layerName.append(std::to_string(layerNumber - 1));
+			layerName.append(std::to_string(std::distance(scene.layers.begin(), iter)));
 			if (ImGui::Button(layerName.data())) {
 				if (iter != scene.layers.begin()) scene.currentLayer = iter;
 			}
@@ -178,13 +179,15 @@ void layerGUI(Scene& scene)
 				auto iterDist = std::distance(scene.layers.begin(), scene.currentLayer);
 				scene.currentLayer = scene.layers.begin();
 
-				if (scene.layers.size() == 2) { // Create a new Layer if There are none left
-					scene.layers.push_back(std::make_unique<Layer>(scene.width, scene.height));
-					iter = scene.layers.erase(iter);
+				if (std::prev(scene.lastActiveLayer) == scene.layers.begin()) { // Create a new Layer if There are none left
+					scene.lastActiveLayer->clearLayer();
 				}
 				else { // This makes sure that we continue working on the layer we were before deleting
 					bool isCurrentLayerBelowIter = scene.layers.begin() + iterDist < iter;
-					iter = scene.layers.erase(iter);
+					iter->clearLayer();
+					std::advance(scene.lastActiveLayer, -1);
+					std::rotate(iter, iter + 1, scene.layers.end());
+
 					if (isCurrentLayerBelowIter) {
 						std::advance(scene.currentLayer, iterDist);
 					}

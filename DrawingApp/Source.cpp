@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <Windows.h>
+#include <thread> 
 
 #include "json.hpp"
 #include "Layer.h"
@@ -11,6 +12,8 @@
 using json = nlohmann::json;
 
 void mainWindowEventHandling();
+void mainRenderLoop();
+void mousePositionSampling();
 void brushWindowEventHandling();
 void lmbPressed();
 void mainWindowDrawing();
@@ -35,28 +38,54 @@ const int SCENE_WIDTH = 800;
 const int SCENE_HEIGHT = 1200;
 Scene scene(SCENE_WIDTH, SCENE_HEIGHT);
 
+sf::Thread mouseLoopThread(&mousePositionSampling);
+std::vector<sf::Vector2i> mousepositions;
+
 int main() {
 	createMainWindow();
 	ImGui::SFML::Init(mainWindow);
 
+	mouseLoopThread.launch();
+	mainRenderLoop();
+
+	return 0;
+}
+
+void mousePositionSampling()
+{
 	while (mainWindow.isOpen())
 	{
+		if (isMouseHeld()) {
+			mousepositions.push_back(sf::Mouse::getPosition(mainWindow));
+			std::cout << mousepositions.size() << std::endl;
+		}
+	}
+}
+
+void mainRenderLoop()
+{
+	while (mainWindow.isOpen())
+	{
+		mousepositions.clear();
 		sf::RenderStates state;
-		state.transform.translate(sf::Vector2f((**scene.currentLayer).offset));
+		state.transform.translate(sf::Vector2f(scene.currentLayer->offset));
 
 		mainWindow.clear(sf::Color(0, 0, 0, 0));
 		ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
 		for (auto iter = scene.layers.begin(); iter <= scene.currentLayer; std::advance(iter, 1)) {
-			mainWindow.draw((**iter).sprite, state);
+			mainWindow.draw(iter->sprite, state);
 		}
 
 		mainWindowDrawing();
 		brushWindowDrawing();
 
-		for (auto iter = scene.layers.begin(); iter < scene.layers.end(); std::advance(iter, 1)) {
-			if (iter > scene.currentLayer) mainWindow.draw((**iter).sprite, state);
+		if (scene.currentLayer != scene.lastActiveLayer) {
+			for (auto iter = std::next(scene.currentLayer); iter <= scene.lastActiveLayer; std::advance(iter, 1)) {
+				mainWindow.draw(iter->sprite, state);
+			}
 		}
+
 
 		//TODO: put this pen pressure update somewhere else
 		if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
@@ -80,7 +109,6 @@ int main() {
 
 		brushWindowRendering();
 	}
-	return 0;
 }
 
 
@@ -97,7 +125,7 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-				(**scene.currentLayer).updateLayer(scene.drawingLayer, scene.currentBrush);
+				scene.currentLayer->updateLayer(scene.drawingLayer, scene.currentBrush);
 			}
 			setMouseNotHeld();
 		}
@@ -106,7 +134,7 @@ void mainWindowEventHandling()
 		switch (event.key.code) {
 		case(sf::Keyboard::Q): {
 			mainWindow.clear(sf::Color(255, 255, 255, 255));
-			(**scene.currentLayer).updateLayer(mainWindow);
+			scene.currentLayer->updateLayer(mainWindow);
 			break;
 		}
 		case(sf::Keyboard::LAlt) : {
@@ -133,19 +161,19 @@ void mainWindowEventHandling()
 			break;
 		}
 		case(sf::Keyboard::Up): {
-			(**scene.currentLayer).offset += sf::Vector2i(0, -10);
+			scene.currentLayer->offset += sf::Vector2i(0, -10);
 			break;
 		}
 		case(sf::Keyboard::Down): {
-			(**scene.currentLayer).offset += sf::Vector2i(0, 10);
+			scene.currentLayer->offset += sf::Vector2i(0, 10);
 			break;
 		}
 		case(sf::Keyboard::Right): {
-			(**scene.currentLayer).offset += sf::Vector2i(10, 0);
+			scene.currentLayer->offset += sf::Vector2i(10, 0);
 			break;
 		}
 		case(sf::Keyboard::Left): {
-			(**scene.currentLayer).offset += sf::Vector2i(-10, 0);
+			scene.currentLayer->offset += sf::Vector2i(-10, 0);
 			break;
 		}
 		case(sf::Keyboard::Escape): {
