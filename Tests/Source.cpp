@@ -1,34 +1,18 @@
 #include <iostream>
-#include <thread> 
-
-int x = 0;
-
-void foo() {
-	while (true) {
-		x++;
-		if (x % 100000 == 0) {
-			std::cout << "Foo" << std::endl;
-		}
-	}
-}
-
-void bar() {
-	while (true) {
-		x++;
-		if (x % 1000000 == 0) {
-			std::cout << "Boo" << std::endl;
-		}
-	}
-}
+#include <algorithm> 
+#include <vector> 
 
 int main() {
-	std::thread first(foo);
-	std::thread second(bar);
+	
+	std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
+	auto iter = vec.begin() + 2;
+	auto lastIter = vec.begin() + 4;
 
-	first.join();                // pauses until first finishes
-	second.join();
+	std::rotate(iter, lastIter, lastIter  + 1);
 
-	std::cout << x << std::endl;
+	for (auto elem : vec) {
+		std::cout << elem << std::endl;
+	}
 
 	return 0;
 }

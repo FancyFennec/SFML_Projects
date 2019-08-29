@@ -133,6 +133,7 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ActionManager.h" />
     <ClInclude Include="Brush.h" />
     <ClInclude Include="GUI.h" />
     <ClInclude Include="Imgui\imconfig.h" />

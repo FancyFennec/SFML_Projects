@@ -8,6 +8,7 @@
 #include "Layer.h"
 #include "Scene.h"
 #include "GUI.h"
+#include "ActionManager.h"
 
 using json = nlohmann::json;
 
@@ -42,6 +43,7 @@ sf::Thread mouseLoopThread(&mousePositionSampling);
 std::vector<sf::Vector2i> mousepositions;
 
 int main() {
+	ActionManager::createLayer(2);
 	createMainWindow();
 	ImGui::SFML::Init(mainWindow);
 
@@ -132,7 +134,7 @@ void mainWindowEventHandling()
 	}
 	if (event.type == sf::Event::KeyPressed) {
 		switch (event.key.code) {
-		case(sf::Keyboard::Q): {
+		case(sf::Keyboard::Q) : {
 			mainWindow.clear(sf::Color(255, 255, 255, 255));
 			scene.currentLayer->updateLayer(mainWindow);
 			break;
