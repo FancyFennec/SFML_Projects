@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include "Scene.h"
+#include "Settings.h"
 
 enum COMMAND_TYPE {
 	CREATE_LAYER,
@@ -52,7 +53,7 @@ public:
 	static void moveBackward(Scene& scene);
 	static void clearActions();
 	static void initialize(Scene& scene) {
-		actions.reserve(20); // Reserve memory for 20 actions
+		actions.reserve(MAX_ACTIONS); // Reserve memory for 20 actions
 		actionIter = std::prev(actions.end());
 	}
 
@@ -67,7 +68,7 @@ std::vector<command> CommandManager::actions = { create_command(1) }; // We crea
 std::vector<command>::iterator CommandManager::actionIter = actions.begin();
 
 inline void CommandManager::createLayer(int layerPos) {
-	if (actions.size() == 20) {
+	if (actions.size() == MAX_ACTIONS) {
 		actions.erase(actions.begin());
 	}
 	actions.push_back(create_command(layerPos));
@@ -75,7 +76,7 @@ inline void CommandManager::createLayer(int layerPos) {
 }
 
 inline void CommandManager::deleteLayer(int layerPos, sf::Texture& texture) {
-	if (actions.size() == 20) {
+	if (actions.size() == MAX_ACTIONS) {
 		actions.erase(actions.begin());
 	}
 	actions.push_back(delete_command(layerPos, texture));
@@ -83,7 +84,7 @@ inline void CommandManager::deleteLayer(int layerPos, sf::Texture& texture) {
 }
 
 inline void CommandManager::updateLayer(int layerPos, sf::Texture& newTexture, sf::Texture& oldTexture) {
-	if (actions.size() == 20) {
+	if (actions.size() == MAX_ACTIONS) {
 		actions.erase(actions.begin());
 	}
 	actions.push_back(update_command(layerPos, newTexture, oldTexture));

@@ -265,9 +265,6 @@ void brushWindowDrawing()
 				scene.drawOnBrushLayer(brushWindow);
 			}
 		}
-		/*else {
-			mainWindow.requestFocus();
-		}*/
 	}
 	else {
 		if (sf::Mouse::getPosition(brushWindow).x >= 0 && sf::Mouse::getPosition(brushWindow).y >= 0) {
@@ -278,13 +275,14 @@ void brushWindowDrawing()
 
 void createMainWindow()
 {
-	/*getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
-	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
+	if (USE_FULLSCREEN) {
+		getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
+		mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
+	}
+	else {
+		mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::None);
+	}
 
-	drawingLayer.updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-	currentLayer->updateSize(SCREEN_WIDTH, SCREEN_HEIGHT);*/
-
-	mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Titlebar);
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(120);
 }

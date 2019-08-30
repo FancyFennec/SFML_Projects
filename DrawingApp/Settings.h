@@ -2,8 +2,11 @@
 
 int BIT(int i) { return 1 << i; }
 
+static bool USE_FULLSCREEN = false;
 static int SCREEN_WIDTH = 1200;
 static int SCREEN_HEIGHT = 800;
+
+const static int MAX_ACTIONS = 10;
 
 static long int SETTINGS = 0;
 static int LMB_PRESSED = BIT(1);
