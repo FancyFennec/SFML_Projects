@@ -3,16 +3,16 @@
 #include <vector> 
 
 int main() {
+	std::vector<int> vec = {1 ,2 ,3};
+	vec.reserve(3);
+	auto iter = vec.end() - 1;
+
+	vec.erase(iter);
+	iter = vec.end() - 1;
+	vec.erase(iter);
+	iter = vec.end() - 1;
 	
-	std::vector<int> vec = { 1, 2, 3, 4, 5, 6 };
-	auto iter = vec.begin() + 2;
-	auto lastIter = vec.begin() + 4;
-
-	std::rotate(iter, lastIter, lastIter  + 1);
-
-	for (auto elem : vec) {
-		std::cout << elem << std::endl;
-	}
+	std::cout << *iter << std::endl;
 
 	return 0;
 }

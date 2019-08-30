@@ -6,6 +6,7 @@
 #include "Imgui/imgui-SFML.h"
 #include "Settings.h"
 #include "Scene.h"
+#include "CommandManager.h"
 
 void mainMenuGUI(sf::RenderWindow& mainWindow);
 void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene);
@@ -116,6 +117,7 @@ void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene
 				auto iterDist = std::distance(scene.brushes.begin(), scene.currentBrush);
 				scene.currentBrush = scene.brushes.begin();
 
+
 				// This makes sure that we continue working on the brush we were before deleting
 				bool isCurrentBrushBelowIter = scene.brushes.begin() + iterDist < iter;
 				iter = scene.brushes.erase(iter);
@@ -144,6 +146,7 @@ void layerGUI(Scene& scene)
 			if (scene.lastActiveLayer < scene.layers.end()) {
 				std::advance(scene.lastActiveLayer, 1);
 				scene.lastActiveLayer->clearLayer();
+				CommandManager::createLayer(std::distance(scene.layers.begin(), scene.lastActiveLayer));
 			}
 			else {
 				std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
@@ -176,24 +179,29 @@ void layerGUI(Scene& scene)
 			std::string delButton = "Del##";
 			delButton.append(layerName); // If we don't append the layer name imgui is confused when we press the button
 			if (ImGui::Button(delButton.data())) {
+				CommandManager::deleteLayer(std::distance(scene.layers.begin(), iter), iter->tex);
 				auto iterDist = std::distance(scene.layers.begin(), scene.currentLayer);
 				scene.currentLayer = scene.layers.begin();
-
-				if (std::prev(scene.lastActiveLayer) == scene.layers.begin()) { // Create a new Layer if There are none left
+				
+					if (std::prev(scene.lastActiveLayer) == scene.layers.begin()) { // Create a new Layer if There are none left
 					scene.lastActiveLayer->clearLayer();
+					
 				}
 				else { // This makes sure that we continue working on the layer we were before deleting
 					bool isCurrentLayerBelowIter = scene.layers.begin() + iterDist < iter;
 					iter->clearLayer();
 					std::advance(scene.lastActiveLayer, -1);
 					std::rotate(iter, iter + 1, scene.layers.end());
-
-					if (isCurrentLayerBelowIter) {
+					
+						if (isCurrentLayerBelowIter) {
 						std::advance(scene.currentLayer, iterDist);
+						
 					}
 					else {
 						std::advance(scene.currentLayer, iterDist - 1);
+						
 					}
+					
 				}
 				if (scene.currentLayer == scene.layers.begin()) std::advance(scene.currentLayer, 1);
 			}

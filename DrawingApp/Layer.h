@@ -63,7 +63,7 @@ sf::RenderStates Layer::renderState(&fragShader);
 sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 
 inline void Layer::clearLayer() {
-	image.create(image.getSize().x, image.getSize().y, sf::Color(255, 255, 255, 0));
+	image.create(width, height, sf::Color(255, 255, 255, 0));
 	tex.update(image);
 	sprite.setTexture(tex);
 }

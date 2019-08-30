@@ -14,13 +14,13 @@ struct command {
 	command(COMMAND_TYPE type, int layerPos, sf::Texture newTexure, sf::Texture oldTexure) :
 		type(type),
 		layerPos(layerPos),
-		newTexure(newTexure),
-		oldTexure(oldTexure) {}
+		newTexure(newTexure.copyToImage()),
+		oldTexure(oldTexure.copyToImage()) {}
 
 	COMMAND_TYPE type;
 	int layerPos;
-	sf::Texture newTexure;
-	sf::Texture oldTexure;
+	sf::Image newTexure;
+	sf::Image oldTexure;
 };
 
 struct create_command : command{
@@ -42,7 +42,6 @@ class CommandManager
 {
 public:
 	CommandManager() {
-		actions.reserve(20);
 	};
 
 	static void createLayer(int layerPos);
@@ -52,6 +51,10 @@ public:
 	static void moveForward(Scene& scene);
 	static void moveBackward(Scene& scene);
 	static void clearActions();
+	static void initialize(Scene& scene) {
+		actions.reserve(20); // Reserve memory for 20 actions
+		actionIter = std::prev(actions.end());
+	}
 
 	~CommandManager();
 
@@ -60,7 +63,7 @@ private:
 	static std::vector<command>::iterator actionIter;
 };
 
-std::vector<command> CommandManager::actions = { create_command(2) };
+std::vector<command> CommandManager::actions = { create_command(1) }; // We create a layer when we create the scene
 std::vector<command>::iterator CommandManager::actionIter = actions.begin();
 
 inline void CommandManager::createLayer(int layerPos) {
@@ -68,7 +71,7 @@ inline void CommandManager::createLayer(int layerPos) {
 		actions.erase(actions.begin());
 	}
 	actions.push_back(create_command(layerPos));
-	std::advance(actionIter, 1);
+	actionIter = std::prev(actions.end());
 }
 
 inline void CommandManager::deleteLayer(int layerPos, sf::Texture& texture) {
@@ -76,7 +79,7 @@ inline void CommandManager::deleteLayer(int layerPos, sf::Texture& texture) {
 		actions.erase(actions.begin());
 	}
 	actions.push_back(delete_command(layerPos, texture));
-	std::advance(actionIter, 1);
+	actionIter = std::prev(actions.end());
 }
 
 inline void CommandManager::updateLayer(int layerPos, sf::Texture& newTexture, sf::Texture& oldTexture) {
@@ -84,7 +87,7 @@ inline void CommandManager::updateLayer(int layerPos, sf::Texture& newTexture, s
 		actions.erase(actions.begin());
 	}
 	actions.push_back(update_command(layerPos, newTexture, oldTexture));
-	std::advance(actionIter, 1);
+	actionIter = std::prev(actions.end());
 }
 
 inline void CommandManager::moveForward(Scene& scene)
@@ -123,7 +126,7 @@ inline void CommandManager::moveForward(Scene& scene)
 		}
 		case(UPDATE_LAYER): {
 			auto iter = (scene.layers.begin() + actionIter->layerPos);
-			iter->tex = actionIter->newTexure;
+			iter->tex.update(actionIter->newTexure);
 			iter->sprite.setTexture(iter->tex);
 			break;
 		}
@@ -134,10 +137,11 @@ inline void CommandManager::moveForward(Scene& scene)
 inline void CommandManager::moveBackward(Scene& scene)
 {
 	if (actionIter != actions.begin()) {
-		std::advance(actionIter, - 1);
 		switch (actionIter->type) {
 		case(CREATE_LAYER): {
-			std::advance(scene.lastActiveLayer, -1);
+			if (actionIter->layerPos != 1) {
+				std::advance(scene.lastActiveLayer, -1);
+			}
 			break;
 		}
 		case(DELETE_LAYER): {
@@ -146,14 +150,14 @@ inline void CommandManager::moveBackward(Scene& scene)
 			scene.currentLayer = scene.layers.begin();
 
 			if (std::next(iter) == scene.layers.begin()) { // Create a new Layer if There are none left
-				scene.lastActiveLayer->tex = actionIter->oldTexure;
+				scene.lastActiveLayer->tex.update(actionIter->oldTexure);
 				scene.lastActiveLayer->sprite.setTexture(scene.lastActiveLayer->tex);
 			}
 			else { // This makes sure that we continue working on the layer we were before deleting
 				bool isCurrentLayerBelowIter = scene.layers.begin() + currentLayerOffset < iter;
 				std::advance(scene.lastActiveLayer, 1);
 				std::rotate(iter, scene.lastActiveLayer, std::next(scene.lastActiveLayer));
-				iter->tex = actionIter->oldTexure;
+				iter->tex.update(actionIter->oldTexure);
 				iter->sprite.setTexture(iter->tex);
 
 				if (isCurrentLayerBelowIter) {
@@ -168,21 +172,26 @@ inline void CommandManager::moveBackward(Scene& scene)
 		}
 		case(UPDATE_LAYER): {
 			auto iter = (scene.layers.begin() + actionIter->layerPos);
-			iter->tex = actionIter->oldTexure;
+			iter->tex.update(actionIter->oldTexure);
 			iter->sprite.setTexture(iter->tex);
 			break;
 		}
 		}
+		std::advance(actionIter, -1);
 	}
 }
 
 inline void CommandManager::clearActions()
 {
 	if (std::next(actionIter) != actions.end()) {
-		for (auto iter = std::next(actionIter); iter < actions.end(); std::advance(iter, 1)) {
-			iter = actions.erase(iter);
+		auto iter = std::prev(actions.end());
+		while (iter != actionIter) {
+			actions.erase(iter);
+			iter = std::prev(actions.end());
 		}
 	}
+	
+	actionIter = std::prev(actions.end());
 }
 
 CommandManager::~CommandManager()

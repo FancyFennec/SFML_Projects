@@ -8,7 +8,7 @@
 #include "Layer.h"
 #include "Scene.h"
 #include "GUI.h"
-#include "ActionManager.h"
+#include "CommandManager.h"
 
 using json = nlohmann::json;
 
@@ -43,7 +43,8 @@ sf::Thread mouseLoopThread(&mousePositionSampling);
 std::vector<sf::Vector2i> mousepositions;
 
 int main() {
-	ActionManager::createLayer(2);
+	CommandManager::initialize(scene);
+
 	createMainWindow();
 	ImGui::SFML::Init(mainWindow);
 
@@ -59,7 +60,7 @@ void mousePositionSampling()
 	{
 		if (isMouseHeld()) {
 			mousepositions.push_back(sf::Mouse::getPosition(mainWindow));
-			std::cout << mousepositions.size() << std::endl;
+			//std::cout << mousepositions.size() << std::endl;
 		}
 	}
 }
@@ -127,7 +128,12 @@ void mainWindowEventHandling()
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
+				sf::Texture oldTexture = scene.currentLayer->tex;
 				scene.currentLayer->updateLayer(scene.drawingLayer, scene.currentBrush);
+				CommandManager::updateLayer(
+					std::distance(scene.layers.begin(), scene.currentLayer),
+					scene.currentLayer->tex,
+					oldTexture);
 			}
 			setMouseNotHeld();
 		}
@@ -150,11 +156,13 @@ void mainWindowEventHandling()
 		//TODO: Implement Ctrl + Z / Y
 		case(sf::Keyboard::Z): {
 			if (isCtrlHeld()) {
+				CommandManager::moveBackward(scene);
 			}
 			break;
 		}
 		case(sf::Keyboard::Y): {
 			if (isCtrlHeld()) {
+				CommandManager::moveForward(scene);
 			}
 			break;
 		}
@@ -204,6 +212,7 @@ void mainWindowEventHandling()
 
 void lmbPressed()
 {
+	CommandManager::clearActions();
 	scene.drawingLayer.clearLayer();
 
 	if (isAltHeld()) {
