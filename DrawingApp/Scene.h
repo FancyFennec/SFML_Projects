@@ -130,7 +130,7 @@ inline void Scene::resetCursorPositions(sf::RenderWindow & window, Layer& layer)
 
 inline void Scene::saveBrush() {
 	sf::RenderTexture renderTex;
-	renderTex.create(brushLayer.image.getSize().x, brushLayer.image.getSize().y);
+	renderTex.create(brushLayer.width, brushLayer.height);
 	renderTex.clear(sf::Color(255, 255, 255, 0));
 
 	renderTex.draw(brushLayer.sprite);

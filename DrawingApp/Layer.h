@@ -11,7 +11,6 @@ public:
 	unsigned int width;
 	unsigned int height;
 
-	sf::Image image;
 	sf::Texture tex;
 	sf::Sprite sprite;
 
@@ -25,15 +24,14 @@ public:
 	Layer(int width, int height) :
 		width(width),
 		height(height) {
-		image.create(width, height, sf::Color(255, 255, 255, 0));
-		initialize();
+		sf::Color color(255, 255, 255, 0);
+		initialize(color);
 	}
 
 	Layer(int width, int height, sf::Color color) :
 		width(width),
 		height(height) {
-		image.create(width, height, color);
-		initialize();
+		initialize(color);
 	}
 
 	void clearLayer();
@@ -51,7 +49,7 @@ private:
 	static sf::RenderTexture rTex;
 	static sf::Shader fragShader;
 
-	void initialize();
+	void initialize(sf::Color& color);
 	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2);
 	sf::RenderStates getRenderState(std::vector<BrushPntr>::iterator & brush, sf::Vector2f &drawingPos);
 	std::function<sf::Vector2f(float)> getBezier(std::vector<sf::Vector2i>& cursorPositions); //Not used right now
@@ -63,6 +61,7 @@ sf::RenderStates Layer::renderState(&fragShader);
 sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 
 inline void Layer::clearLayer() {
+	sf::Image image;
 	image.create(width, height, sf::Color(255, 255, 255, 0));
 	tex.update(image);
 	sprite.setTexture(tex);
@@ -89,7 +88,9 @@ inline void Layer::updateLayer(Layer& newLayer, std::vector<BrushPntr>::iterator
 inline void Layer::drawLayer(sf::RenderWindow & window) {
 	window.draw(sprite);
 }
-inline void Layer::initialize() {
+inline void Layer::initialize(sf::Color& color) {
+	sf::Image image;
+	image.create(width, height, color);
 	tex.create(width, height);
 	tex.update(image);
 	sprite.setTexture(tex);
@@ -98,7 +99,7 @@ inline void Layer::initialize() {
 		offset = sf::Vector2i(SCREEN_WIDTH / 2 - width / 2, SCREEN_HEIGHT / 2 - height / 2);
 	}
 
-	rTex.create(image.getSize().x, image.getSize().y);
+	rTex.create(width, height);
 
 	if (!fragShader.loadFromFile("fragment_shader.frag", sf::Shader::Fragment))
 		std::cout << "Could not load shader" << std::endl;
@@ -120,7 +121,7 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
 
 		sf::RenderTexture renderTex;
-		renderTex.create(image.getSize().x, image.getSize().y);
+		renderTex.create(width, height);
 		renderTex.clear(sf::Color((**brush).color.r, (**brush).color.g, (**brush).color.b, 0));
 
 		(**brush).setBrushColor();
@@ -143,7 +144,7 @@ inline void Layer::drawLinearOnCanvas(float& movedDistance, std::vector<BrushPnt
 		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
 
 		sf::RenderTexture renderTex;
-		renderTex.create(image.getSize().x, image.getSize().y);
+		renderTex.create(width, height);
 		renderTex.clear(sf::Color((*brush)->color.r, (*brush)->color.g, (*brush)->color.b, 0));
 		renderTex.draw(sprite);
 
