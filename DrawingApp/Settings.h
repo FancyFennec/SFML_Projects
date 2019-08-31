@@ -19,6 +19,14 @@ static int CTRL_IS_HELD = BIT(4);
 static int ALT_IS_HELD = BIT(5);
 static int SPACE_IS_HELD = BIT(6);
 
+void getDesktopResolution(int& horizontal, int& vertical) {
+
+	SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);
+
+	horizontal = GetSystemMetrics(SM_CXSCREEN);
+	vertical = GetSystemMetrics(SM_CYSCREEN);
+}
+
 bool wasLMBPressed() {
 	return SETTINGS & LMB_PRESSED;
 }

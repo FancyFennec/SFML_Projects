@@ -144,8 +144,6 @@ void layerGUI(Scene& scene)
 		//Button to create a new Layer
 		if (ImGui::Button("New Layer")) {
 			if (scene.lastActiveLayer < scene.layers.end()) {
-				std::advance(scene.lastActiveLayer, 1);
-				scene.lastActiveLayer->clearLayer();
 				CommandManager::createLayer(std::distance(scene.layers.begin(), scene.lastActiveLayer));
 			}
 			else {
@@ -180,30 +178,6 @@ void layerGUI(Scene& scene)
 			delButton.append(layerName); // If we don't append the layer name imgui is confused when we press the button
 			if (ImGui::Button(delButton.data())) {
 				CommandManager::deleteLayer(std::distance(scene.layers.begin(), iter), iter->tex);
-				auto iterDist = std::distance(scene.layers.begin(), scene.currentLayer);
-				scene.currentLayer = scene.layers.begin();
-				
-					if (std::prev(scene.lastActiveLayer) == scene.layers.begin()) { // Create a new Layer if There are none left
-					scene.lastActiveLayer->clearLayer();
-					
-				}
-				else { // This makes sure that we continue working on the layer we were before deleting
-					bool isCurrentLayerBelowIter = scene.layers.begin() + iterDist < iter;
-					iter->clearLayer();
-					std::advance(scene.lastActiveLayer, -1);
-					std::rotate(iter, iter + 1, scene.layers.end());
-					
-						if (isCurrentLayerBelowIter) {
-						std::advance(scene.currentLayer, iterDist);
-						
-					}
-					else {
-						std::advance(scene.currentLayer, iterDist - 1);
-						
-					}
-					
-				}
-				if (scene.currentLayer == scene.layers.begin()) std::advance(scene.currentLayer, 1);
 			}
 			layerNumber--;
 		}

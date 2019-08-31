@@ -1,0 +1,144 @@
+#pragma once
+
+#include "Imgui/imgui.h"
+#include "Imgui/imgui-SFML.h"
+#include "Settings.h"
+#include "Scene.h"
+#include "CommandManager.h"
+
+void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Scene& scene);
+void brushWindowEventHandling(sf::RenderWindow& brushWindow, sf::Event& event, Scene& scene);
+void lmbPressed(sf::RenderWindow& mainWindow, sf::Event& event, Scene& scene);
+
+void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Scene& scene)
+{
+	if (event.type == sf::Event::Closed)
+		mainWindow.close();
+	if (event.type == sf::Event::MouseButtonPressed) {
+		if (event.mouseButton.button == sf::Mouse::Left) {
+			lmbPressed(mainWindow, event, scene);
+		}
+	}
+	if (event.type == sf::Event::MouseButtonReleased) {
+		if (event.mouseButton.button == sf::Mouse::Left) {
+			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
+				sf::Texture oldTexture = scene.currentLayer->tex;
+				scene.currentLayer->updateLayer(scene.drawingLayer, scene.currentBrush);
+				CommandManager::updateLayer(
+					std::distance(scene.layers.begin(), scene.currentLayer),
+					scene.currentLayer->tex,
+					oldTexture);
+			}
+			setMouseNotHeld();
+		}
+	}
+	if (event.type == sf::Event::KeyPressed) {
+		switch (event.key.code) {
+		case(sf::Keyboard::Q): {
+			mainWindow.clear(sf::Color(255, 255, 255, 255));
+			scene.currentLayer->updateLayer(mainWindow);
+			break;
+		}
+		case(sf::Keyboard::LAlt): {
+			setAltIsHeld();
+			break;
+		}
+		case(sf::Keyboard::LControl): {
+			setCtrlIsHeld();
+			break;
+		}
+									  //TODO: Implement Ctrl + Z / Y
+		case(sf::Keyboard::Z): {
+			if (isCtrlHeld()) {
+				CommandManager::moveBackward();
+			}
+			break;
+		}
+		case(sf::Keyboard::Y): {
+			if (isCtrlHeld()) {
+				CommandManager::moveForward();
+			}
+			break;
+		}
+		case(sf::Keyboard::Space): {
+			setSpaceIsHeld();
+			break;
+		}
+		case(sf::Keyboard::Up): {
+			scene.currentLayer->offset += sf::Vector2i(0, -10);
+			break;
+		}
+		case(sf::Keyboard::Down): {
+			scene.currentLayer->offset += sf::Vector2i(0, 10);
+			break;
+		}
+		case(sf::Keyboard::Right): {
+			scene.currentLayer->offset += sf::Vector2i(10, 0);
+			break;
+		}
+		case(sf::Keyboard::Left): {
+			scene.currentLayer->offset += sf::Vector2i(-10, 0);
+			break;
+		}
+		case(sf::Keyboard::Escape): {
+			mainWindow.close();
+			break;
+		}
+		}
+	}
+	if (event.type == sf::Event::KeyReleased) {
+		switch (event.key.code) {
+		case(sf::Keyboard::LAlt): {
+			setAltNotHeld();
+			break;
+		}
+		case(sf::Keyboard::LControl): {
+			setCtrlNotHeld();
+			break;
+		}
+		case(sf::Keyboard::Space): {
+			setSpaceNotHeld();
+			break;
+		}
+		}
+	}
+}
+
+void lmbPressed(sf::RenderWindow& mainWindow, sf::Event& event, Scene& scene)
+{
+	CommandManager::clearActions();
+	scene.drawingLayer.clearLayer();
+
+	if (isAltHeld()) {
+		if (event.mouseButton.button == sf::Mouse::Left) {
+			scene.pickColor(mainWindow);
+		}
+	}
+	else {
+		setMouseIsHeld();
+		scene.resetCursorPositions(mainWindow, scene.drawingLayer);
+		//No need to draw the window here, it gets drawn because the lmb is being held later
+	}
+}
+
+void brushWindowEventHandling(sf::RenderWindow& brushWindow, sf::Event& event, Scene& scene)
+{
+	if (event.type == sf::Event::MouseButtonPressed) {
+		if (event.key.code == sf::Mouse::Left) {
+			setMouseIsHeld();
+			scene.resetCursorPositions(brushWindow, scene.brushLayer);
+			//No need to draw the window here, it gets drawn because the lmb is held later
+		}
+	}
+	if (event.type == sf::Event::MouseButtonReleased) {
+		if (event.key.code == sf::Mouse::Left) {
+			setMouseNotHeld();
+		}
+	}
+	if (event.type == sf::Event::KeyPressed) {
+		if (event.key.code == sf::Keyboard::Escape) {
+			scene.saveBrush();
+			brushWindow.close();
+		}
+	}
+}
