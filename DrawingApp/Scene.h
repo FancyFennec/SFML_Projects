@@ -20,7 +20,7 @@ public:
 	unsigned int height;
 
 	Layer drawingLayer;
-	std::vector<Layer> layers;
+	std::vector<Layer> layers = {};
 	std::vector<Layer>::iterator currentLayer;
 	std::vector<Layer>::iterator lastActiveLayer;
 	
@@ -41,12 +41,10 @@ public:
 	Scene(unsigned int width, unsigned int height) :
 		width(width),
 		height(height),
-		layers(21),
 		drawingLayer(Layer(width, height)),
-		brushLayer(Layer(brushWidth, brushWidth))
-	{
-		initialize();
-	}
+		brushLayer(Layer(brushWidth, brushWidth)) {}
+
+	void initialize();
 
 	void updateColor();
 	void pickColor(sf::RenderWindow &window);
@@ -59,20 +57,18 @@ public:
 	}
 
 private:
-	void initialize();
 };
 
 float Scene::currentColor[3] = { 0.5f,0.0f,0.5f };
 
 inline void Scene::initialize()
 {
-	//layers.resize(21); // Reserve space for 20 Layers
-	layers[0] = Layer(width, height, sf::Color::White); // Background Layer
-	for (int i = 0; i < 20; i++) {
-		layers[i+1] = Layer(width, height);
-	}
-	for (int i = 1; i < 21; i++) {
-		layers[i].clearLayer();
+	drawingLayer.offset = sf::Vector2i(WINDOW_WIDTH / 2 - width / 2, WINDOW_HEIGHT / 2 - height / 2);
+	layers.reserve(MAX_LAYERS + 1); // Reserve space for 20 Layers
+	layers.push_back(Layer(width, height, sf::Color::White)); // Background Layer
+	for (int i = 0; i < MAX_LAYERS; i++) {
+		layers.push_back(Layer(width, height));
+		layers.back().clearLayer();
 	}
 	currentLayer = std::next(layers.begin());
 	lastActiveLayer = currentLayer;

@@ -2,16 +2,19 @@
 
 int BIT(int i) { return 1 << i; }
 
-static bool USE_FULLSCREEN = false;
-static int SCREEN_WIDTH = 1200;
-static int SCREEN_HEIGHT = 800;
+static bool USE_FULLSCREEN = true;
+static unsigned int FPS = 120;
+
+static int WINDOW_WIDTH = 1200;
+static int WINDOW_HEIGHT = 800;
 
 const static int MAX_ACTIONS = 10;
+const static int MAX_LAYERS = 20;
 
 static long int SETTINGS = 0;
 static int LMB_PRESSED = BIT(1);
 static int LMB_RELEASED = BIT(2);
-static int MOUSE_IS_HELD = BIT(3);
+static int LMB_IS_HELD = BIT(3);
 static int CTRL_IS_HELD = BIT(4);
 static int ALT_IS_HELD = BIT(5);
 static int SPACE_IS_HELD = BIT(6);
@@ -41,15 +44,15 @@ void setLMBNotReleased() {
 }
 
 bool isMouseHeld() {
-	return SETTINGS & MOUSE_IS_HELD;
+	return SETTINGS & LMB_IS_HELD;
 }
 
 void setMouseIsHeld() {
-	SETTINGS |= MOUSE_IS_HELD;
+	SETTINGS |= LMB_IS_HELD;
 }
 
 void setMouseNotHeld() {
-	SETTINGS &= ~MOUSE_IS_HELD;
+	SETTINGS &= ~LMB_IS_HELD;
 }
 
 bool isCtrlHeld() {

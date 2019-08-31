@@ -43,9 +43,10 @@ sf::Thread mouseLoopThread(&mousePositionSampling);
 std::vector<sf::Vector2i> mousepositions;
 
 int main() {
+	createMainWindow();
+	scene.initialize();
 	CommandManager::initialize(scene);
 
-	createMainWindow();
 	ImGui::SFML::Init(mainWindow);
 
 	mouseLoopThread.launch();
@@ -276,15 +277,15 @@ void brushWindowDrawing()
 void createMainWindow()
 {
 	if (USE_FULLSCREEN) {
-		getDesktopResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
-		mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::Fullscreen);
+		getDesktopResolution(WINDOW_WIDTH, WINDOW_HEIGHT);
+		mainWindow.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Drawing App", sf::Style::Fullscreen);
 	}
 	else {
-		mainWindow.create(sf::VideoMode(SCREEN_WIDTH, SCREEN_HEIGHT), "Drawing App", sf::Style::None);
+		mainWindow.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Drawing App", sf::Style::Titlebar);
 	}
 
 	mainWindow.setMouseCursorVisible(false);
-	mainWindow.setFramerateLimit(120);
+	mainWindow.setFramerateLimit(FPS);
 }
 
 void brushWindowRendering()

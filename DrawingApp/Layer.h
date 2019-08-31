@@ -96,7 +96,7 @@ inline void Layer::initialize(sf::Color& color) {
 	sprite.setTexture(tex);
 
 	if (offset.x == 0 && offset.y == 0) {
-		offset = sf::Vector2i(SCREEN_WIDTH / 2 - width / 2, SCREEN_HEIGHT / 2 - height / 2);
+		offset = sf::Vector2i(WINDOW_WIDTH / 2 - width / 2, WINDOW_HEIGHT / 2 - height / 2);
 	}
 
 	rTex.create(width, height);

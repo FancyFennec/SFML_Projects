@@ -15,7 +15,7 @@ void createBrushWindow(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWind
 
 void mainMenuGUI(sf::RenderWindow& mainWindow)
 {
-	ImGui::SetNextWindowSize(ImVec2(SCREEN_WIDTH, 50));
+	ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH, 50));
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
 
 	bool windowFlag = true;
@@ -26,7 +26,7 @@ void mainMenuGUI(sf::RenderWindow& mainWindow)
 	ImGui::SameLine();
 	if (ImGui::Button("Edit")) {
 	}
-	ImGui::SameLine(SCREEN_WIDTH - 50);
+	ImGui::SameLine(WINDOW_WIDTH - 50);
 	if (ImGui::Button("Close")) {
 		mainWindow.close();
 	}
@@ -35,7 +35,7 @@ void mainMenuGUI(sf::RenderWindow& mainWindow)
 
 void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene)
 {
-	ImGui::SetNextWindowSize(ImVec2(250, SCREEN_HEIGHT - 250));
+	ImGui::SetNextWindowSize(ImVec2(250, WINDOW_HEIGHT - 250));
 	ImGui::SetNextWindowPos(ImVec2(0, 50));
 	bool windowFlag = true;
 
@@ -136,8 +136,8 @@ void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene
 
 void layerGUI(Scene& scene)
 {
-	ImGui::SetNextWindowSize(ImVec2(150, SCREEN_HEIGHT / 2));
-	ImGui::SetNextWindowPos(ImVec2(SCREEN_WIDTH - 150, 50));
+	ImGui::SetNextWindowSize(ImVec2(150, WINDOW_HEIGHT / 2));
+	ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH - 150, 50));
 	bool windowFlag = true;
 	ImGui::Begin("Layers", &windowFlag, ImGuiWindowFlags_NoResize);
 	{
@@ -217,5 +217,5 @@ void createBrushWindow(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWind
 	brushWindow.setFramerateLimit(120);
 	brushWindow.clear(sf::Color::Black);
 	brushWindow.setPosition(mainWindow.getPosition() +
-		sf::Vector2i(SCREEN_WIDTH / 2 - scene.brushWidth / 2, SCREEN_HEIGHT / 2 - scene.brushWidth / 2));
+		sf::Vector2i(WINDOW_WIDTH / 2 - scene.brushWidth / 2, WINDOW_HEIGHT / 2 - scene.brushWidth / 2));
 }
