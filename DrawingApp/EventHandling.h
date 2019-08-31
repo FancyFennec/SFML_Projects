@@ -14,6 +14,11 @@ void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Sce
 {
 	if (event.type == sf::Event::Closed)
 		mainWindow.close();
+	if (event.type == sf::Event::GainedFocus) {
+		setMouseNotHeld();
+		setAltNotHeld();
+		setCtrlNotHeld();
+	}
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			lmbPressed(mainWindow, event, scene);
@@ -47,7 +52,6 @@ void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Sce
 			setCtrlIsHeld();
 			break;
 		}
-									  //TODO: Implement Ctrl + Z / Y
 		case(sf::Keyboard::Z): {
 			if (isCtrlHeld()) {
 				CommandManager::moveBackward();
@@ -81,7 +85,7 @@ void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Sce
 			break;
 		}
 		case(sf::Keyboard::Escape): {
-			mainWindow.close();
+			//mainWindow.close();
 			break;
 		}
 		}
@@ -104,23 +108,6 @@ void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Sce
 	}
 }
 
-void lmbPressed(sf::RenderWindow& mainWindow, sf::Event& event, Scene& scene)
-{
-	CommandManager::clearActions();
-	scene.drawingLayer.clearLayer();
-
-	if (isAltHeld()) {
-		if (event.mouseButton.button == sf::Mouse::Left) {
-			scene.pickColor(mainWindow);
-		}
-	}
-	else {
-		setMouseIsHeld();
-		scene.resetCursorPositions(mainWindow, scene.drawingLayer);
-		//No need to draw the window here, it gets drawn because the lmb is being held later
-	}
-}
-
 void brushWindowEventHandling(sf::RenderWindow& brushWindow, sf::Event& event, Scene& scene)
 {
 	if (event.type == sf::Event::MouseButtonPressed) {
@@ -140,5 +127,22 @@ void brushWindowEventHandling(sf::RenderWindow& brushWindow, sf::Event& event, S
 			scene.saveBrush();
 			brushWindow.close();
 		}
+	}
+}
+
+void lmbPressed(sf::RenderWindow& mainWindow, sf::Event& event, Scene& scene)
+{
+	CommandManager::clearActions();
+	scene.drawingLayer.clearLayer();
+
+	if (isAltHeld()) {
+		if (event.mouseButton.button == sf::Mouse::Left) {
+			scene.pickColor(mainWindow);
+		}
+	}
+	else {
+		setMouseIsHeld();
+		scene.resetCursorPositions(mainWindow, scene.drawingLayer);
+		//No need to draw the window here, it gets drawn because the lmb is being held later
 	}
 }

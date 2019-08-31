@@ -13,24 +13,49 @@ void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene
 void layerGUI(Scene& scene);
 void createBrushWindow(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene);
 
+
 void mainMenuGUI(sf::RenderWindow& mainWindow)
 {
-	ImGui::SetNextWindowSize(ImVec2(WINDOW_WIDTH, 50));
-	ImGui::SetNextWindowPos(ImVec2(0, 0));
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("Save as JPEG"))
+			{
+				std::cout << "Save as JPEG" << std::endl;
+			}
+			if (ImGui::MenuItem("Save as PNG"))
+			{
+				std::cout << "Save as PNG" << std::endl;
+			}
+			if (ImGui::MenuItem("Save Layer as JPEG"))
+			{
+				std::cout << "Save Layer as JPEG" << std::endl;
+			}
+			if (ImGui::MenuItem("Save Layer as PNG"))
+			{
+				std::cout << "Save Layer as PNG" << std::endl;
+			}
+			ImGui::EndMenu();
+		}
 
-	bool windowFlag = true;
-	ImGui::Begin("##Main Menu", &windowFlag, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-	ImGui::Dummy(ImVec2(0, 5));
-	if (ImGui::Button("File")) {
+		if (ImGui::BeginMenu("Edit"))
+		{
+			if (ImGui::MenuItem("menu item"))
+			{
+				std::cout << "Menu item pressed" << std::endl;
+			}
+			ImGui::EndMenu();
+		}
+
+		ImGui::SameLine(WINDOW_WIDTH - 60);
+		if (ImGui::Button("Close"))
+		{
+			mainWindow.close();
+		}
+
+		ImGui::EndMainMenuBar();
 	}
-	ImGui::SameLine();
-	if (ImGui::Button("Edit")) {
-	}
-	ImGui::SameLine(WINDOW_WIDTH - 50);
-	if (ImGui::Button("Close")) {
-		mainWindow.close();
-	}
-	ImGui::End();
 }
 
 void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene)

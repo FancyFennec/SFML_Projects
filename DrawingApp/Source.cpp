@@ -11,14 +11,13 @@
 
 using json = nlohmann::json;
 
-
-void mainRenderLoop();
 void mousePositionSampling();
+
+void createMainWindow();
+void mainRenderLoop();
 void mainWindowDrawing();
 void brushWindowDrawing();
-void createMainWindow();
 void brushWindowRendering();
-void getDesktopResolution(int& horizontal, int& vertical);
 
 sf::Clock deltaClock;
 

@@ -2,7 +2,7 @@
 
 int BIT(int i) { return 1 << i; }
 
-static bool USE_FULLSCREEN = true;
+static bool USE_FULLSCREEN = false;
 static unsigned int FPS = 120;
 
 static int WINDOW_WIDTH = 1200;
