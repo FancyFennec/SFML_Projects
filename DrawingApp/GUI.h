@@ -8,33 +8,65 @@
 #include "Scene.h"
 #include "CommandManager.h"
 
-void mainMenuGUI(sf::RenderWindow& mainWindow);
+void mainMenuGUI(sf::RenderWindow& mainWindow, Scene& scene);
 void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene);
 void layerGUI(Scene& scene);
 void createBrushWindow(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene);
 
+bool popupIsOpen = false;
+std::string input;
 
-void mainMenuGUI(sf::RenderWindow& mainWindow)
+static enum FILE_TYPE {
+	PNG,
+	JPEG,
+	SINGLE_PNG,
+	SINGLE_JPEG,
+	SCN
+};
+
+FILE_TYPE file_type;
+
+void mainMenuGUI(sf::RenderWindow& mainWindow, Scene& scene)
 {
 	if (ImGui::BeginMainMenuBar())
 	{
 		if (ImGui::BeginMenu("File"))
 		{
-			if (ImGui::MenuItem("Save as JPEG"))
+			if (ImGui::MenuItem("Load Scene"))
 			{
-				std::cout << "Save as JPEG" << std::endl;
+				std::cout << "Loading Scene" << std::endl;
 			}
-			if (ImGui::MenuItem("Save as PNG"))
+			if (ImGui::MenuItem("Load Layer"))
 			{
-				std::cout << "Save as PNG" << std::endl;
+				std::cout << "Loading Layer" << std::endl;
+			}
+			if (ImGui::MenuItem("Saving Scene"))
+			{
+				std::cout << "Save Scene" << std::endl;
+			}
+			if (ImGui::MenuItem("Save Scene as JPEG"))
+			{
+				file_type = JPEG;
+				popupIsOpen = true;
+				input = "Input FileName and";
+			}
+			if (ImGui::MenuItem("Save Scene as PNG"))
+			{
+				file_type = PNG;
+				popupIsOpen = true;
+				input = "Input FileName and";
 			}
 			if (ImGui::MenuItem("Save Layer as JPEG"))
 			{
-				std::cout << "Save Layer as JPEG" << std::endl;
+				file_type = SINGLE_JPEG;
+				popupIsOpen = true;
+				input = "Input FileName and";
 			}
 			if (ImGui::MenuItem("Save Layer as PNG"))
 			{
-				std::cout << "Save Layer as PNG" << std::endl;
+				file_type = SINGLE_PNG;
+				popupIsOpen = true;
+				input = "Input FileName and";
 			}
 			ImGui::EndMenu();
 		}
@@ -55,6 +87,80 @@ void mainMenuGUI(sf::RenderWindow& mainWindow)
 		}
 
 		ImGui::EndMainMenuBar();
+
+		if (popupIsOpen) {
+			ImGui::OpenPopup("SavedFiles Folder");
+			
+			std::string folderPath("./SavedFiles");
+			for (auto p : fs::directory_iterator(folderPath)) {
+				std::string fileName = p.path().string().substr(folderPath.size() + 1); //Remove folder name
+				if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
+					input = fileName.substr(0, fileName.length() - 4).c_str(); //remove ending
+				}
+			}
+
+			ImGui::Dummy(ImVec2(0, 10));
+			ImGui::DrawLine(sf::Vector2f(0, 0), sf::Vector2f(WINDOW_WIDTH, 0), sf::Color::White, 1.0f);
+			ImGui::Dummy(ImVec2(0, 20));
+
+			char* inputChar = (char*) input.data();
+			if (ImGui::InputText("Press Enter", inputChar, 30, ImGuiInputTextFlags_EnterReturnsTrue)) {
+				std::string file = "./SavedFiles/";
+				file.append(inputChar);
+				switch (file_type) {
+				case(JPEG, SINGLE_JPEG) :
+					file.append(".jpg");
+					break;
+				case(PNG, SINGLE_PNG):
+					file.append(".png");
+					break;
+				case(SCN):
+					file.append(".scn");
+					break;
+				}
+				
+				sf::RenderTexture rTex;
+				rTex.create(scene.width, scene.height);
+				switch (file_type) {
+				case(JPEG): {
+					rTex.clear(sf::Color::White);
+					for (auto layer = scene.layers.begin(); layer != scene.layers.end(); layer++) {
+						rTex.draw(layer->sprite);
+					}
+					break;
+				}
+				case(PNG): {
+					rTex.clear(sf::Color(255, 255, 255, 0));
+					for (auto layer = std::next(scene.layers.begin()); layer != scene.layers.end(); layer++) {
+						rTex.draw(layer->sprite);
+					}
+					break;
+				}
+				case(SINGLE_JPEG): {
+					rTex.clear(sf::Color::White);
+					rTex.draw(scene.layers.begin()->sprite);
+					rTex.draw(scene.currentLayer->sprite);
+					break;
+				}
+				case(SINGLE_PNG): {
+					rTex.clear(sf::Color(255, 255, 255, 0));
+					rTex.draw(scene.currentLayer->sprite);
+					break;
+				}
+				case(SCN): {
+					//TODO: Create Folder and save all the textures;
+				}
+				}
+
+				rTex.display();
+				rTex.getTexture().copyToImage().saveToFile(file);
+				
+				popupIsOpen = false;
+			}
+			ImGui::Dummy(ImVec2(0, 30));
+			ImGui::SameLine(ImGui::GetWindowSize().x - 60);
+			if (ImGui::Button("Close", ImVec2(50, 20))) popupIsOpen = false;
+		}
 	}
 }
 

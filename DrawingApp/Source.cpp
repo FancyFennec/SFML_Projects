@@ -100,7 +100,7 @@ void mainRenderLoop()
 			mainWindowEventHandling(mainWindow, event, scene);
 		}
 
-		mainMenuGUI(mainWindow);
+		mainMenuGUI(mainWindow, scene);
 		brushGUI(mainWindow, brushWindow, scene);
 		layerGUI(scene);
 

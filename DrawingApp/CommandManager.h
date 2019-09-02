@@ -52,6 +52,7 @@ public:
 	static void moveForward();
 	static void moveBackward();
 	static void clearActions();
+
 	static void initialize(Scene& scn) {
 		scene = &scn;
 		actions.reserve(MAX_ACTIONS); // Reserve memory for 20 actions
