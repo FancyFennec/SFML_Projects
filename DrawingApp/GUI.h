@@ -108,10 +108,12 @@ void mainMenuGUI(sf::RenderWindow& mainWindow, Scene& scene)
 					std::string file = "./SavedFiles/";
 					file.append(inputChar);
 					switch (file_type) {
-					case(JPEG, SINGLE_JPEG):
+					case(JPEG):
+					case(SINGLE_JPEG):
 						file.append(".jpg");
 						break;
-					case(PNG, SINGLE_PNG):
+					case(PNG):
+					case(SINGLE_PNG):
 						file.append(".png");
 						break;
 					case(SCN):
@@ -153,7 +155,7 @@ void mainMenuGUI(sf::RenderWindow& mainWindow, Scene& scene)
 					}
 
 					rTex.display();
-					rTex.getTexture().copyToImage().saveToFile(file);
+					rTex.getTexture().copyToImage().saveToFile(file.data());
 
 					popupIsOpen = false;
 				}
@@ -277,7 +279,7 @@ void layerGUI(Scene& scene)
 		//Button to create a new Layer
 		if (ImGui::Button("New Layer")) {
 			if (scene.lastActiveLayer < scene.layers.end()) {
-				CommandManager::createLayer(std::distance(scene.layers.begin(), scene.lastActiveLayer));
+				CommandManager::createLayer();
 			}
 			else {
 				std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
@@ -310,7 +312,7 @@ void layerGUI(Scene& scene)
 			std::string delButton = "Del##";
 			delButton.append(layerName); // If we don't append the layer name imgui is confused when we press the button
 			if (ImGui::Button(delButton.data())) {
-				CommandManager::deleteLayer(std::distance(scene.layers.begin(), iter), iter->tex);
+				CommandManager::deleteLayer(iter);
 			}
 			layerNumber--;
 		}

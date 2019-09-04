@@ -46,6 +46,10 @@ public:
 
 	void initialize();
 
+	unsigned int getDistance(std::vector<Layer>::iterator iter) { return (unsigned int)std::distance(layers.begin(), iter); }
+	unsigned int getDistance() { return getDistance(currentLayer); }
+	unsigned int getSize() { return getDistance(lastActiveLayer); }
+	
 	void updateColor();
 	void pickColor(sf::RenderWindow &window);
 	void resetCursorPositions(sf::RenderWindow & window, Layer& layer);

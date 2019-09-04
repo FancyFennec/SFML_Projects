@@ -29,10 +29,7 @@ void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Sce
 			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 				sf::Texture oldTexture = scene.currentLayer->tex;
 				scene.currentLayer->updateLayer(scene.drawingLayer, scene.currentBrush);
-				CommandManager::updateLayer(
-					std::distance(scene.layers.begin(), scene.currentLayer),
-					scene.currentLayer->tex,
-					oldTexture);
+				CommandManager::updateLayer(oldTexture);
 			}
 			setMouseNotHeld();
 		}
