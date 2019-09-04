@@ -68,6 +68,7 @@ private:
 
 	static void delteLayerAt(std::vector<Layer>::iterator iter);
 };
+
 Scene* CommandManager::scene = nullptr;
 std::vector<command> CommandManager::actions = { create_command() }; // We create a layer when we create the scene
 std::vector<command>::iterator CommandManager::actionIter = actions.begin();
@@ -100,7 +101,6 @@ inline void CommandManager::delteLayerAt(std::vector<Layer>::iterator iter)
 
 	if (std::prev(scene->lastActiveLayer) == scene->layers.begin()) { // Create a new Layer if There are none left
 		scene->lastActiveLayer->clearLayer();
-
 	}
 	else { // This makes sure that we continue working on the layer we were before deleting
 		bool isCurrentLayerBelowIter = scene->layers.begin() + iterDist < iter;
@@ -131,12 +131,12 @@ inline void CommandManager::moveForward()
 	if (std::next(actionIter) != actions.end()) {
 		std::advance(actionIter, 1);
 		switch (actionIter->type) {
-		case(CREATE_LAYER): {
+		case(CREATE_LAYER): { //Increment the lastActiveLayer iterator
 			std::advance(scene->lastActiveLayer, 1);
 			scene->lastActiveLayer->clearLayer();
 			break;
 		}
-		case(DELETE_LAYER): {
+		case(DELETE_LAYER): { // Delete the layer at the position of the iterator
 			auto iter = scene->layers.begin() + actionIter->layerPos;
 			auto currentLayerOffset = std::distance(scene->layers.begin(), scene->currentLayer);
 			scene->currentLayer = scene->layers.begin();
@@ -160,7 +160,7 @@ inline void CommandManager::moveForward()
 			if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 			break;
 		}
-		case(UPDATE_LAYER): {
+		case(UPDATE_LAYER): { //Set the layer texture to the new texture
 			auto iter = (scene->layers.begin() + actionIter->layerPos);
 			iter->tex.update(actionIter->newTexure);
 			iter->sprite.setTexture(iter->tex);
@@ -174,11 +174,11 @@ inline void CommandManager::moveBackward()
 {
 	if (actionIter != actions.begin()) {
 		switch (actionIter->type) {
-		case(CREATE_LAYER): {
+		case(CREATE_LAYER): { //Decrement the lastActiveLayer iterator
 			std::advance(scene->lastActiveLayer, -1);
 			break;
 		}
-		case(DELETE_LAYER): {
+		case(DELETE_LAYER): { // Create a new layer at the position of the iterator
 			auto iter = scene->layers.begin() + actionIter->layerPos;
 			auto currentLayerOffset = std::distance(scene->layers.begin(), scene->currentLayer);
 			scene->currentLayer = scene->layers.begin();
@@ -204,7 +204,7 @@ inline void CommandManager::moveBackward()
 			if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 			break;
 		}
-		case(UPDATE_LAYER): {
+		case(UPDATE_LAYER): { //Set the layer texture to the old texture
 			auto iter = (scene->layers.begin() + actionIter->layerPos);
 			iter->tex.update(actionIter->oldTexure);
 			iter->sprite.setTexture(iter->tex);

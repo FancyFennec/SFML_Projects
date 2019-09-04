@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <thread> 
 
+#include "GlobalVariables.h"
 #include "json.hpp"
 #include "Scene.h"
 #include "GUI.h"
@@ -18,13 +19,6 @@ void mainRenderLoop();
 void mainWindowDrawing();
 void brushWindowDrawing();
 void brushWindowRendering();
-
-sf::Clock deltaClock;
-
-//Window initialisation
-sf::RenderWindow mainWindow;
-sf::RenderWindow brushWindow;
-sf::Event event;
 
 //Needed to get the pen pressure
 MSG msg;
@@ -97,11 +91,11 @@ void mainRenderLoop()
 		while (mainWindow.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
-			mainWindowEventHandling(mainWindow, event, scene);
+			mainWindowEventHandling(scene);
 		}
 
-		mainMenuGUI(mainWindow, scene);
-		brushGUI(mainWindow, brushWindow, scene);
+		mainMenuGUI(scene);
+		brushGUI(scene);
 		layerGUI(scene);
 
 		ImGui::SFML::Render(mainWindow);
@@ -157,7 +151,7 @@ void brushWindowRendering()
 		{
 			if (event.type == sf::Event::Closed)
 				brushWindow.close();
-			brushWindowEventHandling(brushWindow, event, scene);
+			brushWindowEventHandling(scene);
 		}
 		brushWindow.clear(sf::Color::Black);
 		scene.brushLayer.drawLayer(brushWindow);

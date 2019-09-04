@@ -2,16 +2,17 @@
 
 #include <iostream>
 
+#include "GlobalVariables.h"
 #include "Imgui/imgui.h"
 #include "Imgui/imgui-SFML.h"
 #include "Settings.h"
 #include "Scene.h"
 #include "CommandManager.h"
 
-void mainMenuGUI(sf::RenderWindow& mainWindow, Scene& scene);
-void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene);
+void mainMenuGUI(Scene& scene);
+void brushGUI(Scene& scene);
 void layerGUI(Scene& scene);
-void createBrushWindow(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene);
+void createBrushWindow(Scene& scene);
 
 bool popupIsOpen = false;
 std::string input;
@@ -26,7 +27,7 @@ static enum FILE_TYPE {
 
 FILE_TYPE file_type;
 
-void mainMenuGUI(sf::RenderWindow& mainWindow, Scene& scene)
+void mainMenuGUI(Scene& scene)
 {
 	if (ImGui::BeginMainMenuBar())
 	{
@@ -168,7 +169,7 @@ void mainMenuGUI(sf::RenderWindow& mainWindow, Scene& scene)
 	}
 }
 
-void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene)
+void brushGUI(Scene& scene)
 {
 	ImGui::SetNextWindowSize(ImVec2(250, WINDOW_HEIGHT - 250));
 	ImGui::SetNextWindowPos(ImVec2(0, 50));
@@ -199,7 +200,7 @@ void brushGUI(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene
 		}
 		else {
 			scene.brushLayer.clearLayer();
-			createBrushWindow(mainWindow, brushWindow, scene);
+			createBrushWindow(scene);
 		}
 	}
 
@@ -320,7 +321,7 @@ void layerGUI(Scene& scene)
 	ImGui::End();
 }
 
-void createBrushWindow(sf::RenderWindow& mainWindow, sf::RenderWindow& brushWindow, Scene& scene)
+void createBrushWindow(Scene& scene)
 {
 	brushWindow.create(sf::VideoMode(scene.brushWidth, scene.brushWidth), "Define Brush", sf::Style::Titlebar);
 	brushWindow.setFramerateLimit(120);

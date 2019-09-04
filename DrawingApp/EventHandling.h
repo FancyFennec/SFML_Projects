@@ -1,16 +1,17 @@
 #pragma once
 
+#include "GlobalVariables.h"
 #include "Imgui/imgui.h"
 #include "Imgui/imgui-SFML.h"
 #include "Settings.h"
 #include "Scene.h"
 #include "CommandManager.h"
 
-void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Scene& scene);
-void brushWindowEventHandling(sf::RenderWindow& brushWindow, sf::Event& event, Scene& scene);
-void lmbPressed(sf::RenderWindow& mainWindow, sf::Event& event, Scene& scene);
+void mainWindowEventHandling(Scene& scene);
+void brushWindowEventHandling(Scene& scene);
+void lmbPressed(Scene& scene);
 
-void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Scene& scene)
+void mainWindowEventHandling(Scene& scene)
 {
 	if (event.type == sf::Event::Closed)
 		mainWindow.close();
@@ -21,7 +22,7 @@ void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Sce
 	}
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			lmbPressed(mainWindow, event, scene);
+			lmbPressed(scene);
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
@@ -105,7 +106,7 @@ void mainWindowEventHandling(sf::RenderWindow& mainWindow, sf::Event& event, Sce
 	}
 }
 
-void brushWindowEventHandling(sf::RenderWindow& brushWindow, sf::Event& event, Scene& scene)
+void brushWindowEventHandling(Scene& scene)
 {
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.key.code == sf::Mouse::Left) {
@@ -127,7 +128,7 @@ void brushWindowEventHandling(sf::RenderWindow& brushWindow, sf::Event& event, S
 	}
 }
 
-void lmbPressed(sf::RenderWindow& mainWindow, sf::Event& event, Scene& scene)
+void lmbPressed(Scene& scene)
 {
 	CommandManager::clearActions();
 	scene.drawingLayer.clearLayer();
