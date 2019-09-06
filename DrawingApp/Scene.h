@@ -3,9 +3,13 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include <filesystem>
+#include <iostream>
+#include <fstream>
 
 #include "Layer.h"
 #include "Brush.h"
+#include "json.hpp"
+using json = nlohmann::json;
 
 namespace fs = std::experimental::filesystem;
 
@@ -58,6 +62,24 @@ public:
 	void drawOnBrushLayer(sf::RenderWindow& brushWindow);
 
 	~Scene() {
+		json brushJson;
+		brushJson["BrushNames"] = {};
+
+		for (auto p : fs::directory_iterator(BRUSH_DIRECTORY)) {
+			if (p.path().string().substr(
+				p.path().string().length() - 3,
+				p.path().string().length())._Equal("png")
+				) {
+				fs::remove(p);
+			}
+		}
+
+		for (auto &brush : brushes) {
+			brushJson["BrushNames"].push_back(brush->brushName);
+			brush->tex.copyToImage().saveToFile(std::string(BRUSH_DIRECTORY).append(brush->brushName).append(".png"));
+		}
+		std::ofstream o(std::string(BRUSH_DIRECTORY).append("brushes.json"));
+		o << brushJson << std::endl;
 	}
 
 private:
@@ -81,12 +103,16 @@ inline void Scene::initialize()
 	brushLayer.useOffset = false;
 	brushes.reserve(20);
 
-	for (auto p : fs::directory_iterator("Brushes")) {
+	std::ifstream inputStream(std::string(BRUSH_DIRECTORY).append("brushes.json"));
+	json brushJson;
+	inputStream >> brushJson;
+	for (auto& name : brushJson["BrushNames"]) {
 		brushes.push_back(std::make_unique<Brush>(
 			brushWidth,
-			p.path().string().data()
+			std::string(BRUSH_DIRECTORY).append(name.get<std::string>()).append(".png").data()
 			)
 		);
+		brushes.back()->brushName = name.get<std::string>();
 	}
 	
 	currentBrush = brushes.begin();
@@ -137,13 +163,14 @@ inline void Scene::saveBrush() {
 	renderTex.draw(brushLayer.sprite);
 	renderTex.display();
 
-	renderTex.getTexture().copyToImage().saveToFile("./Brushes/BrushWindow.png");
+	renderTex.getTexture().copyToImage().saveToFile(std::string(BRUSH_DIRECTORY).append("NewBrush.png"));
 
 	brushes.push_back(std::make_unique<Brush>(
 		brushWidth,
-		"./Brushes/BrushWindow.png"
+		std::string(BRUSH_DIRECTORY).append("NewBrush.png").data()
 		)
 	);
+	brushes.back()->brushName = "NewBrush";
 }
 
 inline void Scene::drawOnDrawingLayer(sf::RenderWindow & mainWindow) {

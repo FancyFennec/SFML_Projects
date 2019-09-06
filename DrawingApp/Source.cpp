@@ -4,13 +4,10 @@
 #include <thread> 
 
 #include "GlobalVariables.h"
-#include "json.hpp"
 #include "Scene.h"
 #include "GUI.h"
 #include "EventHandling.h"
 #include "CommandManager.h"
-
-using json = nlohmann::json;
 
 void mousePositionSampling();
 

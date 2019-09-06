@@ -9,6 +9,8 @@
 class Brush
 {
 public:
+	std::string brushName = "Brush";
+
 	sf::Image image;
 	sf::Texture tex;
 	sf::Sprite sprite;

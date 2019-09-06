@@ -16,8 +16,10 @@ void createBrushWindow(Scene& scene);
 
 bool popupIsOpen = false;
 bool layerNamePopupIsOpen = false;
+bool brushNamePopupIsOpen = false;
 std::string input;
 static char layerName[128] = "";
+static char brushName[128] = "";
 
 static enum FILE_TYPE {
 	PNG,
@@ -217,11 +219,8 @@ void brushGUI(Scene& scene)
 	ImGui::Image((*scene.brushes.begin())->sprite, sf::Vector2f(30, 30));
 
 	ImGui::SameLine();
-	std::string brushName = "Brush";
-	brushName.append(std::to_string(brushNumber));
-
 	//Button that sets the current brush to the current iterator
-	if (ImGui::Button(brushName.data())) {
+	if (ImGui::Button("Default Brush")) {
 		scene.currentBrush = scene.brushes.begin();
 	}
 	brushNumber++;
@@ -237,12 +236,18 @@ void brushGUI(Scene& scene)
 		ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30));
 
 		ImGui::SameLine();
-		std::string brushName = "Brush";
-		brushName.append(std::to_string(brushNumber));
+		std::string buttonName = (*iter)->brushName;
+		buttonName.append("##");
+		buttonName.append(std::to_string(brushNumber));
 
 		//Button that sets the current brush to the current iterator
-		if (ImGui::Button(brushName.data())) {
+		if (ImGui::Button(buttonName.data())) {
 			scene.currentBrush = iter;
+			if (clickClock.getElapsedTime().asMilliseconds() < DOUBLE_CLICK_SPEED) {
+				brushNamePopupIsOpen = true;
+				strcpy_s(brushName, "");
+			}
+			clickClock.restart();
 		}
 
 		//Delete button
@@ -254,7 +259,6 @@ void brushGUI(Scene& scene)
 			if (ImGui::Button(delButton.data())) {
 				auto iterDist = std::distance(scene.brushes.begin(), scene.currentBrush);
 				scene.currentBrush = scene.brushes.begin();
-
 
 				// This makes sure that we continue working on the brush we were before deleting
 				bool isCurrentBrushBelowIter = scene.brushes.begin() + iterDist < iter;
@@ -270,6 +274,21 @@ void brushGUI(Scene& scene)
 		brushNumber++;
 	}
 	ImGui::End();
+
+	if (brushNamePopupIsOpen) {
+		ImGui::OpenPopup("Chose Brush Name");
+		if (ImGui::BeginPopupModal("Chose Brush Name", &brushNamePopupIsOpen)) {
+
+			if (ImGui::InputText("Press Enter", brushName, sizeof(brushName), ImGuiInputTextFlags_EnterReturnsTrue)) {
+				(*scene.currentBrush)->brushName = std::string(brushName);
+				brushNamePopupIsOpen = false;
+			}
+			ImGui::Dummy(ImVec2(0, 30));
+			ImGui::SameLine(ImGui::GetWindowSize().x - 60);
+			if (ImGui::Button("Close", ImVec2(50, 20))) brushNamePopupIsOpen = false;
+			ImGui::EndPopup();
+		}
+	}
 }
 
 void layerGUI(Scene& scene)
@@ -296,7 +315,7 @@ void layerGUI(Scene& scene)
 		// Draw list of all the layers
 		for (auto iter = scene.lastActiveLayer; iter > scene.layers.begin(); std::advance(iter, -1)) {
 
-			//Image of the layer with white border if it is selected
+			// Image of the layer with white border if it is selected
 			if (iter == scene.currentLayer) {
 				ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color::White);
 			}
@@ -305,9 +324,14 @@ void layerGUI(Scene& scene)
 			}
 			ImGui::Image(iter->sprite, sf::Vector2f(30, 30));
 
-			//Button that sets the current Layer to the current iterator
+			// Button that sets the current Layer to the current iterator
+			// Double clicking lets one chose a layer name
 			ImGui::SameLine();
-			if (ImGui::Button(iter->layerName.data())) {
+			std::string buttonName = iter->layerName;
+			buttonName.append("##");
+			buttonName.append(std::to_string(layerNumber));
+
+			if (ImGui::Button(buttonName.data())) {
 				if (iter != scene.layers.begin()) scene.currentLayer = iter;
 				if (clickClock.getElapsedTime().asMilliseconds() < DOUBLE_CLICK_SPEED) {
 					layerNamePopupIsOpen = true;
