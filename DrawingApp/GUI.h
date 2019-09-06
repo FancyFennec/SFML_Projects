@@ -311,9 +311,7 @@ void layerGUI(Scene& scene)
 				if (iter != scene.layers.begin()) scene.currentLayer = iter;
 				if (clickClock.getElapsedTime().asMilliseconds() < DOUBLE_CLICK_SPEED) {
 					layerNamePopupIsOpen = true;
-					//TODO: reassigning the layername doesn't work
-					std::strcpy(layerName, "");
-					std::cout << "double clicked" << std::endl;
+					strcpy_s(layerName, "");
 				}
 				clickClock.restart();
 			}

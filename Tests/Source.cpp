@@ -5,7 +5,7 @@
 namespace fs = std::experimental::filesystem;
 
 int main() {
-	bool folder_found = false;
+	/*bool folder_found = false;
 	for (auto p : fs::directory_iterator("./TestFolders")) {
 		if (fs::is_directory(p)) {
 			folder_found = true;
@@ -27,6 +27,12 @@ int main() {
 	}
 	if (!folder_found) {
 		std::cout << std::string("No files found in ./TestFolders") << std::endl;
-	}
+	}*/
+
+	char test[128] = "Hallo";
+	strcpy_s(test, "Echo");
+
+	std::cout << test << std::endl;
+
 	return 0;
 }
