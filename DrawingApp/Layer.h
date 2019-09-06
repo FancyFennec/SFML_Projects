@@ -11,6 +11,8 @@ public:
 	unsigned int width;
 	unsigned int height;
 
+	std::string layerName = "Layer";
+
 	sf::Texture tex;
 	sf::Sprite sprite;
 

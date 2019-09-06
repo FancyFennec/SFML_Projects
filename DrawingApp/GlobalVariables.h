@@ -3,6 +3,7 @@
 #include <SFML/Graphics.hpp>
 
 static sf::Clock deltaClock;
+static sf::Clock clickClock;
 
 //Window initialisation
 static sf::RenderWindow mainWindow;

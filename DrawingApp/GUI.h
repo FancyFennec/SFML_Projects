@@ -15,7 +15,9 @@ void layerGUI(Scene& scene);
 void createBrushWindow(Scene& scene);
 
 bool popupIsOpen = false;
+bool layerNamePopupIsOpen = false;
 std::string input;
+static char layerName[128] = "";
 
 static enum FILE_TYPE {
 	PNG,
@@ -275,6 +277,7 @@ void layerGUI(Scene& scene)
 	ImGui::SetNextWindowSize(ImVec2(150, WINDOW_HEIGHT / 2));
 	ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH - 150, 50));
 	bool windowFlag = true;
+
 	ImGui::Begin("Layers", &windowFlag, ImGuiWindowFlags_NoResize);
 	{
 		//Button to create a new Layer
@@ -285,6 +288,8 @@ void layerGUI(Scene& scene)
 			else {
 				std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
 			}
+			scene.lastActiveLayer->layerName = "Layer";
+			scene.lastActiveLayer->layerName.append(std::to_string(scene.getSize()));
 		}
 		int layerNumber = scene.layers.size();
 
@@ -302,16 +307,21 @@ void layerGUI(Scene& scene)
 
 			//Button that sets the current Layer to the current iterator
 			ImGui::SameLine();
-			std::string layerName = "Layer";
-			layerName.append(std::to_string(std::distance(scene.layers.begin(), iter)));
-			if (ImGui::Button(layerName.data())) {
+			if (ImGui::Button(iter->layerName.data())) {
 				if (iter != scene.layers.begin()) scene.currentLayer = iter;
+				if (clickClock.getElapsedTime().asMilliseconds() < DOUBLE_CLICK_SPEED) {
+					layerNamePopupIsOpen = true;
+					//TODO: reassigning the layername doesn't work
+					std::strcpy(layerName, "");
+					std::cout << "double clicked" << std::endl;
+				}
+				clickClock.restart();
 			}
 
 			//Delete button
 			ImGui::SameLine();
 			std::string delButton = "Del##";
-			delButton.append(layerName); // If we don't append the layer name imgui is confused when we press the button
+			delButton.append(std::to_string(scene.getDistance(iter))); // If we don't append the layer name imgui is confused when we press the button
 			if (ImGui::Button(delButton.data())) {
 				CommandManager::deleteLayer(iter);
 			}
@@ -319,6 +329,22 @@ void layerGUI(Scene& scene)
 		}
 	}
 	ImGui::End();
+
+	if (layerNamePopupIsOpen) {
+		ImGui::OpenPopup("Chose Layer Name");
+		if (ImGui::BeginPopupModal("Chose Layer Name", &layerNamePopupIsOpen)) {
+
+			if (ImGui::InputText("Press Enter", layerName, sizeof(layerName), ImGuiInputTextFlags_EnterReturnsTrue)) {
+				//TODO: not working yet... layer doesn't inherit the name
+				scene.currentLayer->layerName = std::string(layerName);
+				layerNamePopupIsOpen = false;
+			}
+			ImGui::Dummy(ImVec2(0, 30));
+			ImGui::SameLine(ImGui::GetWindowSize().x - 60);
+			if (ImGui::Button("Close", ImVec2(50, 20))) layerNamePopupIsOpen = false;
+			ImGui::EndPopup();
+		}
+	}
 }
 
 void createBrushWindow(Scene& scene)

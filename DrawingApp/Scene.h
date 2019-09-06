@@ -75,6 +75,7 @@ inline void Scene::initialize()
 		layers.back().clearLayer();
 	}
 	currentLayer = std::next(layers.begin());
+	currentLayer->layerName = "Layer1";
 	lastActiveLayer = currentLayer;
 
 	brushLayer.useOffset = false;

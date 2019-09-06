@@ -10,6 +10,7 @@ static int WINDOW_HEIGHT = 800;
 
 const static int MAX_ACTIONS = 10;
 const static int MAX_LAYERS = 20;
+static unsigned int DOUBLE_CLICK_SPEED = 300;
 
 static long int SETTINGS = 0;
 static int LMB_PRESSED = BIT(1);
