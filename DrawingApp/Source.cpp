@@ -42,6 +42,7 @@ int main() {
 	return 0;
 }
 
+//TODO: use this seperate thread to implement more smooth mouse poisitions
 void mousePositionSampling()
 {
 	while (mainWindow.isOpen())
@@ -68,6 +69,13 @@ void mainRenderLoop()
 			mainWindow.draw(iter->sprite, state);
 		}
 
+		if (isMouseHeld() && isSpaceHeld()) {
+			std::cout << "moving layer" << std::endl;
+			scene.cursorPositions[2] = scene.cursorPositions[3];
+			scene.cursorPositions[3] = sf::Mouse::getPosition(mainWindow) - scene.currentLayer->offset;
+			scene.currentLayer->offset += scene.cursorPositions[3] - scene.cursorPositions[2];
+		}
+
 		mainWindowDrawing();
 		brushWindowDrawing();
 
@@ -76,7 +84,6 @@ void mainRenderLoop()
 				mainWindow.draw(iter->sprite, state);
 			}
 		}
-
 
 		//TODO: put this pen pressure update somewhere else
 		if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
@@ -105,7 +112,7 @@ void mainRenderLoop()
 void mainWindowDrawing()
 {
 	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-		if (isMouseHeld()) {
+		if (isMouseHeld() && !isSpaceHeld()) {
 			scene.drawOnDrawingLayer(mainWindow);
 		}
 	}
