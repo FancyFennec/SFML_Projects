@@ -69,8 +69,7 @@ void mainRenderLoop()
 			mainWindow.draw(iter->sprite, state);
 		}
 
-		if (isMouseHeld() && isSpaceHeld()) {
-			std::cout << "moving layer" << std::endl;
+		if (isMouseHeld() && isSpaceHeld()) {//This allows dragging of the layers
 			scene.cursorPositions[2] = scene.cursorPositions[3];
 			scene.cursorPositions[3] = sf::Mouse::getPosition(mainWindow) - scene.currentLayer->offset;
 			scene.currentLayer->offset += scene.cursorPositions[3] - scene.cursorPositions[2];
