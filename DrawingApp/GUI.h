@@ -85,6 +85,15 @@ void mainMenuGUI(Scene& scene)
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::ArrowButton("##Back", ImGuiDir_Left))
+		{
+			CommandManager::moveBackward();
+		}
+		if (ImGui::ArrowButton("##Forward", ImGuiDir_Right))
+		{
+			CommandManager::moveForward();
+		}
+
 		ImGui::SameLine(WINDOW_WIDTH - 60);
 		if (ImGui::Button("Close"))
 		{

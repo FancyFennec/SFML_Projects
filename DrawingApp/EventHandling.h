@@ -27,12 +27,12 @@ void mainWindowEventHandling(Scene& scene)
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
+			if (isMouseHeld()) {
 				sf::Texture oldTexture = scene.currentLayer->tex;
 				scene.currentLayer->updateLayer(scene.drawingLayer, scene.currentBrush);
 				CommandManager::updateLayer(oldTexture);
+				setMouseNotHeld();
 			}
-			setMouseNotHeld();
 		}
 	}
 	if (event.type == sf::Event::KeyPressed) {
@@ -130,17 +130,19 @@ void brushWindowEventHandling(Scene& scene)
 
 void lmbPressed(Scene& scene)
 {
-	CommandManager::clearActions();
-	scene.drawingLayer.clearLayer();
+	if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
+		CommandManager::clearActions();
+		scene.drawingLayer.clearLayer();
 
-	if (isAltHeld()) {
-		if (event.mouseButton.button == sf::Mouse::Left) {
-			scene.pickColor(mainWindow);
+		if (isAltHeld()) {
+			if (event.mouseButton.button == sf::Mouse::Left) {
+				scene.pickColor(mainWindow);
+			}
 		}
-	}
-	else {
-		setMouseIsHeld();
-		scene.resetCursorPositions(mainWindow, scene.drawingLayer);
-		//No need to draw the window here, it gets drawn because the lmb is being held later
+		else {
+			setMouseIsHeld();
+			scene.resetCursorPositions(mainWindow, scene.drawingLayer);
+			//No need to draw the window here, it gets drawn because the lmb is being held later
+		}
 	}
 }
