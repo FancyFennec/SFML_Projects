@@ -85,6 +85,8 @@ void mainMenuGUI(Scene& scene)
 		{
 			CommandManager::moveForward();
 		}
+		if (ImGui::Checkbox("GUI", &SHOW_GUI)) {
+		}
 
 		ImGui::SameLine(WINDOW_WIDTH - 60);
 		if (ImGui::Button("Close"))
