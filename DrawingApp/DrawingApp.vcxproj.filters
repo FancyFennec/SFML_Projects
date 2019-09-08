@@ -13,81 +13,102 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\imgui">
+      <UniqueIdentifier>{726f4931-f906-4b1b-86aa-c0ace8142d27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\imgui">
+      <UniqueIdentifier>{47a1c5ba-1bfa-4fce-a1c7-17b423b94aa9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\utils">
+      <UniqueIdentifier>{2d98fc3d-3121-42ff-a73a-20b3e7ecad90}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\classes">
+      <UniqueIdentifier>{370c2754-aee0-466a-8a68-f746c5f03cc6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui">
+      <UniqueIdentifier>{e48383d1-699d-4f6c-9ee9-878cd52d367c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Imgui\imgui.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Imgui\imgui_demo.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Imgui\imgui_draw.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Imgui\imgui_widgets.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
     <ClCompile Include="Imgui\imgui-SFML.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Imgui\imconfig.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Imgui\imgui.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Imgui\imgui_internal.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Imgui\imgui-SFML.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Imgui\imgui-SFML_export.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Imgui\imstb_rectpack.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Imgui\imstb_textedit.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Imgui\imstb_truetype.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="BrushGUI.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="LayerGUI.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="MainMenuGUI.h">
+      <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="json.hpp">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Layer.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
     <ClInclude Include="Brush.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\classes</Filter>
     </ClInclude>
-    <ClInclude Include="Settings.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Layer.h">
+      <Filter>Header Files\classes</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GUI.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\classes</Filter>
     </ClInclude>
     <ClInclude Include="CommandManager.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="EventHandling.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\utils</Filter>
     </ClInclude>
     <ClInclude Include="GlobalVariables.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
+      <Filter>Header Files\utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -96,7 +117,11 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="lsystems.json" />
-    <None Include="fragment_shader.frag" />
+    <None Include="lsystems.json">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="fragment_shader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

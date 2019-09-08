@@ -5,7 +5,9 @@
 
 #include "GlobalVariables.h"
 #include "Scene.h"
-#include "GUI.h"
+#include "MainMenuGUI.h"
+#include "BrushGUI.h"
+#include "LayerGUI.h"
 #include "EventHandling.h"
 #include "CommandManager.h"
 

@@ -133,11 +133,11 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BrushGUI.h" />
     <ClInclude Include="CommandManager.h" />
     <ClInclude Include="Brush.h" />
     <ClInclude Include="EventHandling.h" />
     <ClInclude Include="GlobalVariables.h" />
-    <ClInclude Include="GUI.h" />
     <ClInclude Include="Imgui\imconfig.h" />
     <ClInclude Include="Imgui\imgui-SFML.h" />
     <ClInclude Include="Imgui\imgui-SFML_export.h" />
@@ -148,6 +148,8 @@
     <ClInclude Include="Imgui\imstb_truetype.h" />
     <ClInclude Include="json.hpp" />
     <ClInclude Include="Layer.h" />
+    <ClInclude Include="LayerGUI.h" />
+    <ClInclude Include="MainMenuGUI.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Settings.h" />
