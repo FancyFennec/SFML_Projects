@@ -35,9 +35,21 @@ void brushGUI(Scene& scene)
 			ImGui::SliderInt("Flow", &(*scene.currentBrush)->flow, 0, 255);
 		}
 		if (ImGui::CollapsingHeader("Scatter")) {
-			ImGui::SliderFloat("S-Scatter", &(*scene.currentBrush)->scaterScale, 0, 1);
-			ImGui::SliderFloat("P-Scatter", &(*scene.currentBrush)->scaterPos, 0, 1000);
-			ImGui::SliderFloat("A-Scatter", &(*scene.currentBrush)->scaterAngle, 0, 180);
+			ImGui::Checkbox("Size##Checkbox", &(*scene.currentBrush)->useSScatter);
+			if ((*scene.currentBrush)->useSScatter){
+				ImGui::SameLine(65);
+				ImGui::SliderFloat("##S-Scatter", &(*scene.currentBrush)->scaterScale, 0, 1);
+			}
+			ImGui::Checkbox("Pos##Checkbox", &(*scene.currentBrush)->usePScatter);
+			if ((*scene.currentBrush)->usePScatter) {
+				ImGui::SameLine(65);
+				ImGui::SliderFloat("##P-Scatter", &(*scene.currentBrush)->scaterPos, 0, 1000);
+			}
+			ImGui::Checkbox("Angle##Checkbox", &(*scene.currentBrush)->useAScatter);
+			if ((*scene.currentBrush)->useAScatter) {
+				ImGui::SameLine(65);
+				ImGui::SliderFloat("##A-Scatter", &(*scene.currentBrush)->scaterAngle, 0, 180);
+			}
 		}
 
 		//Button to create a new brush

@@ -22,6 +22,10 @@ public:
 	int flow = 70;
 	float pressure = 1.0f;
 
+	bool useSScatter = true;
+	bool usePScatter = true;
+	bool useAScatter = true;
+
 	float scaterScale = 0.0f;
 	float scaterPos = 0.0f;
 	float scaterAngle = 0.0f;

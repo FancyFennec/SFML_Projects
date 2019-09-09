@@ -53,6 +53,9 @@ private:
 
 	void initialize(sf::Color& color);
 	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2);
+	float getSScatter(std::vector<BrushPntr>::iterator& brush);
+	float getPScatter(std::vector<BrushPntr>::iterator& brush);
+	float getAScatter(std::vector<BrushPntr>::iterator& brush);
 	sf::RenderStates getRenderState(std::vector<BrushPntr>::iterator & brush, sf::Vector2f &drawingPos);
 	std::function<sf::Vector2f(float)> getBezier(std::vector<sf::Vector2i>& cursorPositions); //Not used right now
 };
@@ -97,7 +100,7 @@ inline void Layer::initialize(sf::Color& color) {
 	tex.update(image);
 	sprite.setTexture(tex);
 
-	if (offset.x == 0 && offset.y == 0) {
+	if (offset.x == 0 && offset.y == 0) { // Since the offset is static, we only need to set it o nthe first layer
 		offset = sf::Vector2i(WINDOW_WIDTH / 2 - width / 2, WINDOW_HEIGHT / 2 - height / 2);
 	}
 
@@ -176,13 +179,10 @@ sf::RenderStates Layer::getRenderState(std::vector<BrushPntr>::iterator & brush,
 {
 	sf::RenderStates state;
 
-	float scale = (**brush).pressure * (1.0f + (**brush).scaterScale * (rand() % 20 - 10) / 10.0f);
-	state.transform.scale(
-		scale, scale, drawingPos.x, drawingPos.y);
-	state.transform.rotate((**brush).scaterAngle * (rand() % 20 - 10) / 10.0f, drawingPos);
-	state.transform.translate(
-		(**brush).brushsize * (**brush).scaterPos * (rand() % 20 - 10) / 10.0f,
-		(**brush).brushsize * (**brush).scaterPos * (rand() % 20 - 10) / 10.0f);
+	float scale = getSScatter(brush);
+	state.transform.scale(scale, scale, drawingPos.x, drawingPos.y);
+	state.transform.rotate(getAScatter(brush));
+	state.transform.translate(getPScatter(brush), getPScatter(brush));
 
 	return state;
 }
@@ -263,5 +263,35 @@ inline std::function<sf::Vector2f(float)> Layer::getBezier(std::vector<sf::Vecto
 
 inline float Layer::distance(const sf::Vector2i & vec1, const sf::Vector2i & vec2) {
 	return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
+}
+
+inline float Layer::getSScatter(std::vector<BrushPntr>::iterator & brush)
+{
+	if ((**brush).useSScatter) {
+		return (**brush).pressure * (1.0f + (**brush).scaterScale * (rand() % 20 - 10) / 10.0f);
+	}
+	else {
+		return 1.0f;
+	}
+}
+
+inline float Layer::getPScatter(std::vector<BrushPntr>::iterator & brush)
+{
+	if ((**brush).usePScatter) {
+		return (**brush).brushsize * (**brush).scaterPos * (rand() % 20 - 10) / 10.0f;
+	}
+	else {
+		return (**brush).brushsize;
+	}
+}
+
+inline float Layer::getAScatter(std::vector<BrushPntr>::iterator & brush)
+{
+	if ((**brush).useAScatter) {
+		return (**brush).scaterAngle * (rand() % 20 - 10) / 10.0f;
+	}
+	else {
+		return 0.0f;
+	}
 }
 

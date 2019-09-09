@@ -28,13 +28,15 @@ public:
 	std::vector<Layer>::iterator currentLayer;
 	std::vector<Layer>::iterator lastActiveLayer;
 	
+	//Auxilliary variables for the brush
+	float movedDistance = 0; // keeps track of how much the brush has moved since the last render cicle
+	int brushWidth = 256; //Size of the brush image
+	static float currentColor[3]; //Currently needed to pass to the imgui color picker
+
 	//Brush settings for the current brush
-	int brushWidth = 256;
 	float brushSize = 0.3f;
-	float movedDistance = 0;
 	float stepsize = 2.0f;
-	int alpha = 100;
-	static float currentColor[3];
+	int oppacity = 100;
 
 	Layer brushLayer;
 	std::vector<BrushPntr> brushes;
@@ -62,6 +64,7 @@ public:
 	void drawOnBrushLayer(sf::RenderWindow& brushWindow);
 
 	~Scene() {
+		//TODO: Save the different brush settings as well
 		json brushJson;
 		brushJson["BrushNames"] = {};
 
