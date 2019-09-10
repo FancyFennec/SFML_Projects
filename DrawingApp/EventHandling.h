@@ -29,7 +29,7 @@ void mainWindowEventHandling(Scene& scene)
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (isMouseHeld()) {
 				sf::Texture oldTexture = scene.currentLayer->tex;
-				scene.currentLayer->updateLayer(scene.drawingLayer, scene.currentBrush);
+				scene.currentLayer->blendlayers(scene.drawingLayer, scene.currentBrush);
 				CommandManager::updateLayer(oldTexture);
 				setMouseNotHeld();
 			}
@@ -38,8 +38,6 @@ void mainWindowEventHandling(Scene& scene)
 	if (event.type == sf::Event::KeyPressed) {
 		switch (event.key.code) {
 		case(sf::Keyboard::Q): {
-			mainWindow.clear(sf::Color(255, 255, 255, 255));
-			scene.currentLayer->updateLayer(mainWindow);
 			break;
 		}
 		case(sf::Keyboard::LAlt): {
@@ -62,7 +60,8 @@ void mainWindowEventHandling(Scene& scene)
 			}
 			break;
 		}
-		case(sf::Keyboard::Space): {
+		case(sf::Keyboard::LShift): {
+			//TODO: Somehow on my laptop there are som weird effecets when I use space instead of lshift
 			setSpaceIsHeld();
 			break;
 		}
@@ -98,7 +97,7 @@ void mainWindowEventHandling(Scene& scene)
 			setCtrlNotHeld();
 			break;
 		}
-		case(sf::Keyboard::Space): {
+		case(sf::Keyboard::LShift): {
 			setSpaceNotHeld();
 			break;
 		}

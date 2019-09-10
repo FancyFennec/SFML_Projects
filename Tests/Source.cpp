@@ -9,66 +9,35 @@ namespace fs = std::experimental::filesystem;
 sf::RenderWindow window;
 sf::Event event;
 sf::Color clear(0, 0, 0, 255);
-unsigned int width = 256;
+unsigned int width = 512;
+unsigned int radius = 16;
 
-sf::Image img;
-sf::Texture tex;
+sf::CircleShape circle;
 sf::Sprite sprite;
-
-int step = 0;
-bool calculateNewStep = true;
-unsigned int fileCounter = 0;
-
-float getAlpha(int x, int y, float p) { 
-	return std::powf(1.0f - (float)(x * x + y * y) / (width * width / 4), p);
-};
-
-void calculatePixels(double p);
+unsigned int steps = 32;
+bool stepsizeChanged = true;
 
 int main() {
 
-	window.create(sf::VideoMode(width, width), "Drawing App", sf::Style::Titlebar);
+	window.create(sf::VideoMode(width, width/2), "Test Window", sf::Style::Titlebar);
 	window.setMouseCursorVisible(false);
 	window.setFramerateLimit(60);
 
+	sf::Color col = sf::Color::Red;
+	col.a = 30;
+	circle.setFillColor(col);
+	circle.setRadius(radius);
+	circle.setOrigin(sf::Vector2f(radius / 2, radius / 2));
+
+	sf::RenderTexture rTex;
+	rTex.create(width, width/2);
+
 	while (window.isOpen()) {
 		while (window.pollEvent(event)) {
-			if (event.type == sf::Event::KeyPressed) {
-				if (event.key.code == sf::Keyboard::Escape) {
-					window.close();
-				}
-			}
-			if (event.type == sf::Event::KeyPressed) {
-				if (event.key.code == sf::Keyboard::Up) {
-					calculateNewStep = true;
-					step += 1;
-				}
-			}
-			if (event.type == sf::Event::KeyPressed) {
-				if (event.key.code == sf::Keyboard::Down) {
-					calculateNewStep = true;
-					step -= 1;
-				}
-			}
-			if (event.type == sf::Event::KeyPressed) {
-				if (event.key.code == sf::Keyboard::S) {
-					std::string filename = "Brush";
-					filename.append(std::to_string(fileCounter)).append(".png");
-					img.saveToFile(filename);
-					fileCounter++;
-				}
-			}
+			eventHandling();
 		}
 
-		if (calculateNewStep) {
-			img.create(width, width, sf::Color(255, 255, 255, 0));
-			calculatePixels(pow(2, step));
-			tex.create(width, width);
-			tex.loadFromImage(img);
-			sprite.setTexture(tex);
-
-			calculateNewStep = false;
-		}
+		updatesprite(rTex);
 
 		window.clear(clear);
 
@@ -81,21 +50,57 @@ int main() {
 	return 0;
 }
 
-void calculatePixels(double p)
+void updatesprite(sf::RenderTexture &rTex)
 {
-	for (int i = 0; i < width; i++) {
-		for (int j = 0; j < width; j++) {
-			int x = width / 2 - i;
-			int y = width / 2 - j;
+	if (stepsizeChanged) {
 
-			if ((x * x + y * y) <= (width * width / 4)) {
-				float alpha = getAlpha(x, y, p) * 255;
-				img.setPixel(i, j, sf::Color(255, 255, 255, alpha));
-			}
-			else {
-				img.setPixel(i, j, sf::Color(255, 255, 255, 0));
-			}
+		rTex.clear(sf::Color::White);
 
+		for (int i = 0; i <= steps; i++) {
+			float scalingFactor = ((float)i - steps / 2) / (steps / 2);
+
+			circle.setScale(1 - abs(scalingFactor), 1 - abs(scalingFactor));
+			circle.setPosition(
+				sf::Vector2f(
+					scalingFactor * 200 + width / 2,
+					50.0f * sin(scalingFactor * 3.145) + width / 4
+				)
+			);
+			rTex.draw(circle);
+		}
+
+		rTex.display();
+		sprite.setTexture(rTex.getTexture());
+
+		stepsizeChanged = false;
+	}
+}
+
+void eventHandling()
+{
+	if (event.type == sf::Event::KeyPressed) {
+		if (event.key.code == sf::Keyboard::Escape) {
+			window.close();
+		}
+	}
+	if (event.type == sf::Event::KeyPressed) {
+		if (event.key.code == sf::Keyboard::Up) {
+			std::cout << "Size increased" << std::endl;
+			steps *= 2;
+			stepsizeChanged = true;
+		}
+	}
+	if (event.type == sf::Event::KeyPressed) {
+		if (event.key.code == sf::Keyboard::Down) {
+			if (steps > 2) {
+				std::cout << "Size reduced" << std::endl;
+				steps /= 2;
+				stepsizeChanged = true;
+			}
+		}
+	}
+	if (event.type == sf::Event::KeyPressed) {
+		if (event.key.code == sf::Keyboard::S) {
 		}
 	}
 }

@@ -146,10 +146,6 @@ inline void Scene::resetCursorPositions(sf::RenderWindow & window, Layer& layer)
 	movedDistance = 0.0f;
 	sf::Vector2i newPos = sf::Mouse::getPosition(window);
 
-	if (layer.useOffset) {
-		newPos -= currentLayer->offset;
-	}
-
 	cursorPositions[0] = newPos;
 	cursorPositions[1] = newPos;
 	cursorPositions[2] = newPos;
@@ -177,7 +173,7 @@ inline void Scene::saveBrush() {
 }
 
 inline void Scene::drawOnDrawingLayer(sf::RenderWindow & mainWindow) {
-	drawingLayer.drawLinearOnCanvas(movedDistance, currentBrush, cursorPositions, mainWindow);
+	drawingLayer.drawLerpOnCanvas(movedDistance, currentBrush, cursorPositions, mainWindow);
 	//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
 
 	sf::RenderStates state;
@@ -188,6 +184,6 @@ inline void Scene::drawOnDrawingLayer(sf::RenderWindow & mainWindow) {
 }
 
 inline void Scene::drawOnBrushLayer(sf::RenderWindow & brushWindow) {
-	brushLayer.drawLinearOnCanvas(movedDistance, currentBrush, cursorPositions, brushWindow);
-	brushLayer.drawLayer(brushWindow);
+	brushLayer.drawLerpOnCanvas(movedDistance, currentBrush, cursorPositions, brushWindow);
+	brushLayer.drawLayerinWindow(brushWindow);
 }

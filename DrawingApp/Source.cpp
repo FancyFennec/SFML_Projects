@@ -1,20 +1,17 @@
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include <Windows.h>
 #include <thread> 
 
-#include "GlobalVariables.h"
-#include "Scene.h"
 #include "MainMenuGUI.h"
 #include "BrushGUI.h"
 #include "LayerGUI.h"
 #include "EventHandling.h"
-#include "CommandManager.h"
 
 void mousePositionSampling();
 
 void createMainWindow();
 void mainRenderLoop();
+void moveLayers();
 void mainWindowDrawing();
 void brushWindowDrawing();
 void brushWindowRendering();
@@ -51,7 +48,6 @@ void mousePositionSampling()
 	{
 		if (isMouseHeld()) {
 			mousepositions.push_back(sf::Mouse::getPosition(mainWindow));
-			//std::cout << mousepositions.size() << std::endl;
 		}
 	}
 }
@@ -70,13 +66,8 @@ void mainRenderLoop()
 		for (auto iter = scene.layers.begin(); iter <= scene.currentLayer; std::advance(iter, 1)) {
 			mainWindow.draw(iter->sprite, state);
 		}
-
-		if (isMouseHeld() && isSpaceHeld()) {//This allows dragging of the layers
-			scene.cursorPositions[2] = scene.cursorPositions[3];
-			scene.cursorPositions[3] = sf::Mouse::getPosition(mainWindow) - scene.currentLayer->offset;
-			scene.currentLayer->offset += scene.cursorPositions[3] - scene.cursorPositions[2];
-		}
-
+		
+		moveLayers();
 		mainWindowDrawing();
 		brushWindowDrawing();
 
@@ -107,6 +98,15 @@ void mainRenderLoop()
 		mainWindow.display();
 
 		brushWindowRendering();
+	}
+}
+
+void moveLayers()
+{
+	if (isMouseHeld() && isSpaceHeld()) {//This allows dragging of the layers
+		scene.cursorPositions[2] = scene.cursorPositions[3];
+		scene.cursorPositions[3] = sf::Mouse::getPosition(mainWindow);
+		scene.currentLayer->offset += scene.cursorPositions[3] - scene.cursorPositions[2];
 	}
 }
 
@@ -159,7 +159,7 @@ void brushWindowRendering()
 			brushWindowEventHandling(scene);
 		}
 		brushWindow.clear(sf::Color::Black);
-		scene.brushLayer.drawLayer(brushWindow);
+		scene.brushLayer.drawLayerinWindow(brushWindow);
 		brushWindow.display();
 	}
 }

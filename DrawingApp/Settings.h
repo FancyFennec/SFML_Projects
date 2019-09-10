@@ -8,7 +8,7 @@ static const char* BRUSH_DIRECTORY = "./Brushes/";
 static const char* SCENES_DIRECTORY = "./Scenes/";
 
 static bool USE_FULLSCREEN = false;
-static unsigned int FPS = 120;
+static unsigned int FPS = 60;
 
 static int WINDOW_WIDTH = 1200;
 static int WINDOW_HEIGHT = 800;
@@ -18,12 +18,10 @@ const static int MAX_LAYERS = 20;
 static unsigned int DOUBLE_CLICK_SPEED = 300;
 
 static long int SETTINGS = 0;
-static int LMB_PRESSED = BIT(1);
-static int LMB_RELEASED = BIT(2);
-static int LMB_IS_HELD = BIT(3);
-static int CTRL_IS_HELD = BIT(4);
-static int ALT_IS_HELD = BIT(5);
-static int SPACE_IS_HELD = BIT(6);
+static int LMB_IS_HELD = BIT(0);
+static int CTRL_IS_HELD = BIT(1);
+static int ALT_IS_HELD = BIT(2);
+static int SPACE_IS_HELD = BIT(3);
 
 void getDesktopResolution(int& horizontal, int& vertical) {
 
@@ -31,30 +29,6 @@ void getDesktopResolution(int& horizontal, int& vertical) {
 
 	horizontal = GetSystemMetrics(SM_CXSCREEN);
 	vertical = GetSystemMetrics(SM_CYSCREEN);
-}
-
-bool wasLMBPressed() {
-	return SETTINGS & LMB_PRESSED;
-}
-
-void setLMBPressed() {
-	SETTINGS |= LMB_PRESSED;
-}
-
-void setLMBNotPressed() {
-	SETTINGS &= ~LMB_PRESSED;
-}
-
-bool wasLMBReleased() {
-	return SETTINGS & LMB_RELEASED;
-}
-
-void setLMBReleased() {
-	SETTINGS |= LMB_RELEASED;
-}
-
-void setLMBNotReleased() {
-	SETTINGS &= ~LMB_RELEASED;
 }
 
 bool isMouseHeld() {

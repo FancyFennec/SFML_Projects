@@ -81,7 +81,6 @@ void layerGUI(Scene& scene)
 			if (ImGui::BeginPopupModal("Chose Layer Name", &layerNamePopupIsOpen)) {
 
 				if (ImGui::InputText("Press Enter", layerName, sizeof(layerName), ImGuiInputTextFlags_EnterReturnsTrue)) {
-					//TODO: not working yet... layer doesn't inherit the name
 					scene.currentLayer->layerName = std::string(layerName);
 					layerNamePopupIsOpen = false;
 				}
