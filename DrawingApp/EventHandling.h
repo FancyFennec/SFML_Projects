@@ -37,7 +37,10 @@ void mainWindowEventHandling(Scene& scene)
 	}
 	if (event.type == sf::Event::KeyPressed) {
 		switch (event.key.code) {
-		case(sf::Keyboard::Q): {
+		case(sf::Keyboard::X): { //Swap Colors
+			sf::Color swapColor = (*scene.currentBrush)->currentColor;
+			(*scene.currentBrush)->currentColor = (*scene.currentBrush)->previousColor;
+			(*scene.currentBrush)->previousColor = swapColor;
 			break;
 		}
 		case(sf::Keyboard::LAlt): {
@@ -60,8 +63,7 @@ void mainWindowEventHandling(Scene& scene)
 			}
 			break;
 		}
-		case(sf::Keyboard::LShift): {
-			//TODO: Somehow on my laptop there are som weird effecets when I use space instead of lshift
+		case(sf::Keyboard::Space): {
 			setSpaceIsHeld();
 			break;
 		}
@@ -97,7 +99,7 @@ void mainWindowEventHandling(Scene& scene)
 			setCtrlNotHeld();
 			break;
 		}
-		case(sf::Keyboard::LShift): {
+		case(sf::Keyboard::Space): {
 			setSpaceNotHeld();
 			break;
 		}

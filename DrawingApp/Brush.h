@@ -14,7 +14,8 @@ public:
 	sf::Image image;
 	sf::Texture tex;
 	sf::Sprite sprite;
-	static sf::Color color;
+	static sf::Color currentColor;
+	static sf::Color previousColor;
 
 	float stepsize = 33.0f;
 	float brushsize = 0.3f;
@@ -42,14 +43,14 @@ public:
 	void setBrushSize(float brushSize);
 	void setBrushColor(){
 		sprite.setColor(sf::Color(
-			color.r,
-			color.g,
-			color.b,
+			currentColor.r,
+			currentColor.g,
+			currentColor.b,
 			pressure * flow));
 	}
 
 	void resetBrushColor() {
-		sprite.setColor(color);
+		sprite.setColor(currentColor);
 	}
 
 	~Brush() {};
@@ -58,7 +59,8 @@ private:
 	void initialize();
 };
 
-sf::Color Brush::color = sf::Color::Black;
+sf::Color Brush::currentColor = sf::Color::Black;
+sf::Color Brush::previousColor = sf::Color::Black;
 
 inline void Brush::initialize() {
 	tex.create(image.getSize().x, image.getSize().y);

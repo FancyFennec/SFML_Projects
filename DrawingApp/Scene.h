@@ -119,14 +119,14 @@ inline void Scene::initialize()
 	}
 	
 	currentBrush = brushes.begin();
-	(*currentBrush)->color = sf::Color((sf::Uint8)(currentColor[0] * 255), (sf::Uint8)(currentColor[1] * 255), (sf::Uint8)(currentColor[2] * 255), 255);
+	(*currentBrush)->currentColor = sf::Color((sf::Uint8)(currentColor[0] * 255), (sf::Uint8)(currentColor[1] * 255), (sf::Uint8)(currentColor[2] * 255), 255);
 	(*currentBrush)->setBrushSize(brushSize);
 }
 
 inline void Scene::updateColor() {
-	(*currentBrush)->color.r = (sf::Uint8)(currentColor[0] * 255);
-	(*currentBrush)->color.g = (sf::Uint8)(currentColor[1] * 255);
-	(*currentBrush)->color.b = (sf::Uint8)(currentColor[2] * 255);
+	(*currentBrush)->currentColor.r = (sf::Uint8)(currentColor[0] * 255);
+	(*currentBrush)->currentColor.g = (sf::Uint8)(currentColor[1] * 255);
+	(*currentBrush)->currentColor.b = (sf::Uint8)(currentColor[2] * 255);
 }
 
 inline void Scene::pickColor(sf::RenderWindow & window) {
@@ -135,11 +135,11 @@ inline void Scene::pickColor(sf::RenderWindow & window) {
 	sf::Texture newTex;
 	newTex.create(window.getSize().x, window.getSize().y);
 	newTex.update(window);
-	(*currentBrush)->color = newTex.copyToImage().getPixel(pos.x, pos.y);
+	(*currentBrush)->currentColor = newTex.copyToImage().getPixel(pos.x, pos.y);
 
-	currentColor[0] = (*currentBrush)->color.r / 255.0f;
-	currentColor[1] = (*currentBrush)->color.g / 255.0f;
-	currentColor[2] = (*currentBrush)->color.b / 255.0f;
+	currentColor[0] = (*currentBrush)->currentColor.r / 255.0f;
+	currentColor[1] = (*currentBrush)->currentColor.g / 255.0f;
+	currentColor[2] = (*currentBrush)->currentColor.b / 255.0f;
 }
 
 inline void Scene::resetCursorPositions(sf::RenderWindow & window, Layer& layer) {

@@ -119,7 +119,7 @@ inline void Layer::drawLerpOnCanvas(float& movedDistance, std::vector<BrushPntr>
 
 		sf::RenderTexture renderTex;
 		renderTex.create(width, height);
-		renderTex.clear(sf::Color((**brush).color.r, (**brush).color.g, (**brush).color.b, 0));
+		renderTex.clear(sf::Color((**brush).currentColor.r, (**brush).currentColor.g, (**brush).currentColor.b, 0));
 
 		(**brush).setBrushColor();
 		if (useOffset) {
@@ -148,7 +148,7 @@ inline void Layer::drawLerpOnCanvas(float& movedDistance, std::vector<BrushPntr>
 
 		sf::RenderTexture renderTex;
 		renderTex.create(width, height);
-		renderTex.clear(sf::Color((*brush)->color.r, (*brush)->color.g, (*brush)->color.b, 0));
+		renderTex.clear(sf::Color((*brush)->currentColor.r, (*brush)->currentColor.g, (*brush)->currentColor.b, 0));
 		renderTex.draw(sprite);
 
 		(**brush).setBrushColor();
