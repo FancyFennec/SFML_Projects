@@ -40,6 +40,42 @@ public:
 		initialize();
 	}
 
+	ImVec4 getCurrentImColorRGBA() {
+		return ImVec4(
+			currentColor.r / 255.0f,
+			currentColor.g / 255.0f,
+			currentColor.b / 255.0f,
+			currentColor.a / 255.0f
+		);
+	}
+
+	ImVec4 getCurrentImColorRGB() {
+		return ImVec4(
+			currentColor.r / 255.0f,
+			currentColor.g / 255.0f,
+			currentColor.b / 255.0f,
+			1.0f
+		);
+	}
+
+	ImVec4 getPreviousImColorRGBA() {
+		return ImVec4(
+			previousColor.r / 255.0f,
+			previousColor.g / 255.0f,
+			previousColor.b / 255.0f,
+			previousColor.a / 255.0f
+		);
+	}
+
+	ImVec4 getPreviousImColorRGB() {
+		return ImVec4(
+			previousColor.r / 255.0f,
+			previousColor.g / 255.0f,
+			previousColor.b / 255.0f,
+			1.0f
+		);
+	}
+
 	void setBrushSize(float brushSize);
 	void setBrushColor(){
 		sprite.setColor(sf::Color(

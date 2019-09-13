@@ -28,23 +28,13 @@ void brushGUI(Scene& scene)
 				scene.updateColor();
 			}
 			ImGui::ColorButton("Current##CurrentColor",
-				ImVec4(
-				(**scene.currentBrush).currentColor.r / 255.0f,
-					(**scene.currentBrush).currentColor.g / 255.0f,
-					(**scene.currentBrush).currentColor.b / 255.0f,
-					1.0f
-				),
+				(**scene.currentBrush).getCurrentImColorRGB(),
 				0,
 				ImVec2(30.0f, 20.0f)
 			);
 			ImGui::SameLine();
 			ImGui::ColorButton("Previous##PreviousColor",
-				ImVec4(
-				(**scene.currentBrush).previousColor.r / 255.0f,
-					(**scene.currentBrush).previousColor.g / 255.0f,
-					(**scene.currentBrush).previousColor.b / 255.0f,
-					1.0f
-				),
+				(**scene.currentBrush).getPreviousImColorRGB(),
 				0,
 				ImVec2(30.0f, 20.0f)
 			);
