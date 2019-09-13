@@ -24,8 +24,8 @@ void brushGUI(Scene& scene)
 
 		ImGui::Begin("Brush Settings", &SHOW_GUI, ImGuiWindowFlags_NoResize);
 		if (ImGui::CollapsingHeader("Colour Picker")) {
-			if (ImGui::ColorPicker3("Colour", scene.currentColor)) {
-				scene.updateColor();
+			if (ImGui::ColorPicker3("Colour", guiBrushColor)) {
+				(*scene.currentBrush)->setColor(guiBrushColor);
 			}
 			ImGui::ColorButton("Current##CurrentColor",
 				(**scene.currentBrush).getCurrentImColorRGB(),
@@ -41,7 +41,7 @@ void brushGUI(Scene& scene)
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			ImGui::SliderFloat("Spacing", &(*scene.currentBrush)->stepsize, 0, 500);
-			if (ImGui::SliderFloat("Size", &scene.brushSize, 0, 1)) (*scene.currentBrush)->setBrushSize(scene.brushSize);
+			if (ImGui::SliderFloat("Size", &scene.brushSize, 0, 1)) (*scene.currentBrush)->setSize(scene.brushSize);
 			ImGui::SliderInt("Opacity", &(*scene.currentBrush)->opacity, 0, 255);
 			ImGui::SliderInt("Flow", &(*scene.currentBrush)->flow, 0, 255);
 		}

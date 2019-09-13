@@ -71,13 +71,25 @@ public:
 		return ImVec4(
 			previousColor.r / 255.0f,
 			previousColor.g / 255.0f,
-			previousColor.b / 255.0f,
+			currentColor.b / 255.0f,
 			1.0f
 		);
 	}
 
-	void setBrushSize(float brushSize);
-	void setBrushColor(){
+	void updateGuiColor(static float* color) {
+		color[0] = currentColor.r / 255.0f;
+		color[1] = currentColor.g / 255.0f;
+		color[2] = currentColor.b / 255.0f;
+	}
+
+	void setColor(static float* color) {
+		currentColor.r = (sf::Uint8)(color[0] * 255);
+		currentColor.g = (sf::Uint8)(color[1] * 255);
+		currentColor.b = (sf::Uint8)(color[2] * 255);
+	}
+
+	void setSize(float brushSize);
+	void setSpriteColor(){
 		sprite.setColor(sf::Color(
 			currentColor.r,
 			currentColor.g,
@@ -106,7 +118,7 @@ inline void Brush::initialize() {
 	sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
 }
 
-inline void Brush::setBrushSize(float brushSize) {
+inline void Brush::setSize(float brushSize) {
 	this->brushsize = brushSize;
 	sprite.setScale(sf::Vector2f(brushSize, brushSize));
 	sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);

@@ -31,8 +31,7 @@ public:
 	//Auxilliary variables for the brush
 	float movedDistance = 0; // keeps track of how much the brush has moved since the last render cicle
 	int brushWidth = 256; //Size of the brush image
-	static float currentColor[3]; //Currently needed to pass to the imgui color picker
-
+	
 	//Brush settings for the current brush
 	float brushSize = 0.3f;
 	float stepsize = 2.0f;
@@ -56,8 +55,6 @@ public:
 	unsigned int getDistance() { return getDistance(currentLayer); }
 	unsigned int getSize() { return getDistance(lastActiveLayer); }
 	
-	void updateColor();
-	void pickColor(sf::RenderWindow &window);
 	void resetCursorPositions(sf::RenderWindow & window, Layer& layer);
 	void saveBrush();
 	void drawOnDrawingLayer(sf::RenderWindow& mainWindow);
@@ -88,8 +85,6 @@ public:
 private:
 };
 
-float Scene::currentColor[3] = { 0.5f,0.0f,0.5f };
-
 inline void Scene::initialize()
 {
 	drawingLayer.offset = sf::Vector2i(WINDOW_WIDTH / 2 - width / 2, WINDOW_HEIGHT / 2 - height / 2);
@@ -119,27 +114,8 @@ inline void Scene::initialize()
 	}
 	
 	currentBrush = brushes.begin();
-	(*currentBrush)->currentColor = sf::Color((sf::Uint8)(currentColor[0] * 255), (sf::Uint8)(currentColor[1] * 255), (sf::Uint8)(currentColor[2] * 255), 255);
-	(*currentBrush)->setBrushSize(brushSize);
-}
-
-inline void Scene::updateColor() {
-	(*currentBrush)->currentColor.r = (sf::Uint8)(currentColor[0] * 255);
-	(*currentBrush)->currentColor.g = (sf::Uint8)(currentColor[1] * 255);
-	(*currentBrush)->currentColor.b = (sf::Uint8)(currentColor[2] * 255);
-}
-
-inline void Scene::pickColor(sf::RenderWindow & window) {
-	sf::Vector2i pos = sf::Mouse::getPosition(window);
-
-	sf::Texture newTex;
-	newTex.create(window.getSize().x, window.getSize().y);
-	newTex.update(window);
-	(*currentBrush)->currentColor = newTex.copyToImage().getPixel(pos.x, pos.y);
-
-	currentColor[0] = (*currentBrush)->currentColor.r / 255.0f;
-	currentColor[1] = (*currentBrush)->currentColor.g / 255.0f;
-	currentColor[2] = (*currentBrush)->currentColor.b / 255.0f;
+	(*currentBrush)->setColor(guiBrushColor);
+	(*currentBrush)->setSize(brushSize);
 }
 
 inline void Scene::resetCursorPositions(sf::RenderWindow & window, Layer& layer) {

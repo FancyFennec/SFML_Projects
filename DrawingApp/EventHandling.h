@@ -137,7 +137,13 @@ void lmbPressed(Scene& scene)
 
 		if (isAltHeld()) {
 			if (event.mouseButton.button == sf::Mouse::Left) {
-				scene.pickColor(mainWindow);
+				sf::Vector2i pos = sf::Mouse::getPosition(mainWindow);
+
+				sf::Texture newTex;
+				newTex.create(mainWindow.getSize().x, mainWindow.getSize().y);
+				newTex.update(mainWindow);
+				(*scene.currentBrush)->currentColor = newTex.copyToImage().getPixel(pos.x, pos.y);
+				(*scene.currentBrush)->updateGuiColor(guiBrushColor);
 			}
 		}
 		else {
