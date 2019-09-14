@@ -13,6 +13,8 @@ void createBrushWindow(Scene& scene);
 
 static const ImGuiColorEditFlags colorEditFlags = 
 ImGuiColorEditFlags_NoSidePreview | 
+ImGuiColorEditFlags_NoSmallPreview |
+ImGuiColorEditFlags_NoAlpha |
 ImGuiColorEditFlags_NoLabel |
 ImGuiColorEditFlags_NoInputs;
 
@@ -25,24 +27,16 @@ void brushGUI(Scene& scene)
 	if (SHOW_GUI) {
 		ImGui::SetNextWindowSize(ImVec2(250, WINDOW_HEIGHT - 250));
 		ImGui::SetNextWindowPos(ImVec2(0, 18));
-		bool windowFlag = true;
 
 		ImGui::Begin("Brush Settings", &SHOW_GUI, ImGuiWindowFlags_NoResize);
 		if (ImGui::CollapsingHeader("Colour Picker")) {
-			if (ImGui::ColorPicker3("Colour", (*scene.currentBrush)->guiBrushColor, colorEditFlags)) {
-				(*scene.currentBrush)->synchronizeColors(); // Need to synchronize the color we get from the colorpicker and the brush color
+			ImGui::PushItemWidth(240);
+			if (ImGui::ColorPicker3("##ColorPicker", (*scene.currentBrush)->guiBrushColor, colorEditFlags)) {
+				(*scene.currentBrush)->synchronizeColors(); // Need to synchronize the color we get from the colorpicker with the brush color
 			}
-			ImGui::ColorButton("Current##CurrentColor",
-				(**scene.currentBrush).getCurrentImColorRGB(),
-				0,
-				ImVec2(30.0f, 20.0f)
-			);
+			ImGui::ColorButton("Current##CurrentColor", (**scene.currentBrush).getCurrentImColorRGB(), 0, ImVec2(30.0f, 20.0f));
 			ImGui::SameLine();
-			ImGui::ColorButton("Previous##PreviousColor",
-				(**scene.currentBrush).getPreviousImColorRGB(),
-				0,
-				ImVec2(30.0f, 20.0f)
-			);
+			ImGui::ColorButton("Previous##PreviousColor", (**scene.currentBrush).getPreviousImColorRGB(), 0, ImVec2(30.0f, 20.0f));
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			ImGui::SliderFloat("Spacing", &(*scene.currentBrush)->stepSize, 0, 500);
