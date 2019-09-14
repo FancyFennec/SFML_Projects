@@ -143,7 +143,7 @@ void lmbPressed(Scene& scene)
 				newTex.create(mainWindow.getSize().x, mainWindow.getSize().y);
 				newTex.update(mainWindow);
 				(*scene.currentBrush)->currentColor = newTex.copyToImage().getPixel(pos.x, pos.y);
-				(*scene.currentBrush)->updateGuiColor();
+				(*scene.currentBrush)->updateGuiBrushColor();
 			}
 		}
 		else {

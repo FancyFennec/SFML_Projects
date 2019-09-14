@@ -8,9 +8,14 @@
 #include "Scene.h"
 #include "CommandManager.h"
 
-
 void brushGUI(Scene& scene);
 void createBrushWindow(Scene& scene);
+
+static const ImGuiColorEditFlags colorEditFlags = 
+ImGuiColorEditFlags_NoSidePreview | 
+ImGuiColorEditFlags_NoLabel |
+ImGuiColorEditFlags_NoInputs;
+
 
 bool brushNamePopupIsOpen = false;
 static char brushName[128] = "";
@@ -24,7 +29,7 @@ void brushGUI(Scene& scene)
 
 		ImGui::Begin("Brush Settings", &SHOW_GUI, ImGuiWindowFlags_NoResize);
 		if (ImGui::CollapsingHeader("Colour Picker")) {
-			if (ImGui::ColorPicker3("Colour", (*scene.currentBrush)->guiBrushColor)) {
+			if (ImGui::ColorPicker3("Colour", (*scene.currentBrush)->guiBrushColor, colorEditFlags)) {
 				(*scene.currentBrush)->synchronizeColors(); // Need to synchronize the color we get from the colorpicker and the brush color
 			}
 			ImGui::ColorButton("Current##CurrentColor",
@@ -41,7 +46,7 @@ void brushGUI(Scene& scene)
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			ImGui::SliderFloat("Spacing", &(*scene.currentBrush)->stepSize, 0, 500);
-			if (ImGui::SliderFloat("Size", &scene.brushSize, 0, 1)) (*scene.currentBrush)->setSize(scene.brushSize);
+			if (ImGui::SliderFloat("Size", &scene.brushSize, 0, 1)) (*scene.currentBrush)->setSpriteSize(scene.brushSize);
 			ImGui::SliderInt("Opacity", &(*scene.currentBrush)->opacity, 0, 255);
 			ImGui::SliderInt("Flow", &(*scene.currentBrush)->flow, 0, 255);
 		}
@@ -49,17 +54,17 @@ void brushGUI(Scene& scene)
 			ImGui::Checkbox("Size##Checkbox", &(*scene.currentBrush)->useSScatter);
 			if ((*scene.currentBrush)->useSScatter){
 				ImGui::SameLine(65);
-				ImGui::SliderFloat("##S-Scatter", &(*scene.currentBrush)->scaterScale, 0, 1);
+				ImGui::SliderFloat("##S-Scatter", &(*scene.currentBrush)->scatterScale, 0, 1);
 			}
 			ImGui::Checkbox("Pos##Checkbox", &(*scene.currentBrush)->usePScatter);
 			if ((*scene.currentBrush)->usePScatter) {
 				ImGui::SameLine(65);
-				ImGui::SliderFloat("##P-Scatter", &(*scene.currentBrush)->scaterPos, 0, 1000);
+				ImGui::SliderFloat("##P-Scatter", &(*scene.currentBrush)->scatterPos, 0, 1000);
 			}
 			ImGui::Checkbox("Angle##Checkbox", &(*scene.currentBrush)->useAScatter);
 			if ((*scene.currentBrush)->useAScatter) {
 				ImGui::SameLine(65);
-				ImGui::SliderFloat("##A-Scatter", &(*scene.currentBrush)->scaterAngle, 0, 180);
+				ImGui::SliderFloat("##A-Scatter", &(*scene.currentBrush)->scatterAngle, 0, 180);
 			}
 		}
 

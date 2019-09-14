@@ -46,7 +46,13 @@ void mousePositionSampling()
 {
 	while (mainWindow.isOpen())
 	{
-		if (isMouseHeld()) {
+		if (isMouseHeld()) { // create stream for the layer class to process
+			if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
+				pointerId = GET_POINTERID_WPARAM(msg.wParam);
+				if (GetPointerPenInfo(pointerId, &penInfo)) {
+					(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
+				}
+			}
 			mousepositions.push_back(sf::Mouse::getPosition(mainWindow));
 		}
 	}
@@ -56,7 +62,7 @@ void mainRenderLoop()
 {
 	while (mainWindow.isOpen())
 	{
-		mousepositions.clear();
+		mousepositions.clear(); //TODO: Clearing should be after the positions have been used
 		sf::RenderStates state;
 		state.transform.translate(sf::Vector2f(scene.currentLayer->offset));
 
@@ -77,13 +83,6 @@ void mainRenderLoop()
 			}
 		}
 
-		//TODO: put this pen pressure update somewhere else
-		if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
-			pointerId = GET_POINTERID_WPARAM(msg.wParam);
-			if (GetPointerPenInfo(pointerId, &penInfo)) {
-				(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
-			}
-		}
 		while (mainWindow.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);

@@ -11,27 +11,32 @@ class Brush
 public:
 	std::string brushName = "Brush";
 
-	sf::Image image;
+	sf::Image image; //Needed only for clearing the texture 
 	sf::Texture tex;
 	sf::Sprite sprite;
-	static sf::Color currentColor;
-	static sf::Color previousColor;
 
-	static float guiBrushColor[3]; //Currently needed to pass to the imgui color picker
+	static sf::Color currentColor; //This is the color that is used to draw things
+	static sf::Color previousColor; //We can switch to this color by pressing X
 
-	float stepSize = 33.0f;
-	float brushSize = 0.3f;
+	//Currently needed to pass to the imgui color picker
+	static float guiBrushColor[3]; 
+
+	//Brush settings
+	float stepSize = 33.0f; //Distance between consecutive brush stamps
+	float brushSize = 0.3f; //Radius of the brush
 	int opacity = 170;
 	int flow = 70;
 	float pressure = 1.0f;
 
+	//Flags that allow switching scattering on/off
 	bool useSScatter = true;
 	bool usePScatter = true;
 	bool useAScatter = true;
 
-	float scaterScale = 0.0f;
-	float scaterPos = 0.0f;
-	float scaterAngle = 0.0f;
+	//Scatter values
+	float scatterScale = 0.0f;
+	float scatterPos = 0.0f;
+	float scatterAngle = 0.0f;
 
 	Brush(int brush_width, const char* filePath)
 	{
@@ -82,7 +87,7 @@ public:
 		);
 	}
 
-	void updateGuiColor() {
+	void updateGuiBrushColor() {
 		guiBrushColor[0] = currentColor.r / 255.0f;
 		guiBrushColor[1] = currentColor.g / 255.0f;
 		guiBrushColor[2] = currentColor.b / 255.0f;
@@ -95,7 +100,12 @@ public:
 		currentColor.b = (sf::Uint8)(guiBrushColor[2] * 255);
 	}
 
-	void setSize(float brushSize);
+	void setSpriteSize(float brushSize) {
+		this->brushSize = brushSize;
+		sprite.setScale(sf::Vector2f(brushSize, brushSize));
+		sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
+	}
+
 	void setSpriteColor(){
 		sprite.setColor(sf::Color(
 			currentColor.r,
@@ -104,7 +114,7 @@ public:
 			pressure * flow));
 	}
 
-	void resetBrushColor() {
+	void resetSpriteColor() {
 		sprite.setColor(currentColor);
 	}
 
@@ -122,12 +132,6 @@ inline void Brush::initialize() {
 	tex.create(image.getSize().x, image.getSize().y);
 	tex.update(image);
 	sprite.setTexture(tex);
-	sprite.setScale(sf::Vector2f(brushSize, brushSize));
-	sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
-}
-
-inline void Brush::setSize(float brushSize) {
-	this->brushSize = brushSize;
 	sprite.setScale(sf::Vector2f(brushSize, brushSize));
 	sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
 }

@@ -19,7 +19,6 @@ typedef std::unique_ptr<Brush> BrushPntr;
 class Scene
 {
 public:
-
 	unsigned int width;
 	unsigned int height;
 
@@ -65,11 +64,13 @@ public:
 		brushesJson["Brushes"] = {};
 
 		for (auto p : fs::directory_iterator(BRUSH_DIRECTORY)) {
-			if (p.path().string().substr(
-				p.path().string().length() - 3,
-				p.path().string().length())._Equal("png")
-				) {
-				fs::remove(p);
+			if (!fs::is_directory(p)) { // Only delete the pngs
+				if (p.path().string().substr(
+					p.path().string().length() - 3,
+					p.path().string().length())._Equal("png")
+					) {
+					fs::remove(p);
+				}
 			}
 		}
 
@@ -85,9 +86,9 @@ public:
 			brushJson["UsePScatter"] = brush->usePScatter;
 			brushJson["UseAScatter"] = brush->useAScatter;
 
-			brushJson["ScatterScale"] = brush->scaterScale;
-			brushJson["ScatterPos"] = brush->scaterPos;
-			brushJson["ScatterAngle"] = brush->scaterAngle;
+			brushJson["ScatterScale"] = brush->scatterScale;
+			brushJson["ScatterPos"] = brush->scatterPos;
+			brushJson["ScatterAngle"] = brush->scatterAngle;
 
 			brushesJson["Brushes"].push_back(brushJson);
 
@@ -136,14 +137,14 @@ inline void Scene::initialize()
 		brushes.back()->usePScatter = brush["UsePScatter"].get<bool>();
 		brushes.back()->useAScatter = brush["UseAScatter"].get<bool>();
 
-		brushes.back()->scaterScale = brush["ScatterScale"].get<float>();
-		brushes.back()->scaterPos = brush["ScatterPos"].get<float>();
-		brushes.back()->scaterAngle = brush["ScatterAngle"].get<float>();
+		brushes.back()->scatterScale = brush["ScatterScale"].get<float>();
+		brushes.back()->scatterPos = brush["ScatterPos"].get<float>();
+		brushes.back()->scatterAngle = brush["ScatterAngle"].get<float>();
 	}
 	
 	currentBrush = brushes.begin();
 	(*currentBrush)->synchronizeColors();
-	(*currentBrush)->setSize(brushSize);
+	(*currentBrush)->setSpriteSize(brushSize);
 }
 
 inline void Scene::resetCursorPositions(sf::RenderWindow & window, Layer& layer) {

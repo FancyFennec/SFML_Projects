@@ -170,7 +170,7 @@ inline void Layer::drawLerpOnCanvas(float& movedDistance, std::vector<BrushPntr>
 		tex = renderTex.getTexture();
 		sprite.setTexture(tex);
 
-		(**brush).resetBrushColor();
+		(**brush).resetSpriteColor();
 	}
 }
 
@@ -197,7 +197,7 @@ sf::RenderStates Layer::getRenderState(std::vector<BrushPntr>::iterator & brush,
 inline float Layer::getSScatter(std::vector<BrushPntr>::iterator & brush)
 {
 	if ((**brush).useSScatter) {
-		return (**brush).pressure * (1.0f + (**brush).scaterScale * (rand() % 20 - 10) / 10.0f);
+		return (**brush).pressure * (1.0f + (**brush).scatterScale * (rand() % 20 - 10) / 10.0f);
 	}
 	else {
 		return 1.0f;
@@ -207,7 +207,7 @@ inline float Layer::getSScatter(std::vector<BrushPntr>::iterator & brush)
 inline float Layer::getPScatter(std::vector<BrushPntr>::iterator & brush)
 {
 	if ((**brush).usePScatter) {
-		return (**brush).brushSize * (**brush).scaterPos * (rand() % 20 - 10) / 10.0f;
+		return (**brush).brushSize * (**brush).scatterPos * (rand() % 20 - 10) / 10.0f;
 	}
 	else {
 		return (**brush).brushSize;
@@ -217,7 +217,7 @@ inline float Layer::getPScatter(std::vector<BrushPntr>::iterator & brush)
 inline float Layer::getAScatter(std::vector<BrushPntr>::iterator & brush)
 {
 	if ((**brush).useAScatter) {
-		return (**brush).scaterAngle * (rand() % 20 - 10) / 10.0f;
+		return (**brush).scatterAngle * (rand() % 20 - 10) / 10.0f;
 	}
 	else {
 		return 0.0f;
