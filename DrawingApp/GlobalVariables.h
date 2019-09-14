@@ -2,10 +2,8 @@
 
 #include <SFML/Graphics.hpp>
 
-static sf::Clock deltaClock;
-static sf::Clock clickClock;
-
-static float guiBrushColor[3] = { 0.5f,0.0f,0.5f }; //Currently needed to pass to the imgui color picker
+static sf::Clock deltaClock; //For imgui
+static sf::Clock clickClock; //For click timing
 
 //Window initialisation
 static sf::RenderWindow mainWindow;

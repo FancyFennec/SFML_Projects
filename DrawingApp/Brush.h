@@ -17,8 +17,10 @@ public:
 	static sf::Color currentColor;
 	static sf::Color previousColor;
 
-	float stepsize = 33.0f;
-	float brushsize = 0.3f;
+	static float guiBrushColor[3]; //Currently needed to pass to the imgui color picker
+
+	float stepSize = 33.0f;
+	float brushSize = 0.3f;
 	int opacity = 170;
 	int flow = 70;
 	float pressure = 1.0f;
@@ -76,16 +78,17 @@ public:
 		);
 	}
 
-	void updateGuiColor(static float* color) {
-		color[0] = currentColor.r / 255.0f;
-		color[1] = currentColor.g / 255.0f;
-		color[2] = currentColor.b / 255.0f;
+	void updateGuiColor() {
+		guiBrushColor[0] = currentColor.r / 255.0f;
+		guiBrushColor[1] = currentColor.g / 255.0f;
+		guiBrushColor[2] = currentColor.b / 255.0f;
 	}
 
-	void setColor(static float* color) {
-		currentColor.r = (sf::Uint8)(color[0] * 255);
-		currentColor.g = (sf::Uint8)(color[1] * 255);
-		currentColor.b = (sf::Uint8)(color[2] * 255);
+	//TODO: Not the nicest way we are doingt his now, maybe there is a better way of doing things
+	void synchronizeColors() {
+		currentColor.r = (sf::Uint8)(guiBrushColor[0] * 255);
+		currentColor.g = (sf::Uint8)(guiBrushColor[1] * 255);
+		currentColor.b = (sf::Uint8)(guiBrushColor[2] * 255);
 	}
 
 	void setSize(float brushSize);
@@ -109,17 +112,18 @@ private:
 
 sf::Color Brush::currentColor = sf::Color::Black;
 sf::Color Brush::previousColor = sf::Color::Black;
+float Brush::guiBrushColor[3] = { 0.5f,0.0f,0.5f };
 
 inline void Brush::initialize() {
 	tex.create(image.getSize().x, image.getSize().y);
 	tex.update(image);
 	sprite.setTexture(tex);
-	sprite.setScale(sf::Vector2f(brushsize, brushsize));
+	sprite.setScale(sf::Vector2f(brushSize, brushSize));
 	sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
 }
 
 inline void Brush::setSize(float brushSize) {
-	this->brushsize = brushSize;
+	this->brushSize = brushSize;
 	sprite.setScale(sf::Vector2f(brushSize, brushSize));
 	sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
 }

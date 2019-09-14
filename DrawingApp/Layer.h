@@ -139,9 +139,9 @@ inline void Layer::drawLerpOnCanvas(float& movedDistance, std::vector<BrushPntr>
 
 		(**brush).resetBrushColor();
 
-	} else if (movedDistance > (*brush)->stepsize * (*brush)->brushsize * (*brush)->pressure) {
+	} else if (movedDistance > (*brush)->stepSize * (*brush)->brushSize * (*brush)->pressure) {
 
-		int steps = (int)std::floorf(movedDistance / ((*brush)->stepsize * (*brush)->brushsize * (*brush)->pressure));
+		int steps = (int)std::floorf(movedDistance / ((*brush)->stepSize * (*brush)->brushSize * (*brush)->pressure));
 
 		sf::Vector2f direction = sf::Vector2f(cursorPositions[3] - cursorPositions[2]) / distance(cursorPositions[3], cursorPositions[2]);
 		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
@@ -160,7 +160,7 @@ inline void Layer::drawLerpOnCanvas(float& movedDistance, std::vector<BrushPntr>
 		}
 
 		for (int i = 0; i < steps; i++) {
-			sf::Vector2f drawingPos = circlePos + (i + 1) * (**brush).stepsize * (**brush).brushsize * (**brush).pressure * direction;
+			sf::Vector2f drawingPos = circlePos + (i + 1) * (**brush).stepSize * (**brush).brushSize * (**brush).pressure * direction;
 			if (useOffset) {
 				(**brush).sprite.setPosition(drawingPos - sf::Vector2f(offset));
 			}
@@ -171,9 +171,9 @@ inline void Layer::drawLerpOnCanvas(float& movedDistance, std::vector<BrushPntr>
 			renderTex.draw((**brush).sprite, getRenderState(brush, drawingPos));
 		}
 
-		circlePos += steps * (**brush).stepsize * (**brush).brushsize * (**brush).pressure * direction;
+		circlePos += steps * (**brush).stepSize * (**brush).brushSize * (**brush).pressure * direction;
 		cursorPositions[2] = sf::Vector2i(circlePos);
-		movedDistance -= (**brush).stepsize * (**brush).brushsize * (**brush).pressure * steps;
+		movedDistance -= (**brush).stepSize * (**brush).brushSize * (**brush).pressure * steps;
 		
 		renderTex.display();
 		tex = renderTex.getTexture();
@@ -216,10 +216,10 @@ inline float Layer::getSScatter(std::vector<BrushPntr>::iterator & brush)
 inline float Layer::getPScatter(std::vector<BrushPntr>::iterator & brush)
 {
 	if ((**brush).usePScatter) {
-		return (**brush).brushsize * (**brush).scaterPos * (rand() % 20 - 10) / 10.0f;
+		return (**brush).brushSize * (**brush).scaterPos * (rand() % 20 - 10) / 10.0f;
 	}
 	else {
-		return (**brush).brushsize;
+		return (**brush).brushSize;
 	}
 }
 

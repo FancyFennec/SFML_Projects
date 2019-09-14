@@ -35,7 +35,7 @@ public:
 	//Brush settings for the current brush
 	float brushSize = 0.3f;
 	float stepsize = 2.0f;
-	int oppacity = 100;
+	int opacity = 100;
 
 	Layer brushLayer;
 	std::vector<BrushPntr> brushes;
@@ -61,9 +61,8 @@ public:
 	void drawOnBrushLayer(sf::RenderWindow& brushWindow);
 
 	~Scene() {
-		//TODO: Save the different brush settings as well
-		json brushJson;
-		brushJson["BrushNames"] = {};
+		json brushesJson;
+		brushesJson["Brushes"] = {};
 
 		for (auto p : fs::directory_iterator(BRUSH_DIRECTORY)) {
 			if (p.path().string().substr(
@@ -75,11 +74,27 @@ public:
 		}
 
 		for (auto &brush : brushes) {
-			brushJson["BrushNames"].push_back(brush->brushName);
+			json brushJson;
+			brushJson["BrushName"] = brush->brushName;
+			brushJson["BrushSize"] = brush->brushSize;
+			brushJson["StepSize"] = brush->stepSize;
+			brushJson["Oppacity"] = brush->opacity;
+			brushJson["Flow"] = brush->flow;
+
+			brushJson["UseSScatter"] = brush->useSScatter;
+			brushJson["UsePScatter"] = brush->usePScatter;
+			brushJson["UseAScatter"] = brush->useAScatter;
+
+			brushJson["ScatterScale"] = brush->scaterScale;
+			brushJson["ScatterPos"] = brush->scaterPos;
+			brushJson["ScatterAngle"] = brush->scaterAngle;
+
+			brushesJson["Brushes"].push_back(brushJson);
+
 			brush->tex.copyToImage().saveToFile(std::string(BRUSH_DIRECTORY).append(brush->brushName).append(".png"));
 		}
 		std::ofstream o(std::string(BRUSH_DIRECTORY).append("brushes.json"));
-		o << brushJson << std::endl;
+		o << brushesJson << std::endl;
 	}
 
 private:
@@ -104,17 +119,30 @@ inline void Scene::initialize()
 	std::ifstream inputStream(std::string(BRUSH_DIRECTORY).append("brushes.json"));
 	json brushJson;
 	inputStream >> brushJson;
-	for (auto& name : brushJson["BrushNames"]) {
+	for (auto& brush : brushJson["Brushes"]) {
 		brushes.push_back(std::make_unique<Brush>(
 			brushWidth,
-			std::string(BRUSH_DIRECTORY).append(name.get<std::string>()).append(".png").data()
+			std::string(BRUSH_DIRECTORY).append(brush["BrushName"].get<std::string>()).append(".png").data()
 			)
 		);
-		brushes.back()->brushName = name.get<std::string>();
+		brushes.back()->brushName = brush["BrushName"].get<std::string>();
+
+		brushes.back()->brushSize = brush["BrushSize"].get<float>();
+		brushes.back()->stepSize = brush["StepSize"].get<float>();
+		brushes.back()->opacity = brush["Oppacity"].get<int>();
+		brushes.back()->flow = brush["Flow"].get<int>();
+
+		brushes.back()->useSScatter = brush["UseSScatter"].get<bool>();
+		brushes.back()->usePScatter = brush["UsePScatter"].get<bool>();
+		brushes.back()->useAScatter = brush["UseAScatter"].get<bool>();
+
+		brushes.back()->scaterScale = brush["ScatterScale"].get<float>();
+		brushes.back()->scaterPos = brush["ScatterPos"].get<float>();
+		brushes.back()->scaterAngle = brush["ScatterAngle"].get<float>();
 	}
 	
 	currentBrush = brushes.begin();
-	(*currentBrush)->setColor(guiBrushColor);
+	(*currentBrush)->synchronizeColors();
 	(*currentBrush)->setSize(brushSize);
 }
 
