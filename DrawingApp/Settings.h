@@ -8,7 +8,7 @@ static const char* BRUSH_DIRECTORY = "./Brushes/";
 static const char* SCENES_DIRECTORY = "./Scenes/";
 
 static bool USE_FULLSCREEN = false;
-static unsigned int FPS = 60;
+static unsigned int FPS = 120;
 
 static int WINDOW_WIDTH = 1200;
 static int WINDOW_HEIGHT = 800;

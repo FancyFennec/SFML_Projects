@@ -30,7 +30,7 @@ void brushGUI(Scene& scene)
 
 		ImGui::Begin("Brush Settings", &SHOW_GUI, ImGuiWindowFlags_NoResize);
 		if (ImGui::CollapsingHeader("Colour Picker")) {
-			ImGui::PushItemWidth(240);
+			ImGui::PushItemWidth(235);
 			if (ImGui::ColorPicker3("##ColorPicker", (*scene.currentBrush)->guiBrushColor, colorEditFlags)) {
 				(*scene.currentBrush)->synchronizeColors(); // Need to synchronize the color we get from the colorpicker with the brush color
 			}

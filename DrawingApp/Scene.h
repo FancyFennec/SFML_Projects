@@ -178,7 +178,7 @@ inline void Scene::saveBrush() {
 }
 
 inline void Scene::drawOnDrawingLayer(sf::RenderWindow & mainWindow) {
-	drawingLayer.drawLerpOnCanvas(movedDistance, currentBrush, cursorPositions, mainWindow);
+	drawingLayer.drawLerpOnLayer(movedDistance, currentBrush, cursorPositions, mainWindow);
 	//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
 
 	sf::RenderStates state;
@@ -189,6 +189,6 @@ inline void Scene::drawOnDrawingLayer(sf::RenderWindow & mainWindow) {
 }
 
 inline void Scene::drawOnBrushLayer(sf::RenderWindow & brushWindow) {
-	brushLayer.drawLerpOnCanvas(movedDistance, currentBrush, cursorPositions, brushWindow);
+	brushLayer.drawLerpOnLayer(movedDistance, currentBrush, cursorPositions, brushWindow);
 	brushLayer.drawLayerinWindow(brushWindow);
 }

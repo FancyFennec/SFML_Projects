@@ -40,7 +40,7 @@ public:
 	void blendlayers(Layer& newLayer, std::vector<BrushPntr>::iterator& brush);
 	void drawLayerinWindow(sf::RenderWindow& window);
 	void resetDrawFlag() { drawFlag = 0; };
-	void drawLerpOnCanvas(float& movedDistance, std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window);
+	void drawLerpOnLayer(float& movedDistance, std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window);
 
 	~Layer();
 
@@ -54,7 +54,7 @@ private:
 	float getSScatter(std::vector<BrushPntr>::iterator& brush);
 	float getPScatter(std::vector<BrushPntr>::iterator& brush);
 	float getAScatter(std::vector<BrushPntr>::iterator& brush);
-	sf::RenderStates getRenderState(std::vector<BrushPntr>::iterator & brush, sf::Vector2f &drawingPos);
+	sf::RenderStates getRenderState(std::vector<BrushPntr>::iterator & brush);
 };
 
 sf::RenderTexture Layer::rTex;
@@ -106,7 +106,7 @@ inline void Layer::drawLayerinWindow(sf::RenderWindow & window) {
 	window.draw(sprite);
 }
 
-inline void Layer::drawLerpOnCanvas(float& movedDistance, std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window)
+inline void Layer::drawLerpOnLayer(float& movedDistance, std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>& cursorPositions, sf::RenderWindow& window)
 {
 	cursorPositions[3] = sf::Mouse::getPosition(window);
 	movedDistance = distance(cursorPositions[2], cursorPositions[3]);
@@ -119,46 +119,29 @@ inline void Layer::drawLerpOnCanvas(float& movedDistance, std::vector<BrushPntr>
 		renderTex.clear(sf::Color((**brush).currentColor.r, (**brush).currentColor.g, (**brush).currentColor.b, 0));
 
 		(**brush).setSpriteColor();
+		sf::Vector2f offset2f;
+		if (useOffset) {
+			offset2f = sf::Vector2f(offset);
+		}
 
 		if (drawFlag == 0) { //This is the case when we just clicked, here we just draw the brushstamp at the cursor position
 			drawFlag = 1;
 
 			sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
-			
-			if (useOffset) {
-				(**brush).sprite.setPosition(circlePos - sf::Vector2f(offset));
-			}
-			else {
-				(**brush).sprite.setPosition(circlePos);
-			}
-
-			renderTex.draw((**brush).sprite, getRenderState(brush, circlePos));
+			(**brush).sprite.setPosition(circlePos - offset2f);
+			renderTex.draw((**brush).sprite, getRenderState(brush));
 		}
 		else { //Here we need to make sure that consecutive brushstamps have a constant distance to each other
 			int steps = (int)std::floorf(movedDistance / relativeStepSize);
 
 			sf::Vector2f direction = sf::Vector2f(cursorPositions[3] - cursorPositions[2]) / distance(cursorPositions[3], cursorPositions[2]);
 			sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
-
 			renderTex.draw(sprite);
-
-			if (useOffset) {
-				(**brush).sprite.setPosition(circlePos - sf::Vector2f(offset));
-			}
-			else {
-				(**brush).sprite.setPosition(circlePos);
-			}
 
 			for (int i = 0; i < steps; i++) {
 				sf::Vector2f drawingPos = circlePos + (i + 1) * relativeStepSize * direction;
-
-				if (useOffset) {
-					(**brush).sprite.setPosition(drawingPos - sf::Vector2f(offset));
-				}
-				else {
-					(**brush).sprite.setPosition(drawingPos);
-				}
-				renderTex.draw((**brush).sprite, getRenderState(brush, drawingPos));
+				(**brush).sprite.setPosition(drawingPos - offset2f);
+				renderTex.draw((**brush).sprite, getRenderState(brush));
 			}
 
 			circlePos += steps * relativeStepSize * direction;
@@ -182,12 +165,11 @@ inline float Layer::distance(const sf::Vector2i & vec1, const sf::Vector2i & vec
 	return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
 }
 
-sf::RenderStates Layer::getRenderState(std::vector<BrushPntr>::iterator & brush, sf::Vector2f &drawingPos)
+sf::RenderStates Layer::getRenderState(std::vector<BrushPntr>::iterator & brush)
 {
 	sf::RenderStates state;
-
 	float scale = getSScatter(brush);
-	state.transform.scale(scale, scale, drawingPos.x, drawingPos.y);
+	state.transform.scale(scale, scale, (**brush).sprite.getPosition().x, (**brush).sprite.getPosition().y);
 	state.transform.rotate(getAScatter(brush));
 	state.transform.translate(getPScatter(brush), getPScatter(brush));
 
@@ -197,10 +179,10 @@ sf::RenderStates Layer::getRenderState(std::vector<BrushPntr>::iterator & brush,
 inline float Layer::getSScatter(std::vector<BrushPntr>::iterator & brush)
 {
 	if ((**brush).useSScatter) {
-		return (**brush).pressure * (1.0f + (**brush).scatterScale * (rand() % 20 - 10) / 10.0f);
+		return (**brush).pressure * (1.0f - (**brush).scatterScale * (rand() % 10 - 10) / 10.0f);
 	}
 	else {
-		return 1.0f;
+		return (**brush).pressure * 1.0f;
 	}
 }
 
