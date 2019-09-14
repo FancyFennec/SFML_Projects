@@ -55,7 +55,6 @@ private:
 	float getPScatter(std::vector<BrushPntr>::iterator& brush);
 	float getAScatter(std::vector<BrushPntr>::iterator& brush);
 	sf::RenderStates getRenderState(std::vector<BrushPntr>::iterator & brush, sf::Vector2f &drawingPos);
-	std::function<sf::Vector2f(float)> getBezier(std::vector<sf::Vector2i>& cursorPositions); //Not used right now
 };
 
 sf::RenderTexture Layer::rTex;
@@ -111,70 +110,62 @@ inline void Layer::drawLerpOnCanvas(float& movedDistance, std::vector<BrushPntr>
 {
 	cursorPositions[3] = sf::Mouse::getPosition(window);
 	movedDistance = distance(cursorPositions[2], cursorPositions[3]);
+	float relativeStepSize = (**brush).computeRelativeStepSize();
 
-	if (drawFlag == 0) {
-		drawFlag = 1;
-
-		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
+	if (drawFlag == 0 || movedDistance > relativeStepSize) {
 
 		sf::RenderTexture renderTex;
 		renderTex.create(width, height);
 		renderTex.clear(sf::Color((**brush).currentColor.r, (**brush).currentColor.g, (**brush).currentColor.b, 0));
 
 		(**brush).setSpriteColor();
-		if (useOffset) {
-			(**brush).sprite.setPosition(circlePos - sf::Vector2f(offset));
-		}
-		else {
-			(**brush).sprite.setPosition(circlePos);
-		}
-		
 
-		renderTex.draw((**brush).sprite, getRenderState(brush, circlePos));
+		if (drawFlag == 0) { //This is the case when we just clicked, here we just draw the brushstamp at the cursor position
+			drawFlag = 1;
 
-		renderTex.display();
-
-		tex = renderTex.getTexture();
-		sprite.setTexture(tex);
-
-		(**brush).resetBrushColor();
-
-	} else if (movedDistance > (*brush)->stepSize * (*brush)->brushSize * (*brush)->pressure) {
-
-		int steps = (int)std::floorf(movedDistance / ((*brush)->stepSize * (*brush)->brushSize * (*brush)->pressure));
-
-		sf::Vector2f direction = sf::Vector2f(cursorPositions[3] - cursorPositions[2]) / distance(cursorPositions[3], cursorPositions[2]);
-		sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
-
-		sf::RenderTexture renderTex;
-		renderTex.create(width, height);
-		renderTex.clear(sf::Color((*brush)->currentColor.r, (*brush)->currentColor.g, (*brush)->currentColor.b, 0));
-		renderTex.draw(sprite);
-
-		(**brush).setSpriteColor();
-		if (useOffset) {
-			(**brush).sprite.setPosition(circlePos - sf::Vector2f(offset));
-		}
-		else {
-			(**brush).sprite.setPosition(circlePos);
-		}
-
-		for (int i = 0; i < steps; i++) {
-			sf::Vector2f drawingPos = circlePos + (i + 1) * (**brush).stepSize * (**brush).brushSize * (**brush).pressure * direction;
+			sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
+			
 			if (useOffset) {
-				(**brush).sprite.setPosition(drawingPos - sf::Vector2f(offset));
+				(**brush).sprite.setPosition(circlePos - sf::Vector2f(offset));
 			}
 			else {
-				(**brush).sprite.setPosition(drawingPos);
+				(**brush).sprite.setPosition(circlePos);
 			}
 
-			renderTex.draw((**brush).sprite, getRenderState(brush, drawingPos));
+			renderTex.draw((**brush).sprite, getRenderState(brush, circlePos));
+		}
+		else { //Here we need to make sure that consecutive brushstamps have a constant distance to each other
+			int steps = (int)std::floorf(movedDistance / relativeStepSize);
+
+			sf::Vector2f direction = sf::Vector2f(cursorPositions[3] - cursorPositions[2]) / distance(cursorPositions[3], cursorPositions[2]);
+			sf::Vector2f circlePos = sf::Vector2f(cursorPositions[2]);
+
+			renderTex.draw(sprite);
+
+			if (useOffset) {
+				(**brush).sprite.setPosition(circlePos - sf::Vector2f(offset));
+			}
+			else {
+				(**brush).sprite.setPosition(circlePos);
+			}
+
+			for (int i = 0; i < steps; i++) {
+				sf::Vector2f drawingPos = circlePos + (i + 1) * relativeStepSize * direction;
+
+				if (useOffset) {
+					(**brush).sprite.setPosition(drawingPos - sf::Vector2f(offset));
+				}
+				else {
+					(**brush).sprite.setPosition(drawingPos);
+				}
+				renderTex.draw((**brush).sprite, getRenderState(brush, drawingPos));
+			}
+
+			circlePos += steps * relativeStepSize * direction;
+			cursorPositions[2] = sf::Vector2i(circlePos);
+			movedDistance -= relativeStepSize * steps;
 		}
 
-		circlePos += steps * (**brush).stepSize * (**brush).brushSize * (**brush).pressure * direction;
-		cursorPositions[2] = sf::Vector2i(circlePos);
-		movedDistance -= (**brush).stepSize * (**brush).brushSize * (**brush).pressure * steps;
-		
 		renderTex.display();
 		tex = renderTex.getTexture();
 		sprite.setTexture(tex);

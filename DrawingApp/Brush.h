@@ -42,6 +42,10 @@ public:
 		initialize();
 	}
 
+	float computeRelativeStepSize() {
+		return stepSize * brushSize * pressure;
+	}
+
 	ImVec4 getCurrentImColorRGBA() {
 		return ImVec4(
 			currentColor.r / 255.0f,
