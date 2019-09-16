@@ -136,6 +136,7 @@
     <ClInclude Include="BrushGUI.h" />
     <ClInclude Include="CommandManager.h" />
     <ClInclude Include="Brush.h" />
+    <ClInclude Include="CursorBufferUtils.h" />
     <ClInclude Include="EventHandling.h" />
     <ClInclude Include="GlobalVariables.h" />
     <ClInclude Include="Imgui\imconfig.h" />

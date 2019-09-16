@@ -6,6 +6,7 @@
 #include "Settings.h"
 #include "Scene.h"
 #include "CommandManager.h"
+#include "CursorBufferUtils.h"
 
 void mainWindowEventHandling(Scene& scene);
 void brushWindowEventHandling(Scene& scene);
@@ -112,7 +113,6 @@ void brushWindowEventHandling(Scene& scene)
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.key.code == sf::Mouse::Left) {
 			setMouseIsHeld();
-			scene.resetCursorPositions(brushWindow, scene.brushLayer);
 			//No need to draw the window here, it gets drawn because the lmb is held later
 		}
 	}
@@ -148,7 +148,7 @@ void lmbPressed(Scene& scene)
 		}
 		else {
 			setMouseIsHeld();
-			scene.resetCursorPositions(mainWindow, scene.drawingLayer);
+			CursorBufferUtils::initializeBuffer();
 			//No need to draw the window here, it gets drawn because the lmb is being held later
 		}
 	}

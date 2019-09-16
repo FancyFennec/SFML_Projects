@@ -53,7 +53,7 @@ void mousePositionSampling()
 					(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
 				}
 			}
-			mousepositions.push_back(sf::Mouse::getPosition(mainWindow));
+			CursorBufferUtils::updateBuffer(scene.currentBrush);
 		}
 	}
 }
@@ -113,6 +113,18 @@ void mainWindowDrawing()
 {
 	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 		if (isMouseHeld() && !isSpaceHeld()) {
+			if (CursorBufferUtils::isFirstStamp) {
+				scene.drawingLayer.drawLerpOnLayer(scene.currentBrush, CursorBufferUtils::cursorBuffer.begin(), mainWindow);
+			}
+			else {
+				if (CursorBufferUtils::cursorBuffer.size() > 1) {
+					auto iter = CursorBufferUtils::cursorBuffer.begin();
+					for (int i = 0; i < CursorBufferUtils::cursorBuffer.size() - 1 ; i++) {
+						scene.drawingLayer.drawLerpOnLayer(scene.currentBrush, iter + i, mainWindow);
+					}
+					CursorBufferUtils::resetBuffer();
+				}
+			}
 			scene.drawOnDrawingLayer(mainWindow);
 		}
 	}

@@ -54,7 +54,6 @@ public:
 	unsigned int getDistance() { return getDistance(currentLayer); }
 	unsigned int getSize() { return getDistance(lastActiveLayer); }
 	
-	void resetCursorPositions(sf::RenderWindow & window, Layer& layer);
 	void saveBrush();
 	void drawOnDrawingLayer(sf::RenderWindow& mainWindow);
 	void drawOnBrushLayer(sf::RenderWindow& brushWindow);
@@ -147,18 +146,6 @@ inline void Scene::initialize()
 	(*currentBrush)->setSpriteSize(brushSize);
 }
 
-inline void Scene::resetCursorPositions(sf::RenderWindow & window, Layer& layer) {
-	movedDistance = 0.0f;
-	sf::Vector2i newPos = sf::Mouse::getPosition(window);
-
-	cursorPositions[0] = newPos;
-	cursorPositions[1] = newPos;
-	cursorPositions[2] = newPos;
-	cursorPositions[3] = newPos;
-
-	drawingLayer.resetDrawFlag();
-}
-
 inline void Scene::saveBrush() {
 	sf::RenderTexture renderTex;
 	renderTex.create(brushLayer.width, brushLayer.height);
@@ -178,7 +165,7 @@ inline void Scene::saveBrush() {
 }
 
 inline void Scene::drawOnDrawingLayer(sf::RenderWindow & mainWindow) {
-	drawingLayer.drawLerpOnLayer(movedDistance, currentBrush, cursorPositions, mainWindow);
+	//drawingLayer.drawLerpOnLayer(movedDistance, currentBrush, cursorPositions, mainWindow);
 	//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
 
 	sf::RenderStates state;
@@ -189,6 +176,6 @@ inline void Scene::drawOnDrawingLayer(sf::RenderWindow & mainWindow) {
 }
 
 inline void Scene::drawOnBrushLayer(sf::RenderWindow & brushWindow) {
-	brushLayer.drawLerpOnLayer(movedDistance, currentBrush, cursorPositions, brushWindow);
+	//brushLayer.drawLerpOnLayer(movedDistance, currentBrush, cursorPositions, brushWindow);
 	brushLayer.drawLayerinWindow(brushWindow);
 }
