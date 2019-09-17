@@ -9,11 +9,11 @@
 #include "msgpack.hpp"
 namespace fs = std::experimental::filesystem;
 
-std::vector<int> createVector(sf::Image image) {
+std::vector<sf::Uint8> createVector(sf::Image image) {
 	sf::Vector2u size = image.getSize();
 	int width = size.x;
 	int height = size.y;
-	std::vector<int> data = {};
+	std::vector<sf::Uint8> data = {};
 	data.push_back(width);
 	data.push_back(height);
 
@@ -33,39 +33,31 @@ int main() {
 
 	std::ofstream ostrm("MyFile.jns", std::ios::out | std::ios::binary);
 	
-	std::vector<int> a = {};
+	std::vector<sf::Uint8> a = {};
 	sf::Image img;
-	img.create(1200, 1200);
-	a = createVector(img);
-	ostrm.write((char*)&a[0], a.size() * sizeof(int));
+	int width = 200;
+	int height = 200;
+	img.create(width, height, sf::Color::Green);
+	ostrm.write((char*)&width, sizeof(int));
+	ostrm.write((char*)&height, sizeof(int));
+
+	ostrm.write((char*)&img.getPixelsPtr()[0], sizeof(sf::Uint8) * width * height * 4);
 	ostrm.close();
 
 	std::ifstream istrm("MyFile.jns", std::ios::in | std::ios::binary);
 
-	size_t begin = istrm.tellg();
-	istrm.seekg(0, std::ifstream::end);
-	size_t end = istrm.tellg();
-	size_t size = (end - begin)/ sizeof(int);
-	int buffer = 0;
-
-	istrm.seekg(0, std::ifstream::beg);
-	istrm.read((char*)&buffer, sizeof(int));
-	int width = buffer;
-	istrm.read((char*)&buffer, sizeof(int));
-	int height = buffer;
-
-	std::vector<int> b;
-	b.reserve(width * height * 4 + 2);
-	b.push_back(width);
-	b.push_back(height);
-	b.resize(width * height * 4 + 2);
-
-	istrm.read((char*)&b[2], sizeof(int) * (size -2));
+	int new_width = 0;
+	istrm.read((char*)&new_width, sizeof(int));
+	int new_height = 0;
+	istrm.read((char*)&new_height, sizeof(int));
+	
 
 	sf::Image image;
-	image.create((unsigned int)width, (unsigned int)height, (const sf::Uint8*)&b[2]);
-
-	std::cout << b.size() << std::endl;
+	image.create(new_width, new_height);
+	istrm.read((char*)&image.getPixelsPtr()[0], sizeof(sf::Uint8) * new_width * new_height * 4);
 	istrm.close();
+
+	image.saveToFile("test.jpg");
+	
 
 }
