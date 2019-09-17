@@ -13,9 +13,7 @@ void createMainWindow();
 void mainRenderLoop();
 void moveLayers();
 void mainWindowDrawing();
-
 bool notDragingScene();
-
 bool isCursorHoveringLayer();
 
 //Needed to get the pen pressure
