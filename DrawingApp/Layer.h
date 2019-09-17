@@ -2,7 +2,7 @@
 
 #include "Brush.h"
 #include "Settings.h"
-#include "CursorBufferUtils.h"
+#include "CursorBuffer.h"
 
 typedef std::unique_ptr<Brush> BrushPntr;
 
@@ -39,9 +39,8 @@ public:
 
 	void clearLayer();
 	void blendlayers(Layer& newLayer, std::vector<BrushPntr>::iterator& brush);
-	void drawLayerinWindow(sf::RenderWindow& window);
-	void drawLerpOnLayer(std::vector<BrushPntr>::iterator& brush,
-		std::vector<sf::Vector2i>::iterator iter, sf::RenderWindow& window);
+	void drawLayerinWindow();
+	void lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>::iterator iter);
 	~Layer();
 
 private:
@@ -101,12 +100,11 @@ inline void Layer::blendlayers(Layer& newLayer, std::vector<BrushPntr>::iterator
 	tex = rTex.getTexture();
 	sprite.setTexture(tex);
 }
-inline void Layer::drawLayerinWindow(sf::RenderWindow & window) {
-	window.draw(sprite);
+inline void Layer::drawLayerinWindow() {
+	mainWindow.draw(sprite);
 }
 
-inline void Layer::drawLerpOnLayer(std::vector<BrushPntr>::iterator& brush, 
-	std::vector<sf::Vector2i>::iterator iter, sf::RenderWindow& window)
+inline void Layer::lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>::iterator iter)
 {
 	sf::RenderTexture renderTex;
 	renderTex.create(width, height);
@@ -118,16 +116,15 @@ inline void Layer::drawLerpOnLayer(std::vector<BrushPntr>::iterator& brush,
 		offset2f = sf::Vector2f(offset);
 	}
 
-	if (CursorBufferUtils::isFirstStamp) { //This is the case when we just clicked, here we just draw the brushstamp at the cursor position
-		CursorBufferUtils::isFirstStamp = false;
+	if (CursorBuffer::isFirstStamp) { //This is the case when we just clicked, here we just draw the brushstamp at the cursor position
+		CursorBuffer::isFirstStamp = false;
 
 		sf::Vector2f circlePos = sf::Vector2f(*iter);
 		(**brush).sprite.setPosition(circlePos - offset2f);
 		renderTex.draw((**brush).sprite, getRenderState(brush));
 	}
 	else { //Here we need to make sure that consecutive brushstamps have a constant distance to each other
-		std::cout << CursorBufferUtils::cursorBuffer.size() << std::endl;
-		float movedDistance = distance(*iter, *std::next(iter));
+		float movedDistance = distance(*iter, *(iter + 1));
 		float relativeStepSize = (**brush).computeRelativeStepSize();
 		int steps = (int)std::floorf(movedDistance / relativeStepSize);
 

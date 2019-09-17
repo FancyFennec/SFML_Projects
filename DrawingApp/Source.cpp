@@ -13,8 +13,10 @@ void createMainWindow();
 void mainRenderLoop();
 void moveLayers();
 void mainWindowDrawing();
-void brushWindowDrawing();
-void brushWindowRendering();
+
+bool notDragingScene();
+
+bool isCursorHoveringLayer();
 
 //Needed to get the pen pressure
 MSG msg;
@@ -53,7 +55,7 @@ void mousePositionSampling()
 					(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
 				}
 			}
-			CursorBufferUtils::updateBuffer(scene.currentBrush);
+			CursorBuffer::update(scene.currentBrush);
 		}
 	}
 }
@@ -75,7 +77,6 @@ void mainRenderLoop()
 		
 		moveLayers();
 		mainWindowDrawing();
-		brushWindowDrawing();
 
 		if (scene.currentLayer != scene.lastActiveLayer) {
 			for (auto iter = std::next(scene.currentLayer); iter <= scene.lastActiveLayer; std::advance(iter, 1)) {
@@ -95,8 +96,6 @@ void mainRenderLoop()
 
 		ImGui::SFML::Render(mainWindow);
 		mainWindow.display();
-
-		brushWindowRendering();
 	}
 }
 
@@ -111,39 +110,33 @@ void moveLayers()
 
 void mainWindowDrawing()
 {
-	if (mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
-		if (isMouseHeld() && !isSpaceHeld()) {
-			if (CursorBufferUtils::isFirstStamp) {
-				scene.drawingLayer.drawLerpOnLayer(scene.currentBrush, CursorBufferUtils::cursorBuffer.begin(), mainWindow);
+	if (isCursorHoveringLayer()) {
+		if (notDragingScene()) {
+			if (CursorBuffer::isFirstStamp) {
+				scene.drawingLayer.lerpDrawingOnLayer(scene.currentBrush, CursorBuffer::positions.begin());
 			}
 			else {
-				if (CursorBufferUtils::cursorBuffer.size() > 1) {
-					auto iter = CursorBufferUtils::cursorBuffer.begin();
-					for (int i = 0; i < CursorBufferUtils::cursorBuffer.size() - 1 ; i++) {
-						scene.drawingLayer.drawLerpOnLayer(scene.currentBrush, iter + i, mainWindow);
+				if (CursorBuffer::positions.size() > 1) {
+					auto iter = CursorBuffer::positions.begin();
+					for (int i = 0; i < CursorBuffer::positions.size() - 1 ; i++) {
+						scene.drawingLayer.lerpDrawingOnLayer(scene.currentBrush, iter + i);
 					}
-					CursorBufferUtils::resetBuffer();
+					CursorBuffer::reset();
 				}
 			}
-			scene.drawOnDrawingLayer(mainWindow);
+			scene.renderDrawingLayer();
 		}
 	}
 }
 
-void brushWindowDrawing()
+bool notDragingScene()
 {
-	if (brushWindow.hasFocus()) {
-		if (sf::Mouse::getPosition(brushWindow).x >= 0 && sf::Mouse::getPosition(brushWindow).y >= 0) {
-			if (isMouseHeld()) {
-				scene.drawOnBrushLayer(brushWindow);
-			}
-		}
-	}
-	else {
-		if (sf::Mouse::getPosition(brushWindow).x >= 0 && sf::Mouse::getPosition(brushWindow).y >= 0) {
-			brushWindow.requestFocus();
-		}
-	}
+	return isMouseHeld() && !isSpaceHeld();
+}
+
+bool isCursorHoveringLayer()
+{
+	return mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive();
 }
 
 void createMainWindow()
@@ -158,19 +151,4 @@ void createMainWindow()
 
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(FPS);
-}
-
-void brushWindowRendering()
-{
-	if (brushWindow.isOpen() && brushWindow.hasFocus()) {
-		while (brushWindow.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-				brushWindow.close();
-			brushWindowEventHandling(scene);
-		}
-		brushWindow.clear(sf::Color::Black);
-		scene.brushLayer.drawLayerinWindow(brushWindow);
-		brushWindow.display();
-	}
 }

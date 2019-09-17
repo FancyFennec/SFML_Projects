@@ -160,9 +160,5 @@ void brushGUI(Scene& scene)
 
 void createBrushWindow(Scene& scene)
 {
-	brushWindow.create(sf::VideoMode(scene.brushWidth, scene.brushWidth), "Define Brush", sf::Style::Titlebar);
-	brushWindow.setFramerateLimit(120);
-	brushWindow.clear(sf::Color::Black);
-	brushWindow.setPosition(mainWindow.getPosition() +
-		sf::Vector2i(WINDOW_WIDTH / 2 - scene.brushWidth / 2, WINDOW_HEIGHT / 2 - scene.brushWidth / 2));
+	//TODO: Implement something :3
 }

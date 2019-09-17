@@ -55,8 +55,7 @@ public:
 	unsigned int getSize() { return getDistance(lastActiveLayer); }
 	
 	void saveBrush();
-	void drawOnDrawingLayer(sf::RenderWindow& mainWindow);
-	void drawOnBrushLayer(sf::RenderWindow& brushWindow);
+	void renderDrawingLayer();
 
 	~Scene() {
 		json brushesJson;
@@ -164,18 +163,11 @@ inline void Scene::saveBrush() {
 	brushes.back()->brushName = "NewBrush";
 }
 
-inline void Scene::drawOnDrawingLayer(sf::RenderWindow & mainWindow) {
-	//drawingLayer.drawLerpOnLayer(movedDistance, currentBrush, cursorPositions, mainWindow);
-	//mainLayer.drawCubicOnCanvas(movedDistance, currentbrush, cursorPositions);
+inline void Scene::renderDrawingLayer() {
 
 	sf::RenderStates state;
 	state.transform.translate(sf::Vector2f(currentLayer->offset));
 	drawingLayer.sprite.setColor(sf::Color(255, 255, 255, (*currentBrush)->opacity));
 	mainWindow.draw(drawingLayer.sprite, state);
 	drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
-}
-
-inline void Scene::drawOnBrushLayer(sf::RenderWindow & brushWindow) {
-	//brushLayer.drawLerpOnLayer(movedDistance, currentBrush, cursorPositions, brushWindow);
-	brushLayer.drawLayerinWindow(brushWindow);
 }

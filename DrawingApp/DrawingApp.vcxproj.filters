@@ -110,7 +110,7 @@
     <ClInclude Include="Settings.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
-    <ClInclude Include="CursorBufferUtils.h">
+    <ClInclude Include="CursorBuffer.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
   </ItemGroup>
