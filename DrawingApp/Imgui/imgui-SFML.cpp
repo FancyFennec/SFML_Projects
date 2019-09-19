@@ -405,15 +405,17 @@ namespace ImGui {
 				}
 			}
 
-			// Update Ctrl, Shift, Alt, Super state
-			io.KeyCtrl = io.KeysDown[sf::Keyboard::LControl] ||
-				io.KeysDown[sf::Keyboard::RControl];
-			io.KeyAlt =
-				io.KeysDown[sf::Keyboard::LAlt] || io.KeysDown[sf::Keyboard::RAlt];
-			io.KeyShift =
-				io.KeysDown[sf::Keyboard::LShift] || io.KeysDown[sf::Keyboard::RShift];
-			io.KeySuper = io.KeysDown[sf::Keyboard::LSystem] ||
-				io.KeysDown[sf::Keyboard::RSystem];
+
+			//TODO::I commented out as a fix for a bug where after alt tabing the gui was unasable
+			//// Update Ctrl, Shift, Alt, Super state
+			//io.KeyCtrl = io.KeysDown[sf::Keyboard::LControl] ||
+			//	io.KeysDown[sf::Keyboard::RControl];
+			//io.KeyAlt =
+			//	io.KeysDown[sf::Keyboard::LAlt] || io.KeysDown[sf::Keyboard::RAlt];
+			//io.KeyShift =
+			//	io.KeysDown[sf::Keyboard::LShift] || io.KeysDown[sf::Keyboard::RShift];
+			//io.KeySuper = io.KeysDown[sf::Keyboard::LSystem] ||
+			//	io.KeysDown[sf::Keyboard::RSystem];
 
 #ifdef ANDROID
 #ifdef USE_JNI

@@ -126,7 +126,10 @@ void lmbPressed(Scene& scene)
 		}
 		else {
 			setMouseIsHeld();
-			CursorBuffer::initialize();
+			scene.cursorPositions[1] = sf::Mouse::getPosition(mainWindow);
+			scene.cursorPositions[0] = scene.cursorPositions[1];
+			CursorBuffer::isFirstStamp = true;
+			CursorBuffer::isBufferBeingCleared = true;
 		}
 	}
 }

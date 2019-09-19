@@ -10,17 +10,17 @@ class CursorBuffer
 {
 public:
 	static bool isFirstStamp;
+	static bool isBufferBeingCleared;
+
 	static std::vector<sf::Vector2i> positions;
 
-	static void initialize() {
-		positions.clear();
-		positions.reserve(20);
-		positions.push_back(sf::Mouse::getPosition(mainWindow));
-		isFirstStamp = true;
-	}
-
 	static void update(std::vector<BrushPntr>::iterator brush) {
-		if(!isFirstStamp && !positions.empty()) {
+		if (isFirstStamp && isBufferBeingCleared) {
+			positions.clear();
+			positions.reserve(20);
+			positions.push_back(sf::Mouse::getPosition(mainWindow));
+			isBufferBeingCleared = false;
+		} else if(!positions.empty()) {
 			if (currentCursorDistance() > (**brush).computeRelativeStepSize()) {
 				positions.push_back(sf::Mouse::getPosition(mainWindow));
 			}
@@ -48,6 +48,7 @@ private:
 	}
 };
 bool CursorBuffer::isFirstStamp = true;
+bool CursorBuffer::isBufferBeingCleared = true;
 std::vector<sf::Vector2i> CursorBuffer::positions = {};
 
 CursorBuffer::CursorBuffer()

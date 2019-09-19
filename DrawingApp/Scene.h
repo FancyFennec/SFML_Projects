@@ -40,7 +40,7 @@ public:
 	std::vector<BrushPntr> brushes;
 	std::vector<BrushPntr>::iterator currentBrush;
 
-	std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0), sf::Vector2i(0,0) };
+	std::vector<sf::Vector2i> cursorPositions = { sf::Vector2i(0,0), sf::Vector2i(0,0) };
 
 	Scene(unsigned int width, unsigned int height) :
 		width(width),

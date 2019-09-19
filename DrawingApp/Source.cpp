@@ -26,7 +26,6 @@ const int SCENE_HEIGHT = 1200;
 Scene scene(SCENE_WIDTH, SCENE_HEIGHT);
 
 sf::Thread mouseLoopThread(&mousePositionSampling);
-std::vector<sf::Vector2i> mousepositions;
 
 int main() {
 	createMainWindow();
@@ -62,7 +61,6 @@ void mainRenderLoop()
 {
 	while (mainWindow.isOpen())
 	{
-		mousepositions.clear(); //TODO: Clearing should be after the positions have been used
 		sf::RenderStates state;
 		state.transform.translate(sf::Vector2f(scene.currentLayer->offset));
 
@@ -100,9 +98,9 @@ void mainRenderLoop()
 void moveLayers()
 {
 	if (isMouseHeld() && isSpaceHeld()) {//This allows dragging of the layers
-		scene.cursorPositions[2] = scene.cursorPositions[3];
-		scene.cursorPositions[3] = sf::Mouse::getPosition(mainWindow);
-		scene.currentLayer->offset += scene.cursorPositions[3] - scene.cursorPositions[2];
+		scene.cursorPositions[0] = scene.cursorPositions[1];
+		scene.cursorPositions[1] = sf::Mouse::getPosition(mainWindow);
+		scene.currentLayer->offset += scene.cursorPositions[1] - scene.cursorPositions[0];
 	}
 }
 
