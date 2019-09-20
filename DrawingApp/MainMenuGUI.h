@@ -29,6 +29,12 @@ void mainMenuGUI(Scene& scene)
 	{
 		if (ImGui::BeginMenu("File"))
 		{
+			if (ImGui::MenuItem("Saving Scene"))
+			{
+				file_type = SCN;
+				saveFilePopupIsOpen = true;
+				input = "Input FileName and";
+			}
 			if (ImGui::MenuItem("Load Scene"))
 			{
 				std::cout << "Loading Scene" << std::endl;
@@ -36,10 +42,6 @@ void mainMenuGUI(Scene& scene)
 			if (ImGui::MenuItem("Load Layer"))
 			{
 				std::cout << "Loading Layer" << std::endl;
-			}
-			if (ImGui::MenuItem("Saving Scene"))
-			{
-				std::cout << "Save Scene" << std::endl;
 			}
 			if (ImGui::MenuItem("Save Scene as JPEG"))
 			{
@@ -100,10 +102,14 @@ void mainMenuGUI(Scene& scene)
 			ImGui::OpenPopup("Save Window");
 			if (ImGui::BeginPopupModal("Save Window", &saveFilePopupIsOpen)) {
 				std::string folderPath("./SavedFiles");
+				std::string tmpPath("./SavedFiles/tmp");
+
 				for (auto p : fs::directory_iterator(folderPath)) {
 					std::string fileName = p.path().string().substr(folderPath.size() + 1); //Remove folder name
-					if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
-						input = fileName.substr(0, fileName.length() - 4).c_str(); //remove ending
+					if (!fs::is_directory(p)) {
+						if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
+							input = fileName.substr(0, fileName.length() - 4).c_str(); //remove ending
+						}
 					}
 				}
 
@@ -113,26 +119,26 @@ void mainMenuGUI(Scene& scene)
 
 				char* inputChar = (char*)input.data();
 				if (ImGui::InputText("Press Enter", inputChar, 30, ImGuiInputTextFlags_EnterReturnsTrue)) {
-					std::string file = "./SavedFiles/";
-					file.append(inputChar);
+					folderPath.append("/").append(inputChar);
 					switch (file_type) {
 					case(JPEG):
 					case(SINGLE_JPEG):
-						file.append(".jpg");
+						folderPath.append(".jpg");
 						break;
 					case(PNG):
 					case(SINGLE_PNG):
-						file.append(".png");
+						folderPath.append(".png");
 						break;
 					case(SCN):
-						file.append(".scn");
+						tmpPath.append("/").append(inputChar).append(".png");
+						folderPath.append(".scn");
 						break;
 					}
 
-					sf::RenderTexture rTex;
-					rTex.create(scene.width, scene.height);
 					switch (file_type) {
 					case(JPEG): {
+						sf::RenderTexture rTex;
+						rTex.create(scene.width, scene.height);
 						rTex.clear(sf::Color::White);
 						for (auto layer = scene.layers.begin(); layer != scene.layers.end(); layer++) {
 							rTex.draw(layer->sprite);
@@ -140,30 +146,57 @@ void mainMenuGUI(Scene& scene)
 						break;
 					}
 					case(PNG): {
+						sf::RenderTexture rTex;
+						rTex.create(scene.width, scene.height);
 						rTex.clear(sf::Color(255, 255, 255, 0));
 						for (auto layer = std::next(scene.layers.begin()); layer != scene.layers.end(); layer++) {
 							rTex.draw(layer->sprite);
 						}
+						rTex.display();
+						rTex.getTexture().copyToImage().saveToFile(folderPath.data());
 						break;
 					}
 					case(SINGLE_JPEG): {
+						sf::RenderTexture rTex;
+						rTex.create(scene.width, scene.height);
 						rTex.clear(sf::Color::White);
 						rTex.draw(scene.layers.begin()->sprite);
 						rTex.draw(scene.currentLayer->sprite);
+						rTex.display();
+						rTex.getTexture().copyToImage().saveToFile(folderPath.data());
 						break;
 					}
 					case(SINGLE_PNG): {
+						sf::RenderTexture rTex;
+						rTex.create(scene.width, scene.height);
 						rTex.clear(sf::Color(255, 255, 255, 0));
 						rTex.draw(scene.currentLayer->sprite);
+						rTex.display();
+						rTex.getTexture().copyToImage().saveToFile(folderPath.data());
 						break;
 					}
 					case(SCN): {
+
+						unsigned int layerCount = std::distance(scene.layers.begin(), scene.lastActiveLayer);
+
+						sf::Vector2f offset(scene.width, 0);
+						sf::RenderStates rState;
+						
+						sf::RenderTexture rTex;
+						rTex.create(scene.width * layerCount, scene.height);
+						rTex.clear(sf::Color(255, 255, 255, 0));
+
+						for (int i = 0; i < layerCount; i++) {
+							rTex.draw(scene.layers[i + 1].sprite, rState);
+							rState.transform.translate(offset);
+						}
+
+						rTex.display();
+						rTex.getTexture().copyToImage().saveToFile(tmpPath.data());
+
 						//TODO: Create Folder and save all the textures;
 					}
 					}
-
-					rTex.display();
-					rTex.getTexture().copyToImage().saveToFile(file.data());
 
 					saveFilePopupIsOpen = false;
 				}
