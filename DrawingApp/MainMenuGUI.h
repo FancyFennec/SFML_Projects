@@ -266,6 +266,8 @@ void loadScene(std::string &fileName, Scene & scene)
 
 	//create a render texture with the right size and draw portions of the texture to it
 	sf::RenderTexture rtex;
+	sf::RenderStates rState;
+	rState.blendMode = sf::BlendNone;
 	rtex.create(width, height);
 	sf::IntRect rect(0, 0, width, height);
 	sf::Sprite sprite;
@@ -274,7 +276,7 @@ void loadScene(std::string &fileName, Scene & scene)
 		rect.left = i * width;
 		sprite.setTexture(tex);
 		sprite.setTextureRect(rect);
-		rtex.draw(sprite);
+		rtex.draw(sprite, rState);
 		rtex.display();
 
 		scene.layers[i + 1].tex = rtex.getTexture();
@@ -289,6 +291,7 @@ void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath)
 
 	sf::Vector2f offset(scene.width, 0);
 	sf::RenderStates rState;
+	rState.blendMode = sf::BlendNone;
 
 	sf::RenderTexture rTex;
 	rTex.create(scene.width * layerCount, scene.height);
