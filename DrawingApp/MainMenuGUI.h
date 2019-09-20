@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
 
 #include "Imgui/imgui.h"
 #include "Imgui/imgui-SFML.h"
@@ -10,7 +11,18 @@
 
 void mainMenuGUI(Scene& scene);
 
+void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath);
+
+void saveCurrentLayerAsPNG(Scene & scene, std::string &folderPath);
+
+void saveCurrentLayerAsJPEG(Scene & scene, std::string &folderPath);
+
+void saveSceneAsPNG(Scene & scene, std::string &folderPath);
+
+void saveSceneAsJPEG(Scene & scene);
+
 bool saveFilePopupIsOpen = false;
+bool openFilePopupIsOpen = false;
 std::string input;
 
 static enum FILE_TYPE {
@@ -37,11 +49,13 @@ void mainMenuGUI(Scene& scene)
 			}
 			if (ImGui::MenuItem("Load Scene"))
 			{
-				std::cout << "Loading Scene" << std::endl;
+				file_type = SCN;
+				openFilePopupIsOpen = true;
 			}
 			if (ImGui::MenuItem("Load Layer"))
 			{
-				std::cout << "Loading Layer" << std::endl;
+				file_type = PNG;
+				openFilePopupIsOpen = true;
 			}
 			if (ImGui::MenuItem("Save Scene as JPEG"))
 			{
@@ -99,8 +113,9 @@ void mainMenuGUI(Scene& scene)
 		ImGui::EndMainMenuBar();
 
 		if (saveFilePopupIsOpen) {
-			ImGui::OpenPopup("Save Window");
-			if (ImGui::BeginPopupModal("Save Window", &saveFilePopupIsOpen)) {
+			ImGui::SetNextWindowSize(ImVec2(600, 500));
+			ImGui::OpenPopup("Save File");
+			if (ImGui::BeginPopupModal("Save File", &saveFilePopupIsOpen)) {
 				std::string folderPath("./SavedFiles");
 				std::string tmpPath("./SavedFiles/tmp");
 
@@ -130,71 +145,30 @@ void mainMenuGUI(Scene& scene)
 						folderPath.append(".png");
 						break;
 					case(SCN):
-						tmpPath.append("/").append(inputChar).append(".png");
+						tmpPath.append("/").append("tmp").append(".png");
 						folderPath.append(".scn");
 						break;
 					}
 
 					switch (file_type) {
 					case(JPEG): {
-						sf::RenderTexture rTex;
-						rTex.create(scene.width, scene.height);
-						rTex.clear(sf::Color::White);
-						for (auto layer = scene.layers.begin(); layer != scene.layers.end(); layer++) {
-							rTex.draw(layer->sprite);
-						}
+						saveSceneAsJPEG(scene);
 						break;
 					}
 					case(PNG): {
-						sf::RenderTexture rTex;
-						rTex.create(scene.width, scene.height);
-						rTex.clear(sf::Color(255, 255, 255, 0));
-						for (auto layer = std::next(scene.layers.begin()); layer != scene.layers.end(); layer++) {
-							rTex.draw(layer->sprite);
-						}
-						rTex.display();
-						rTex.getTexture().copyToImage().saveToFile(folderPath.data());
+						saveSceneAsPNG(scene, folderPath);
 						break;
 					}
 					case(SINGLE_JPEG): {
-						sf::RenderTexture rTex;
-						rTex.create(scene.width, scene.height);
-						rTex.clear(sf::Color::White);
-						rTex.draw(scene.layers.begin()->sprite);
-						rTex.draw(scene.currentLayer->sprite);
-						rTex.display();
-						rTex.getTexture().copyToImage().saveToFile(folderPath.data());
+						saveCurrentLayerAsJPEG(scene, folderPath);
 						break;
 					}
 					case(SINGLE_PNG): {
-						sf::RenderTexture rTex;
-						rTex.create(scene.width, scene.height);
-						rTex.clear(sf::Color(255, 255, 255, 0));
-						rTex.draw(scene.currentLayer->sprite);
-						rTex.display();
-						rTex.getTexture().copyToImage().saveToFile(folderPath.data());
+						saveCurrentLayerAsPNG(scene, folderPath);
 						break;
 					}
 					case(SCN): {
-
-						unsigned int layerCount = std::distance(scene.layers.begin(), scene.lastActiveLayer);
-
-						sf::Vector2f offset(scene.width, 0);
-						sf::RenderStates rState;
-						
-						sf::RenderTexture rTex;
-						rTex.create(scene.width * layerCount, scene.height);
-						rTex.clear(sf::Color(255, 255, 255, 0));
-
-						for (int i = 0; i < layerCount; i++) {
-							rTex.draw(scene.layers[i + 1].sprite, rState);
-							rState.transform.translate(offset);
-						}
-
-						rTex.display();
-						rTex.getTexture().copyToImage().saveToFile(tmpPath.data());
-
-						//TODO: Create Folder and save all the textures;
+						saveScene(scene, tmpPath, folderPath);
 					}
 					}
 
@@ -206,5 +180,131 @@ void mainMenuGUI(Scene& scene)
 				ImGui::EndPopup();
 			}
 		}
+
+		if (openFilePopupIsOpen) {
+			ImGui::SetNextWindowSize(ImVec2(600, 500));
+			ImGui::OpenPopup("Open File");
+			if (ImGui::BeginPopupModal("Open File", &openFilePopupIsOpen)) {
+				std::string folderPath("./SavedFiles");
+				std::string tmpPath("./SavedFiles/tmp");
+
+				for (auto p : fs::directory_iterator(folderPath)) {
+					std::string fileName = p.path().string().substr(folderPath.size() + 1); //Remove folder name
+
+					switch(file_type){
+					case(SCN): {
+						if (!fs::is_directory(p) && fileName.substr(fileName.size() - 4) == ".scn") {
+							if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
+								input = fileName.c_str();
+								openFilePopupIsOpen = false;
+							}
+						}
+						break;
+					}
+					case(PNG): {
+						if (!fs::is_directory(p) && fileName.substr(fileName.size() - 4) != ".scn") {
+							if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
+								input = fileName.c_str();
+								openFilePopupIsOpen = false;
+							}
+						}
+						break;
+					}
+					}
+					
+				}
+				ImGui::Dummy(ImVec2(0, 30));
+				ImGui::SameLine(ImGui::GetWindowSize().x - 60);
+				if (ImGui::Button("Close", ImVec2(50, 20))) openFilePopupIsOpen = false;
+				ImGui::EndPopup();
+			}
+		}
+	}
+}
+
+void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath)
+{
+	//Draw all layers to a big PNG
+	unsigned int layerCount = std::distance(scene.layers.begin(), scene.lastActiveLayer);
+
+	sf::Vector2f offset(scene.width, 0);
+	sf::RenderStates rState;
+
+	sf::RenderTexture rTex;
+	rTex.create(scene.width * layerCount, scene.height);
+	rTex.clear(sf::Color(255, 255, 255, 0));
+
+	for (int i = 0; i < layerCount; i++) {
+		rTex.draw(scene.layers[i + 1].sprite, rState);
+		rState.transform.translate(offset);
+	}
+
+	rTex.display();
+	rTex.getTexture().copyToImage().saveToFile(tmpPath.data());
+
+	//Create input stream for the ng and output stream for the file we want to write to
+	std::ifstream istrm(tmpPath.data(), std::ios::in | std::ios::binary);
+	std::ofstream ostrm(folderPath.data(), std::ios::out | std::ios::binary);
+
+	ostrm.write((char*)&layerCount, sizeof(int));
+	ostrm.write((char*)&scene.width, sizeof(int));
+	ostrm.write((char*)&scene.height, sizeof(int));
+
+	istrm.seekg(0, std::ios::end);
+	std::streampos end = istrm.tellg();
+	istrm.seekg(0, std::ios::beg);
+
+	//Make buffer with the right size
+	std::vector<char> buffer;
+	buffer.resize(end / sizeof(char));
+
+	//read data into the buffer and write it to the file again
+	istrm.read((char*)buffer.data(), end / sizeof(char));
+	ostrm.write((char*)buffer.data(), end / sizeof(char));
+
+	istrm.close();
+	ostrm.close();
+}
+
+void saveCurrentLayerAsPNG(Scene & scene, std::string &folderPath)
+{
+	sf::RenderTexture rTex;
+	rTex.create(scene.width, scene.height);
+	rTex.clear(sf::Color(255, 255, 255, 0));
+	rTex.draw(scene.currentLayer->sprite);
+	rTex.display();
+	rTex.getTexture().copyToImage().saveToFile(folderPath.data());
+}
+
+void saveCurrentLayerAsJPEG(Scene & scene, std::string &folderPath)
+{
+	sf::RenderTexture rTex;
+	rTex.create(scene.width, scene.height);
+	rTex.clear(sf::Color::White);
+	rTex.draw(scene.layers.begin()->sprite);
+	rTex.draw(scene.currentLayer->sprite);
+	rTex.display();
+	rTex.getTexture().copyToImage().saveToFile(folderPath.data());
+}
+
+void saveSceneAsPNG(Scene & scene, std::string &folderPath)
+{
+	sf::RenderTexture rTex;
+	rTex.create(scene.width, scene.height);
+	rTex.clear(sf::Color(255, 255, 255, 0));
+	for (auto layer = std::next(scene.layers.begin()); layer != scene.layers.end(); layer++) {
+		rTex.draw(layer->sprite);
+	}
+	rTex.display();
+	rTex.getTexture().copyToImage().saveToFile(folderPath.data());
+}
+
+void saveSceneAsJPEG(Scene & scene)
+{
+	sf::RenderTexture rTex;
+	rTex.create(scene.width, scene.height);
+	rTex.clear(sf::Color::White);
+	for (auto layer = scene.layers.begin(); layer != scene.layers.end(); layer++) {
+		rTex.draw(layer->sprite);
 	}
 }
