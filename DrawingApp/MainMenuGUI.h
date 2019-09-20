@@ -11,6 +11,8 @@
 
 void mainMenuGUI(Scene& scene);
 
+void loadScene(std::string &fileName, Scene & scene);
+
 void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath);
 
 void saveCurrentLayerAsPNG(Scene & scene, std::string &folderPath);
@@ -195,7 +197,8 @@ void mainMenuGUI(Scene& scene)
 					case(SCN): {
 						if (!fs::is_directory(p) && fileName.substr(fileName.size() - 4) == ".scn") {
 							if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
-								input = fileName.c_str();
+								std::string path = folderPath;
+								loadScene(path.append("/").append(fileName), scene);
 								openFilePopupIsOpen = false;
 							}
 						}
@@ -204,7 +207,7 @@ void mainMenuGUI(Scene& scene)
 					case(PNG): {
 						if (!fs::is_directory(p) && fileName.substr(fileName.size() - 4) != ".scn") {
 							if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
-								input = fileName.c_str();
+								//TODO: create a new layer with the image in it
 								openFilePopupIsOpen = false;
 							}
 						}
@@ -219,6 +222,63 @@ void mainMenuGUI(Scene& scene)
 				ImGui::EndPopup();
 			}
 		}
+	}
+}
+
+void loadScene(std::string &fileName, Scene & scene)
+{
+	//reading the file back into an image
+	std::ifstream newistrm(fileName, std::ios::out | std::ios::binary);
+
+	int layerCount;
+	newistrm.read((char*)&layerCount, sizeof(int));
+	int width;
+	newistrm.read((char*)&width, sizeof(int));
+	int height;
+	newistrm.read((char*)&height, sizeof(int));
+
+	scene.width = width;
+	scene.height = height;
+
+	scene.lastActiveLayer = scene.layers.begin() + layerCount;
+
+	for (auto layer : scene.layers) {
+		layer.width = width;
+		layer.height = height;
+		layer.clearLayer();
+	}
+
+	std::streampos begin = newistrm.tellg();
+	newistrm.seekg(0, std::ios::end);
+	std::streampos end = newistrm.tellg();
+	newistrm.seekg(begin);
+
+	std::vector<char> buffer;
+	buffer.resize((end - begin) / sizeof(char));
+	newistrm.read((char*)buffer.data(), (end - begin) / sizeof(char));
+
+	newistrm.close();
+
+	//Load the data into a texture
+	sf::Texture tex;
+	tex.create(width, height);
+	tex.loadFromMemory(buffer.data(), width * height * layerCount);
+
+	//create a render texture with the right size and draw portions of the texture to it
+	sf::RenderTexture rtex;
+	rtex.create(width, height);
+	sf::IntRect rect(0, 0, width, height);
+	sf::Sprite sprite;
+
+	for (int i = 0; i < layerCount; i++) {
+		rect.left = i * width;
+		sprite.setTexture(tex);
+		sprite.setTextureRect(rect);
+		rtex.draw(sprite);
+		rtex.display();
+
+		scene.layers[i + 1].tex = rtex.getTexture();
+		scene.layers[i + 1].sprite.setTexture(scene.layers[i + 1].tex);
 	}
 }
 
