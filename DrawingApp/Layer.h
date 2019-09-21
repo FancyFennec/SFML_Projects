@@ -125,6 +125,7 @@ inline void Layer::lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, s
 	}
 	else { //Here we need to make sure that consecutive brushstamps have a constant distance to each other
 		float movedDistance = distance(*iter, *(iter + 1));
+		movedDistance = distance(*iter, *(iter + 1)) > 200.0f ? 0 : movedDistance; //TODO: Sometimes iter + 1 accesses something outside the vector, then the moved distance becomse a large number
 		float relativeStepSize = (**brush).computeRelativeStepSize();
 		int steps = (int)std::floorf(movedDistance / relativeStepSize);
 
