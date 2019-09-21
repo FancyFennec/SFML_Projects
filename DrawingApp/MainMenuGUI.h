@@ -11,6 +11,8 @@
 
 void mainMenuGUI(Scene& scene);
 
+void loadLayerFromFile(std::string &folderPath, std::string &fileName, Scene & scene);
+
 void loadScene(std::string &fileName, Scene & scene);
 
 void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath);
@@ -49,12 +51,12 @@ void mainMenuGUI(Scene& scene)
 				saveFilePopupIsOpen = true;
 				input = "Input FileName and";
 			}
-			if (ImGui::MenuItem("Load Scene"))
+			if (ImGui::MenuItem("Open Scene"))
 			{
 				file_type = SCN;
 				openFilePopupIsOpen = true;
 			}
-			if (ImGui::MenuItem("Load Layer"))
+			if (ImGui::MenuItem("Open Layer from File"))
 			{
 				file_type = PNG;
 				openFilePopupIsOpen = true;
@@ -199,6 +201,7 @@ void mainMenuGUI(Scene& scene)
 							if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
 								std::string path = folderPath;
 								loadScene(path.append("/").append(fileName), scene);
+								//TODO: reset the commands
 								openFilePopupIsOpen = false;
 							}
 						}
@@ -207,7 +210,7 @@ void mainMenuGUI(Scene& scene)
 					case(PNG): {
 						if (!fs::is_directory(p) && fileName.substr(fileName.size() - 4) != ".scn") {
 							if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
-								//TODO: create a new layer with the image in it
+								loadLayerFromFile(folderPath, fileName, scene);
 								openFilePopupIsOpen = false;
 							}
 						}
@@ -223,6 +226,27 @@ void mainMenuGUI(Scene& scene)
 			}
 		}
 	}
+}
+
+void loadLayerFromFile(std::string &folderPath, std::string &fileName, Scene & scene)
+{
+	std::string path = folderPath;
+	path.append("/").append(fileName);
+
+	sf::Texture tex;
+	tex.loadFromFile(path);
+
+	if (scene.lastActiveLayer < scene.layers.end()) {
+		CommandManager::createLayer();
+	}
+	else {
+		std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
+	}
+	scene.lastActiveLayer->layerName = "Layer";
+	scene.lastActiveLayer->layerName.append(std::to_string(scene.getSize()));
+
+	scene.lastActiveLayer->tex = tex;
+	scene.lastActiveLayer->sprite.setTexture(scene.lastActiveLayer->tex);
 }
 
 void loadScene(std::string &fileName, Scene & scene)
@@ -287,7 +311,7 @@ void loadScene(std::string &fileName, Scene & scene)
 void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath)
 {
 	//Draw all layers to a big PNG
-	unsigned int layerCount = std::distance(scene.layers.begin(), scene.lastActiveLayer);
+	unsigned int layerCount = scene.getSize();
 
 	sf::Vector2f offset(scene.width, 0);
 	sf::RenderStates rState;
@@ -331,12 +355,7 @@ void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath)
 
 void saveCurrentLayerAsPNG(Scene & scene, std::string &folderPath)
 {
-	sf::RenderTexture rTex;
-	rTex.create(scene.width, scene.height);
-	rTex.clear(sf::Color(255, 255, 255, 0));
-	rTex.draw(scene.currentLayer->sprite);
-	rTex.display();
-	rTex.getTexture().copyToImage().saveToFile(folderPath.data());
+	scene.currentLayer->tex.copyToImage().saveToFile(folderPath.data());
 }
 
 void saveCurrentLayerAsJPEG(Scene & scene, std::string &folderPath)
