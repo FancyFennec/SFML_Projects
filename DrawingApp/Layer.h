@@ -116,7 +116,7 @@ inline void Layer::lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, s
 		offset2f = sf::Vector2f(offset);
 	}
 
-	if (CursorBuffer::isFirstStamp && !CursorBuffer::isBufferBeingCleared) { //This is the case when we just clicked, here we just draw the brushstamp at the cursor position
+	if (CursorBuffer::isFirstStamp) { //This is the case when we just clicked, here we just draw the brushstamp at the cursor position
 		CursorBuffer::isFirstStamp = false;
 
 		sf::Vector2f circlePos = sf::Vector2f(*iter);

@@ -45,13 +45,7 @@ void mousePositionSampling()
 	while (mainWindow.isOpen())
 	{
 		if (isMouseHeld()) { // create stream for the layer class to process
-			if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
-				pointerId = GET_POINTERID_WPARAM(msg.wParam);
-				if (GetPointerPenInfo(pointerId, &penInfo)) {
-					std::cout << penInfo.pressure << std::endl;
-					(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
-				}
-			}
+			
 			CursorBuffer::update(scene.currentBrush);
 		}
 	}
@@ -77,6 +71,14 @@ void mainRenderLoop()
 		if (scene.currentLayer != scene.lastActiveLayer) {
 			for (auto iter = std::next(scene.currentLayer); iter <= scene.lastActiveLayer; std::advance(iter, 1)) {
 				mainWindow.draw(iter->sprite, state);
+			}
+		}
+
+		if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
+			pointerId = GET_POINTERID_WPARAM(msg.wParam);
+			if (GetPointerPenInfo(pointerId, &penInfo)) {
+				std::cout << penInfo.pressure << std::endl;
+				(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
 			}
 		}
 
@@ -108,7 +110,7 @@ void mainWindowDrawing()
 {
 	if (isCursorHoveringLayer()) {
 		if (notDragingScene()) {
-			if (CursorBuffer::isFirstStamp) {
+			if (CursorBuffer::isFirstStamp && !CursorBuffer::isBufferBeingCleared) {
 				scene.drawingLayer.lerpDrawingOnLayer(scene.currentBrush, CursorBuffer::positions.begin());
 			}
 			else {

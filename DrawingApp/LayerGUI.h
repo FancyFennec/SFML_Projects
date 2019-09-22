@@ -36,7 +36,7 @@ void layerGUI(Scene& scene)
 			int layerNumber = scene.layers.size();
 
 			// Draw list of all the layers
-			for (auto iter = scene.lastActiveLayer; iter > scene.layers.begin(); std::advance(iter, -1)) {
+			for (auto iter = scene.lastActiveLayer; iter > scene.layers.begin(); std::advance(iter, -1)) { // Don't draw the first layer
 
 				// Image of the layer with white border if it is selected
 				if (iter == scene.currentLayer) {

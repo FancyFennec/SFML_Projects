@@ -40,9 +40,9 @@ void brushGUI(Scene& scene)
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			ImGui::SliderFloat("Spacing", &(*scene.currentBrush)->stepSize, 0, 500);
-			if (ImGui::SliderFloat("Size", &scene.brushSize, 0, 1)) (*scene.currentBrush)->setSpriteSize(scene.brushSize);
-			ImGui::SliderInt("Opacity", &(*scene.currentBrush)->opacity, 0, 255);
-			ImGui::SliderInt("Flow", &(*scene.currentBrush)->flow, 0, 255);
+			if (ImGui::SliderFloat("MaxSize", &scene.brushSize, 0, 1)) (*scene.currentBrush)->setSpriteSize(scene.brushSize);
+			ImGui::SliderInt("MaxOpacity", &(*scene.currentBrush)->opacity, 0, 255);
+			ImGui::SliderInt("MaxFlow", &(*scene.currentBrush)->flow, 0, 255);
 		}
 		if (ImGui::CollapsingHeader("Scatter")) {
 			ImGui::Checkbox("Size##Checkbox", &(*scene.currentBrush)->useSScatter);
