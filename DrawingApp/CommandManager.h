@@ -96,19 +96,19 @@ inline void CommandManager::deleteLayer(std::vector<Layer>::iterator iter) {
 
 inline void CommandManager::delteLayerAt(std::vector<Layer>::iterator iter)
 {
-	//TODO: This is a mess, please clean this up
-	auto iterDist = std::distance(scene->layers.begin(), scene->currentLayer);
-	scene->currentLayer = scene->layers.begin();
-
 	if (std::prev(scene->lastActiveLayer) == scene->layers.begin()) { // Create a new Layer if There are none left
 		scene->lastActiveLayer->clearLayer();
 	}
 	else { // This makes sure that we continue working on the layer we were before deleting
-		bool isCurrentLayerBelowIter = scene->layers.begin() + iterDist < iter;
+		auto iterDist = std::distance(scene->layers.begin(), scene->currentLayer);
+		scene->currentLayer = scene->layers.begin();
+
 		iter->clearLayer();
 		std::advance(scene->lastActiveLayer, -1);
-		std::rotate(iter, iter + 1, scene->layers.end());
+		
 
+		bool isCurrentLayerBelowIter = scene->layers.begin() + iterDist < iter;
+		std::rotate(iter, iter + 1, scene->layers.end());
 		if (isCurrentLayerBelowIter) {
 			std::advance(scene->currentLayer, iterDist);
 		}
@@ -118,7 +118,7 @@ inline void CommandManager::delteLayerAt(std::vector<Layer>::iterator iter)
 	}
 	if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 
-	for (auto layer = scene->layers.begin() + 1; layer < scene->layers.end(); layer++) {
+	for (auto layer = scene->layers.begin(); layer < scene->layers.end(); layer++) {
 		layer->sprite.setTexture(layer->tex);
 	}
 }
@@ -142,19 +142,19 @@ inline void CommandManager::moveForward()
 			break;
 		}
 		case(DELETE_LAYER): { // Delete the layer at the position of the iterator
-			auto iter = scene->layers.begin() + actionIter->layerPos;
-			auto currentLayerOffset = std::distance(scene->layers.begin(), scene->currentLayer);
-			scene->currentLayer = scene->layers.begin();
-
 			if (std::prev(scene->lastActiveLayer) == scene->layers.begin()) { // Create a new Layer if There are none left
 				scene->lastActiveLayer->clearLayer();
 			}
 			else { // This makes sure that we continue working on the layer we were before deleting
-				bool isCurrentLayerBelowIter = scene->layers.begin() + currentLayerOffset < iter;
+				auto iter = scene->layers.begin() + actionIter->layerPos;
+				auto currentLayerOffset = std::distance(scene->layers.begin(), scene->currentLayer);
+				scene->currentLayer = scene->layers.begin();
+				
 				iter->clearLayer();
 				std::advance(scene->lastActiveLayer, -1);
-				std::rotate(iter, iter + 1, scene->layers.end());
 
+				bool isCurrentLayerBelowIter = scene->layers.begin() + currentLayerOffset < iter;
+				std::rotate(iter, iter + 1, scene->layers.end());
 				if (isCurrentLayerBelowIter) {
 					std::advance(scene->currentLayer, currentLayerOffset);
 				}
@@ -164,7 +164,7 @@ inline void CommandManager::moveForward()
 			}
 			if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 
-			for (auto layer = scene->layers.begin() + 1; layer < scene->layers.end(); layer++) {
+			for (auto layer = scene->layers.begin(); layer < scene->layers.end(); layer++) {
 				layer->sprite.setTexture(layer->tex);
 			}
 			break;
@@ -212,7 +212,7 @@ inline void CommandManager::moveBackward()
 			}
 			if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 
-			for (auto layer = scene->layers.begin() + 1; layer < scene->layers.end(); layer++) {
+			for (auto layer = scene->layers.begin(); layer < scene->layers.end(); layer++) {
 				layer->sprite.setTexture(layer->tex);
 			}
 			break;

@@ -310,6 +310,7 @@ void loadScene(std::string &fileName, Scene & scene)
 
 void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath)
 {
+	//TODO: I think this could be done in one go
 	//Draw all layers to a big PNG
 	unsigned int layerCount = scene.getSize();
 

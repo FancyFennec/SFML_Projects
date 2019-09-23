@@ -96,16 +96,17 @@ void brushGUI(Scene& scene)
 			scene.currentBrush = scene.brushes.begin();
 		}
 		brushNumber++;
+		sf::Color borderColor;
 		for (auto iter = std::prev(scene.brushes.end()); iter > scene.brushes.begin(); std::advance(iter, -1)) {
 
 			//Image of the brush with white border if it is selected
 			if (iter == scene.currentBrush) {
-				ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color::White);
+				borderColor = sf::Color::White;
 			}
 			else {
-				ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color(150, 150, 150));
+				borderColor = sf::Color(150, 150, 150);
 			}
-			ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30));
+			ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30), sf::Color::White, borderColor);
 
 			ImGui::SameLine();
 			std::string buttonName = (*iter)->brushName;

@@ -7,11 +7,12 @@
 #include "LayerGUI.h"
 #include "EventHandling.h"
 
-void mousePositionSampling();
-
 void createMainWindow();
 void mainRenderLoop();
-void moveLayers();
+void sampleMousePositions();
+void samplePenPressure();
+void sampleNormals();
+void dragLayers();
 void mainWindowDrawing();
 bool notDragingScene();
 bool isCursorHoveringLayer();
@@ -25,7 +26,7 @@ const int SCENE_WIDTH = 800;
 const int SCENE_HEIGHT = 1200;
 Scene scene(SCENE_WIDTH, SCENE_HEIGHT);
 
-sf::Thread mouseLoopThread(&mousePositionSampling);
+sf::Thread positionSamplingLoop(&sampleMousePositions);
 
 int main() {
 	createMainWindow();
@@ -36,20 +37,10 @@ int main() {
 
 	ImGui::SFML::Init(mainWindow);
 
-	mouseLoopThread.launch();
+	positionSamplingLoop.launch();
 	mainRenderLoop();
 
 	return 0;
-}
-
-void mousePositionSampling()
-{
-	while (mainWindow.isOpen())
-	{
-		if (isMouseHeld()) { // create stream for the layer class to process
-			CursorBuffer::update(scene.currentBrush);
-		}
-	}
 }
 
 void mainRenderLoop()
@@ -66,7 +57,7 @@ void mainRenderLoop()
 			mainWindow.draw(iter->sprite, state);
 		}
 		
-		moveLayers();
+		dragLayers();
 		mainWindowDrawing();
 
 		if (scene.currentLayer != scene.lastActiveLayer) {
@@ -75,14 +66,7 @@ void mainRenderLoop()
 			}
 		}
 
-		if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
-			pointerId = GET_POINTERID_WPARAM(msg.wParam);
-			if (GetPointerPenInfo(pointerId, &penInfo)) {
-				std::cout << penInfo.pressure << std::endl;
-				(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
-			}
-		}
-
+		samplePenPressure(); //Needs to be done before we process all the events
 		while (mainWindow.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
@@ -94,21 +78,44 @@ void mainRenderLoop()
 		layerGUI(scene);
 
 		ImGui::SFML::Render(mainWindow);
-
-		if (pickNormalValue) {
-			sf::Color col = getSampledColor();
-
-			if (col != sf::Color(66, 150, 250)) {
-				(**scene.currentBrush).currentNormal = col;
-			}
-			pickNormalValue = false;
-		}
+		sampleNormals(); //Needs to be done after the imgui rendering
 		
 		mainWindow.display();
 	}
 }
 
-void moveLayers()
+void sampleMousePositions()
+{
+	while (mainWindow.isOpen())
+	{
+		if (isMouseHeld()) CursorBuffer::update(scene.currentBrush);
+	}
+}
+
+void samplePenPressure()
+{
+	if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
+		pointerId = GET_POINTERID_WPARAM(msg.wParam);
+		if (GetPointerPenInfo(pointerId, &penInfo)) {
+			std::cout << penInfo.pressure << std::endl;
+			(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
+		}
+	}
+}
+
+void sampleNormals()
+{
+	if (pickNormalValue) {
+		sf::Color col = getSampledColor();
+
+		if (col != sf::Color(66, 150, 250)) {
+			(**scene.currentBrush).currentNormal = col;
+		}
+		pickNormalValue = false;
+	}
+}
+
+void dragLayers()
 {
 	if (isMouseHeld() && isSpaceHeld()) {//This allows dragging of the layers
 		scene.cursorPositions[0] = scene.cursorPositions[1];

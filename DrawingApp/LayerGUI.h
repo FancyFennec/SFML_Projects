@@ -36,16 +36,17 @@ void layerGUI(Scene& scene)
 			int layerNumber = scene.layers.size();
 
 			// Draw list of all the layers
+			sf::Color borderColor;
 			for (auto iter = scene.lastActiveLayer; iter > scene.layers.begin(); std::advance(iter, -1)) { // Don't draw the first layer
-
+				
 				// Image of the layer with white border if it is selected
 				if (iter == scene.currentLayer) {
-					ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color::White);
+					borderColor = sf::Color::White;
 				}
 				else {
-					ImGui::DrawRect(sf::FloatRect(sf::Vector2f(0, 0), sf::Vector2f(30, 30)), sf::Color(150, 150, 150));
+					borderColor = sf::Color(150, 150, 150);
 				}
-				ImGui::Image(iter->sprite, sf::Vector2f(30, 30));
+				ImGui::Image(iter->sprite, sf::Vector2f(30, 30), sf::Color::White, borderColor);
 
 				// Button that sets the current Layer to the current iterator
 				// Double clicking lets one chose a layer name

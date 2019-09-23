@@ -8,14 +8,14 @@ static const char* BRUSH_DIRECTORY = "./Brushes/";
 static const char* SCENES_DIRECTORY = "./Scenes/";
 
 static bool USE_FULLSCREEN = false;
-static unsigned int FPS = 120;
+static unsigned int FPS = 40;
 
-static int WINDOW_WIDTH = 1200;
-static int WINDOW_HEIGHT = 800;
+static int WINDOW_WIDTH = 1600;
+static int WINDOW_HEIGHT = 1000;
 
 const static int MAX_ACTIONS = 10;
 const static int MAX_LAYERS = 20;
-static unsigned int DOUBLE_CLICK_SPEED = 300;
+static unsigned int DOUBLE_CLICK_SPEED = 200;
 
 static long int SETTINGS = 0;
 static int LMB_IS_HELD = BIT(0);
