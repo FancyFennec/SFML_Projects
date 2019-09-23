@@ -9,76 +9,63 @@
 
 namespace fs = std::experimental::filesystem;
 
+sf::RenderWindow window;
+sf::Event event;
+
 int main() {
 
-	//Create image and save it as a png
-	sf::Image img;
-	int width = 1200;
-	int height = 800;
-	img.create(width, height, sf::Color::Red);
-	img.saveToFile("test.png");
-
-	//create input stream for the ng and output stream for the file we want to write to
-	std::ifstream istrm("test.png", std::ios::in | std::ios::binary);
-	std::ofstream ostrm("MyFile.jns", std::ios::out | std::ios::binary);
-
-	ostrm.write((char*)&width, sizeof(int));
-	ostrm.write((char*)&height, sizeof(int));
-
-	istrm.seekg(0, std::ios::end);
-	std::streampos end = istrm.tellg();
-	istrm.seekg(0, std::ios::beg);
-
-	//Make buffer with the right size
-	std::vector<char> buffer;
-	buffer.resize(end / sizeof(char));
-
-	//read data into the buffer and write it to the file again
-	istrm.read((char*)buffer.data(), end / sizeof(char));
-	ostrm.write((char*)buffer.data(), end / sizeof(char));
-	
-	istrm.close();
-	ostrm.close();
-
-	//reading the file back into an image
-	std::ifstream newistrm("MyFile.jns", std::ios::out | std::ios::binary);
-	int new_width;
-	newistrm.read((char*)&new_width, sizeof(int));
-	int new_height;
-	newistrm.read((char*)&new_height, sizeof(int));
-
-	std::cout << new_width << std::endl;
-	std::cout << new_height << std::endl;
+	window.create(sf::VideoMode(400, 400), "TestWindow");
+	window.setFramerateLimit(60);
 
 
-	sf::Image image;
-	image.create(new_width, new_height);
-
-	std::streampos begin = newistrm.tellg();
-	newistrm.seekg(0, std::ios::end);
-	end = newistrm.tellg();
-	newistrm.seekg(begin);
-
-	buffer.resize((end - begin) / sizeof(char));
-	newistrm.read((char*)buffer.data(), (end - begin) / sizeof(char));
-
-	newistrm.close();
-
-	image.loadFromMemory(buffer.data(), new_width * new_height);
-	image.saveToFile("test2.png");
-
-	sf::IntRect rect(0, 0, 300, 800);
+	const unsigned int width = 400;
+	sf::Image normal;
+	normal.create(width, width);
+	sf::Color color;
 	sf::Texture tex;
-	tex.create(new_width, new_height);
-	tex.loadFromImage(image);
+	tex.create(width, width);
 	sf::Sprite sprite;
-	sprite.setTexture(tex);
-	sprite.setTextureRect(rect);
 
-	sf::RenderTexture rtex;
-	rtex.create(300, 800);
-	rtex.draw(sprite);
-	rtex.display();
-	rtex.getTexture().copyToImage().saveToFile("test3.png");
+	for (int j = 0; j < normal.getSize().y; j++) {
+		for (int i = 0; i < normal.getSize().x; i++) {
+			float x = 2.0f * (i - width / 2.0f) / width;
+			float y = 2.0f * (j - width / 2.0f) / width;
+
+			if (x*x + y * y > 1.0f) {
+				color = sf::Color(255, 255, 255, 0);
+			}
+			else {
+				float z = 1.0f - sqrt(x*x + y * y);
+
+				x = (x / 2.0f + 0.5f) * 255.0f;
+				y = (y / 2.0f + 0.5f) * 255.0f;
+				z = (z / 2.0f + 0.5f) * 255.0f;
+
+				color = sf::Color(x, y, z, 255);
+			}
+			normal.setPixel(i, j, color);
+		}
+	}
+
+	tex.loadFromImage(normal);
+	sprite.setTexture(tex);
+
+	while (window.isOpen()) {
+		while (window.pollEvent(event)) {
+			if (event.type == sf::Event::Closed) {
+				window.close();
+			}
+			if (event.type == sf::Event::KeyPressed) {
+				if (event.key.code == sf::Keyboard::Escape) {
+					window.close();
+				}
+			}
+		}
+
+		window.clear(sf::Color::Black);
+		window.draw(sprite);
+		window.display();
+
+	}
 
 }

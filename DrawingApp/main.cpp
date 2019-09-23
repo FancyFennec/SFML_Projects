@@ -45,7 +45,6 @@ void mousePositionSampling()
 	while (mainWindow.isOpen())
 	{
 		if (isMouseHeld()) { // create stream for the layer class to process
-			
 			CursorBuffer::update(scene.currentBrush);
 		}
 	}
