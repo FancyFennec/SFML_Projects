@@ -31,6 +31,8 @@ int main() {
 	createMainWindow();
 	scene.initialize();
 	CommandManager::initialize(scene);
+	normalTex.loadFromFile("normalColorPicker.png");
+	samplingTexture.create(WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	ImGui::SFML::Init(mainWindow);
 
@@ -92,6 +94,16 @@ void mainRenderLoop()
 		layerGUI(scene);
 
 		ImGui::SFML::Render(mainWindow);
+
+		if (pickNormalValue) {
+			sf::Color col = getSampledColor();
+
+			if (col != sf::Color(66, 150, 250)) {
+				(**scene.currentBrush).currentNormal = col;
+			}
+			pickNormalValue = false;
+		}
+		
 		mainWindow.display();
 	}
 }

@@ -141,7 +141,7 @@ inline void Scene::initialize()
 	}
 	
 	currentBrush = brushes.begin();
-	(*currentBrush)->synchronizeColors();
+	(*currentBrush)->synchronizeBrushColor();
 	(*currentBrush)->setSpriteSize(brushSize);
 }
 

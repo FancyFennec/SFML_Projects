@@ -14,11 +14,11 @@ sf::Event event;
 
 int main() {
 
-	window.create(sf::VideoMode(400, 400), "TestWindow");
+	const unsigned int width = 800;
+
+	window.create(sf::VideoMode(width, width), "TestWindow");
 	window.setFramerateLimit(60);
 
-
-	const unsigned int width = 400;
 	sf::Image normal;
 	normal.create(width, width);
 	sf::Color color;
@@ -53,10 +53,12 @@ int main() {
 	while (window.isOpen()) {
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed) {
+				normal.saveToFile("normalColorPicker.png");
 				window.close();
 			}
 			if (event.type == sf::Event::KeyPressed) {
 				if (event.key.code == sf::Keyboard::Escape) {
+					normal.saveToFile("normalColorPicker.png");
 					window.close();
 				}
 			}

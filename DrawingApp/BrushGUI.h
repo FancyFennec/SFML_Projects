@@ -32,11 +32,18 @@ void brushGUI(Scene& scene)
 		if (ImGui::CollapsingHeader("Colour Picker")) {
 			ImGui::PushItemWidth(235);
 			if (ImGui::ColorPicker3("##ColorPicker", (*scene.currentBrush)->guiBrushColor, colorEditFlags)) {
-				(*scene.currentBrush)->synchronizeColors(); // Need to synchronize the color we get from the colorpicker with the brush color
+				(*scene.currentBrush)->synchronizeBrushColor(); // Need to synchronize the color we get from the colorpicker with the brush color
 			}
 			ImGui::ColorButton("Current##CurrentColor", (**scene.currentBrush).getCurrentImColorRGB(), 0, ImVec2(30.0f, 20.0f));
 			ImGui::SameLine();
 			ImGui::ColorButton("Previous##PreviousColor", (**scene.currentBrush).getPreviousImColorRGB(), 0, ImVec2(30.0f, 20.0f));
+		}
+		if (ImGui::CollapsingHeader("Normal Picker")) {
+			ImGui::PushItemWidth(235);
+			
+			if (ImGui::ImageButton(normalTex, sf::Vector2f(200, 200))) {
+				pickNormalValue = true;
+			}
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			ImGui::SliderFloat("Spacing", &(*scene.currentBrush)->stepSize, 0, 500);
