@@ -108,7 +108,7 @@ void sampleNormals()
 	if (pickNormalValue) {
 		sf::Color col = getSampledColor();
 
-		if (col != sf::Color(66, 150, 250)) {
+		if (col != sf::Color::Black) {
 			(**scene.currentBrush).currentNormal = col;
 		}
 		pickNormalValue = false;

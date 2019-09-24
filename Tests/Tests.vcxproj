@@ -141,6 +141,7 @@
     <ClInclude Include="TestClass.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="fragment_shader.frag" />
     <None Include="HelloWorld_Kernel.cl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

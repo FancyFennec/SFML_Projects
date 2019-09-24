@@ -41,7 +41,8 @@ void brushGUI(Scene& scene)
 		if (ImGui::CollapsingHeader("Normal Picker")) {
 			ImGui::PushItemWidth(235);
 			
-			if (ImGui::ImageButton(normalTex, sf::Vector2f(200, 200))) {
+
+			if (ImGui::ImageButton(normalTex, sf::Vector2f(200, 200), 1, sf::Color::Black, sf::Color::White)) {
 				pickNormalValue = true;
 			}
 		}

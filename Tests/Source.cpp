@@ -9,65 +9,54 @@
 
 namespace fs = std::experimental::filesystem;
 
-sf::RenderWindow window;
-sf::Event event;
+unsigned int width = 400;
 
 int main() {
 
-	const unsigned int width = 800;
+	sf::Image backgroundImg;
+	sf::Color backgroundCol(127, 127, 255);
+	sf::Texture backgroundTex;
+	sf::Sprite backgroundSpr;
 
-	window.create(sf::VideoMode(width, width), "TestWindow");
-	window.setFramerateLimit(60);
+	backgroundImg.create(width, width, backgroundCol);
+	backgroundTex.create(width, width);
+	backgroundTex.loadFromImage(backgroundImg);
+	backgroundSpr.setTexture(backgroundTex);
 
-	sf::Image normal;
-	normal.create(width, width);
-	sf::Color color;
-	sf::Texture tex;
-	tex.create(width, width);
-	sf::Sprite sprite;
+	sf::Image normalImg;
+	sf::Color normalCol(255, 127, 127, 100);
+	sf::Texture normalTex;
+	sf::Sprite normalSpr;
 
-	for (int j = 0; j < normal.getSize().y; j++) {
-		for (int i = 0; i < normal.getSize().x; i++) {
-			float x = 2.0f * (i - width / 2.0f) / width;
-			float y = 2.0f * (j - width / 2.0f) / width;
+	normalImg.create(width, width, normalCol);
+	normalTex.create(width, width);
+	normalTex.loadFromImage(normalImg);
+	normalSpr.setTexture(normalTex);
 
-			if (x*x + y * y > 1.0f) {
-				color = sf::Color(255, 255, 255, 0);
-			}
-			else {
-				float z = 1.0f - sqrt(x*x + y * y);
-
-				x = (x / 2.0f + 0.5f) * 255.0f;
-				y = (y / 2.0f + 0.5f) * 255.0f;
-				z = (z / 2.0f + 0.5f) * 255.0f;
-
-				color = sf::Color(x, y, z, 255);
-			}
-			normal.setPixel(i, j, color);
-		}
+	sf::RenderTexture rTex;
+	rTex.create(width, width);
+	sf::Shader shader;
+	sf::RenderStates state(&shader);
+	
+	if (shader.loadFromFile("./fragment_shader.frag", sf::Shader::Fragment)) {
+		std::cout << "Shader loaded" << std::endl;
+	}
+	else {
+		std::cout << "!!!Shader loading failed" << std::endl;
+		return -1;
 	}
 
-	tex.loadFromImage(normal);
-	sprite.setTexture(tex);
+	shader.setUniform("texture1", backgroundTex);
+	shader.setUniform("texture2", normalTex);
 
-	while (window.isOpen()) {
-		while (window.pollEvent(event)) {
-			if (event.type == sf::Event::Closed) {
-				normal.saveToFile("normalColorPicker.png");
-				window.close();
-			}
-			if (event.type == sf::Event::KeyPressed) {
-				if (event.key.code == sf::Keyboard::Escape) {
-					normal.saveToFile("normalColorPicker.png");
-					window.close();
-				}
-			}
-		}
+	rTex.draw(backgroundSpr, state);
+	rTex.display();
+	sf::Color col = rTex.getTexture().copyToImage().getPixel(0, 0);
 
-		window.clear(sf::Color::Black);
-		window.draw(sprite);
-		window.display();
+	std::cout << (int)col.r << std::endl;
+	std::cout << (int)col.g << std::endl;
+	std::cout << (int)col.b << std::endl;
+	std::cout << (int)col.a << std::endl;
 
-	}
-
+	return 0;
 }
