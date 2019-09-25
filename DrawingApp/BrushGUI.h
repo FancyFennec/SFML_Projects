@@ -11,8 +11,8 @@
 void brushGUI(Scene& scene);
 void createBrushWindow(Scene& scene);
 
-static const ImGuiColorEditFlags colorEditFlags = 
-ImGuiColorEditFlags_NoSidePreview | 
+static const ImGuiColorEditFlags colorEditFlags =
+ImGuiColorEditFlags_NoSidePreview |
 ImGuiColorEditFlags_NoSmallPreview |
 ImGuiColorEditFlags_NoAlpha |
 ImGuiColorEditFlags_NoLabel |
@@ -40,7 +40,7 @@ void brushGUI(Scene& scene)
 		}
 		if (ImGui::CollapsingHeader("Normal Picker")) {
 			ImGui::PushItemWidth(235);
-			
+
 
 			if (ImGui::ImageButton(normalTex, sf::Vector2f(200, 200), 1, sf::Color::Black, sf::Color::White)) {
 				pickNormalValue = true;
@@ -48,9 +48,26 @@ void brushGUI(Scene& scene)
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			ImGui::SliderFloat("Spacing", &(*scene.currentBrush)->stepSize, 0, 500);
+
+			ImGui::Checkbox("##SizePress", &(*scene.currentBrush)->useSizePress);
+			ImGui::SameLine();
 			if (ImGui::SliderFloat("MaxSize", &scene.brushSize, 0, 1)) (*scene.currentBrush)->setSpriteSize(scene.brushSize);
+			if ((*scene.currentBrush)->useSizePress){
+				ImGui::Dummy(ImVec2(19, 0));
+				ImGui::SameLine();
+				ImGui::SliderFloat("MinSize", &(*scene.currentBrush)->minSize, 0.0f, scene.brushSize);
+			}
+			
 			ImGui::SliderInt("MaxOpacity", &(*scene.currentBrush)->opacity, 0, 255);
+
+			ImGui::Checkbox("##FlowPress", &(*scene.currentBrush)->useFlowPress);
+			ImGui::SameLine();
 			ImGui::SliderInt("MaxFlow", &(*scene.currentBrush)->flow, 0, 255);
+			if ((*scene.currentBrush)->useFlowPress) {
+				ImGui::Dummy(ImVec2(19, 0));
+				ImGui::SameLine();
+				ImGui::SliderInt("MinFlow", &(*scene.currentBrush)->minFlow, 0, (*scene.currentBrush)->flow);
+			}
 		}
 		if (ImGui::CollapsingHeader("Scatter")) {
 			ImGui::Checkbox("Size##Checkbox", &(*scene.currentBrush)->useSScatter);

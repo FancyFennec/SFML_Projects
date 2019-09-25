@@ -23,9 +23,17 @@ public:
 	//Brush settings
 	float stepSize = 33.0f; //Distance between consecutive brush stamps
 	float brushSize = 0.3f; //Radius of the brush
+
 	int opacity = 170;
 	int flow = 70;
 	float pressure = 1.0f;
+
+	bool useSizePress = false;
+	bool useFlowPress = false;
+
+	float minSize = 0.0f;
+	int minOpac = 0;
+	int minFlow = 0;
 
 	//Flags that allow switching scattering on/off
 	bool useSScatter = true;
@@ -109,7 +117,7 @@ public:
 			currentColor.r,
 			currentColor.g,
 			currentColor.b,
-			pressure * flow));
+			 useFlowPress? minFlow + pressure * (flow - minFlow) : flow));
 	}
 
 	void resetSpriteColor() {

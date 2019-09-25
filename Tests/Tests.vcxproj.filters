@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="HelloWorld_Kernel.cl" />
-    <None Include="fragment_shader.frag" />
+    <None Include="normal_blending.frag" />
+    <None Include="render_shader.frag" />
   </ItemGroup>
 </Project>

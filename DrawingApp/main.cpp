@@ -97,8 +97,10 @@ void samplePenPressure()
 	if (PeekMessageW(&msg, mainWindow.getSystemHandle(), 0, 0, PM_NOREMOVE)) {
 		pointerId = GET_POINTERID_WPARAM(msg.wParam);
 		if (GetPointerPenInfo(pointerId, &penInfo)) {
-			std::cout << penInfo.pressure << std::endl;
-			(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
+			if (penInfo.pressure > 0) {
+				if (!isMouseHeld()) lmbPressed(scene);
+				(**scene.currentBrush).pressure = penInfo.pressure / 1024.0f;
+			}
 		}
 	}
 }

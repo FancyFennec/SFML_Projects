@@ -22,7 +22,7 @@ void mainWindowEventHandling(Scene& scene)
 	}
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
-			lmbPressed(scene);
+			if (!isMouseHeld()) lmbPressed(scene);
 		}
 	}
 	if (event.type == sf::Event::MouseButtonReleased) {
@@ -114,10 +114,8 @@ void lmbPressed(Scene& scene)
 		scene.drawingLayer.clearLayer();
 
 		if (isAltHeld()) {
-			if (event.mouseButton.button == sf::Mouse::Left) {
-				(*scene.currentBrush)->currentColor = getSampledColor();
-				(*scene.currentBrush)->synchronizeGuiBrushColor();
-			}
+			(*scene.currentBrush)->currentColor = getSampledColor();
+			(*scene.currentBrush)->synchronizeGuiBrushColor();
 		}
 		else {
 			setMouseIsHeld();
