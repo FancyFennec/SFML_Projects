@@ -20,20 +20,21 @@ public:
 	static sf::Color previousColor; //We can switch to this color by pressing X
 	static sf::Color currentNormal;
 
-	//Brush settings
-	float stepSize = 33.0f; //Distance between consecutive brush stamps
-	float brushSize = 0.3f; //Radius of the brush
-
-	int opacity = 170;
-	int flow = 70;
-	float pressure = 1.0f;
-
+	//Brush settings#
+	//TODO: don't use pen [ressure for size and flow if the flags are alse"
 	bool useSizePress = false;
 	bool useFlowPress = false;
 
+	float stepSize = 33.0f;
+	int opacity = 170;
+	float maxSize = 0.3f;
 	float minSize = 0.0f;
-	int minOpac = 0;
+	int maxFlow = 70;
 	int minFlow = 0;
+	float pressure = 1.0f;
+
+	float sizeRatio = minSize / maxSize;
+	float flowRatio = float(minFlow) / float(maxFlow);
 
 	//Flags that allow switching scattering on/off
 	bool useSScatter = true;
@@ -54,7 +55,7 @@ public:
 	}
 
 	float computeRelativeStepSize() {
-		return stepSize * brushSize * pressure;
+		return stepSize * maxSize * pressure;
 	}
 
 	ImVec4 getCurrentImColorRGBA() {
@@ -107,7 +108,7 @@ public:
 	}
 
 	void setSpriteSize(float brushSize) {
-		this->brushSize = brushSize;
+		this->maxSize = brushSize;
 		sprite.setScale(sf::Vector2f(brushSize, brushSize));
 		sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
 	}
@@ -117,7 +118,7 @@ public:
 			currentColor.r,
 			currentColor.g,
 			currentColor.b,
-			 useFlowPress? minFlow + pressure * (flow - minFlow) : flow));
+			 useFlowPress? minFlow + pressure * (maxFlow - minFlow) : maxFlow));
 	}
 
 	void resetSpriteColor() {
@@ -137,6 +138,6 @@ sf::Color Brush::currentNormal = sf::Color(127, 127, 255, 255);
 
 inline void Brush::initialize() {
 	sprite.setTexture(tex);
-	sprite.setScale(sf::Vector2f(brushSize, brushSize));
+	sprite.setScale(sf::Vector2f(maxSize, maxSize));
 	sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
 }

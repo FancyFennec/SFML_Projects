@@ -171,8 +171,8 @@ sf::RenderStates Layer::getRenderState(std::vector<BrushPntr>::iterator & brush)
 
 inline float Layer::getSScatter(std::vector<BrushPntr>::iterator & brush)
 {
-	float minScale = (**brush).useSizePress ? (**brush).minSize / (**brush).brushSize : 0.0f;
-	float maxScale = (**brush).useSizePress ? ((**brush).brushSize - (**brush).minSize) / (**brush).brushSize : 0.0f;
+	float minScale = (**brush).useSizePress ? (**brush).minSize / (**brush).maxSize : 0.0f;
+	float maxScale = (**brush).useSizePress ? ((**brush).maxSize - (**brush).minSize) / (**brush).maxSize : 1.0f;
 
 	if ((**brush).useSScatter) {
 		return minScale + maxScale * (**brush).pressure * (1.0f - (**brush).scatterScale * (rand() % 10 - 10) / 10.0f);
@@ -185,10 +185,10 @@ inline float Layer::getSScatter(std::vector<BrushPntr>::iterator & brush)
 inline float Layer::getPScatter(std::vector<BrushPntr>::iterator & brush)
 {
 	if ((**brush).usePScatter) {
-		return (**brush).brushSize * (**brush).scatterPos * (rand() % 20 - 10) / 10.0f;
+		return (**brush).maxSize * (**brush).scatterPos * (rand() % 20 - 10) / 10.0f;
 	}
 	else {
-		return (**brush).brushSize;
+		return (**brush).maxSize;
 	}
 }
 

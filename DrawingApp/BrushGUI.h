@@ -49,24 +49,34 @@ void brushGUI(Scene& scene)
 		if (ImGui::CollapsingHeader("Settings")) {
 			ImGui::SliderFloat("Spacing", &(*scene.currentBrush)->stepSize, 0, 500);
 
-			ImGui::Checkbox("##SizePress", &(*scene.currentBrush)->useSizePress);
-			ImGui::SameLine();
-			if (ImGui::SliderFloat("MaxSize", &scene.brushSize, 0, 1)) (*scene.currentBrush)->setSpriteSize(scene.brushSize);
-			if ((*scene.currentBrush)->useSizePress){
-				ImGui::Dummy(ImVec2(19, 0));
-				ImGui::SameLine();
-				ImGui::SliderFloat("MinSize", &(*scene.currentBrush)->minSize, 0.0f, scene.brushSize);
-			}
-			
 			ImGui::SliderInt("MaxOpacity", &(*scene.currentBrush)->opacity, 0, 255);
 
 			ImGui::Checkbox("##FlowPress", &(*scene.currentBrush)->useFlowPress);
 			ImGui::SameLine();
-			ImGui::SliderInt("MaxFlow", &(*scene.currentBrush)->flow, 0, 255);
+			if (ImGui::SliderInt("Flow", &(*scene.currentBrush)->maxFlow, 0, 255)) {
+				(*scene.currentBrush)->minFlow = (*scene.currentBrush)->maxFlow * (*scene.currentBrush)->flowRatio;
+			}
 			if ((*scene.currentBrush)->useFlowPress) {
 				ImGui::Dummy(ImVec2(19, 0));
 				ImGui::SameLine();
-				ImGui::SliderInt("MinFlow", &(*scene.currentBrush)->minFlow, 0, (*scene.currentBrush)->flow);
+				if (ImGui::SliderInt("Min##Flow", &(*scene.currentBrush)->minFlow, 0, (*scene.currentBrush)->maxFlow)) {
+					(*scene.currentBrush)->flowRatio = float((*scene.currentBrush)->minFlow) / float((*scene.currentBrush)->maxFlow);
+				}
+			}
+
+			ImGui::Checkbox("##SizePress", &(*scene.currentBrush)->useSizePress);
+			ImGui::SameLine();
+			if (ImGui::SliderFloat("Size", &scene.brushSize, 0, 1)) {
+				(*scene.currentBrush)->setSpriteSize(scene.brushSize);
+				(*scene.currentBrush)->minSize = (*scene.currentBrush)->maxSize * (*scene.currentBrush)->sizeRatio;
+			}
+			if ((*scene.currentBrush)->useSizePress) {
+				ImGui::Dummy(ImVec2(19, 0));
+				ImGui::SameLine();
+				if (ImGui::SliderFloat("Min##Size", &(*scene.currentBrush)->minSize, 0.0f, scene.brushSize)){
+					(*scene.currentBrush)->sizeRatio = (*scene.currentBrush)->minSize / (*scene.currentBrush)->maxSize;
+				}
+				
 			}
 		}
 		if (ImGui::CollapsingHeader("Scatter")) {

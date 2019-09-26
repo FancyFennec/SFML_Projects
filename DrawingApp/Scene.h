@@ -75,10 +75,10 @@ public:
 		for (auto &brush : brushes) {
 			json brushJson;
 			brushJson["BrushName"] = brush->brushName;
-			brushJson["BrushSize"] = brush->brushSize;
+			brushJson["BrushSize"] = brush->maxSize;
 			brushJson["StepSize"] = brush->stepSize;
 			brushJson["Oppacity"] = brush->opacity;
-			brushJson["Flow"] = brush->flow;
+			brushJson["Flow"] = brush->maxFlow;
 
 			brushJson["UseSScatter"] = brush->useSScatter;
 			brushJson["UsePScatter"] = brush->usePScatter;
@@ -126,10 +126,10 @@ inline void Scene::initialize()
 		);
 		brushes.back()->brushName = brush["BrushName"].get<std::string>();
 
-		brushes.back()->brushSize = brush["BrushSize"].get<float>();
+		brushes.back()->maxSize = brush["BrushSize"].get<float>();
 		brushes.back()->stepSize = brush["StepSize"].get<float>();
 		brushes.back()->opacity = brush["Oppacity"].get<int>();
-		brushes.back()->flow = brush["Flow"].get<int>();
+		brushes.back()->maxFlow = brush["Flow"].get<int>();
 
 		brushes.back()->useSScatter = brush["UseSScatter"].get<bool>();
 		brushes.back()->usePScatter = brush["UsePScatter"].get<bool>();
