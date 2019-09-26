@@ -21,7 +21,6 @@ public:
 	static sf::Color currentNormal;
 
 	//Brush settings#
-	//TODO: don't use pen [ressure for size and flow if the flags are alse"
 	bool useSizePress = false;
 	bool useFlowPress = false;
 

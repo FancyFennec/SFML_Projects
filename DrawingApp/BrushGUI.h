@@ -47,9 +47,13 @@ void brushGUI(Scene& scene)
 			}
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
-			ImGui::SliderFloat("Spacing", &(*scene.currentBrush)->stepSize, 0, 500);
+			ImGui::Dummy(ImVec2(19, 0));
+			ImGui::SameLine();
+			ImGui::SliderFloat("Spac", &(*scene.currentBrush)->stepSize, 0, 500);
 
-			ImGui::SliderInt("MaxOpacity", &(*scene.currentBrush)->opacity, 0, 255);
+			ImGui::Dummy(ImVec2(19, 0));
+			ImGui::SameLine();
+			ImGui::SliderInt("Opac", &(*scene.currentBrush)->opacity, 0, 255);
 
 			ImGui::Checkbox("##FlowPress", &(*scene.currentBrush)->useFlowPress);
 			ImGui::SameLine();
