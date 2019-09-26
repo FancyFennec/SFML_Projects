@@ -73,7 +73,7 @@ int main() {
 		return -1;
 	}
 
-	normalBlendingShader.setUniform("texture1", bgNomalTex);
+	normalBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
 	normalBlendingShader.setUniform("texture2", fgNormalTex);
 
 	rTex.draw(bgNormalSprite, state);
