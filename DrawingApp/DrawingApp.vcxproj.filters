@@ -123,7 +123,13 @@
     <None Include="lsystems.json">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="fragment_shader.frag">
+    <None Include="alpha_blending_shader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="normal_blending_shader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="render_shader.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

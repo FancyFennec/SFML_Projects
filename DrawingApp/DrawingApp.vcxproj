@@ -159,8 +159,10 @@
     <ResourceCompile Include="LSystems.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="fragment_shader.frag" />
+    <None Include="alpha_blending_shader.frag" />
     <None Include="lsystems.json" />
+    <None Include="normal_blending_shader.frag" />
+    <None Include="render_shader.frag" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
