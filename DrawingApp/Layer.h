@@ -20,8 +20,6 @@ public:
 	bool useOffset = true;
 	static sf::Vector2i offset;
 
-	static sf::RenderStates renderState;
-
 	Layer(){}
 
 	Layer(int width, int height) :
@@ -45,7 +43,10 @@ public:
 
 private:
 	static sf::RenderTexture rTex;
-	static sf::Shader fragShader;
+	static sf::Shader alphaBlendingShader;
+	static sf::Shader normalBlendingShader;
+	static sf::RenderStates alphaBlendingRState;
+	static sf::RenderStates normalBlendingRState;
 
 	void initialize(sf::Color& color);
 	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2);
@@ -56,8 +57,10 @@ private:
 };
 
 sf::RenderTexture Layer::rTex;
-sf::Shader Layer::fragShader;
-sf::RenderStates Layer::renderState(&fragShader);
+sf::Shader Layer::alphaBlendingShader;
+sf::Shader Layer::normalBlendingShader;
+sf::RenderStates Layer::alphaBlendingRState(&alphaBlendingShader);
+sf::RenderStates Layer::normalBlendingRState(&normalBlendingShader);
 sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 
 inline void Layer::initialize(sf::Color& color) {
@@ -73,10 +76,12 @@ inline void Layer::initialize(sf::Color& color) {
 
 	rTex.create(width, height);
 
-	if (!fragShader.loadFromFile("fragment_shader.frag", sf::Shader::Fragment))
-		std::cout << "Could not load shader" << std::endl;
+	if (!alphaBlendingShader.loadFromFile(ALPHA_BLENDING_SHADER_PATH, sf::Shader::Fragment))
+		std::cout << "Could not load ALphaBlendingShader" << std::endl;
+	if (!normalBlendingShader.loadFromFile(NORMAL_BLENDING_SHADER_PATH, sf::Shader::Fragment))
+		std::cout << "Could not load NormalBlendingShader" << std::endl;
 
-	renderState.blendMode = sf::BlendNone;
+	alphaBlendingRState.blendMode = sf::BlendNone;
 }
 
 inline void Layer::clearLayer() {
@@ -90,16 +95,17 @@ inline void Layer::blendlayers(Layer& newLayer, std::vector<BrushPntr>::iterator
 
 	rTex.clear(sf::Color(255, 255, 255, 0));
 
-	fragShader.setUniform("texture1", tex);
-	fragShader.setUniform("texture2", newLayer.tex);
-	fragShader.setUniform("alpha", (**brush).opacity / 255.0f);
+	alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
+	alphaBlendingShader.setUniform("texture2", newLayer.tex);
+	alphaBlendingShader.setUniform("alpha", (**brush).opacity / 255.0f);
 
-	rTex.draw(sprite, renderState);
+	rTex.draw(sprite, alphaBlendingRState);
 	rTex.display();
 
 	tex = rTex.getTexture();
 	sprite.setTexture(tex);
 }
+
 inline void Layer::drawLayerinWindow() {
 	mainWindow.draw(sprite);
 }

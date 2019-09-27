@@ -3,10 +3,6 @@
 int BIT(int i) { return 1 << i; }
 
 static bool SHOW_GUI = true;
-
-static const char* BRUSH_DIRECTORY = "./Brushes/";
-static const char* SCENES_DIRECTORY = "./Scenes/";
-
 static bool USE_FULLSCREEN = false;
 static unsigned int FPS = 40;
 

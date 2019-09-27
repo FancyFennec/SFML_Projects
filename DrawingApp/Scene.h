@@ -97,7 +97,12 @@ public:
 	}
 
 private:
+	static sf::Shader renderShader;
+	static sf::RenderStates renderState;
 };
+
+sf::Shader Scene::renderShader;
+sf::RenderStates Scene::renderState(&renderShader);
 
 inline void Scene::initialize()
 {

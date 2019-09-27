@@ -83,7 +83,7 @@ int main() {
 
 	window.create(sf::VideoMode(width, width), "TestWindow");
 
-	normalMapTex.loadFromFile("./normalColorPicker.png");
+	normalMapTex.loadFromFile("./test2.jpg");
 	normalMapSprite.setTexture(normalMapTex);
 
 	renderShader.setUniform("normalMap", normalMapTex);
