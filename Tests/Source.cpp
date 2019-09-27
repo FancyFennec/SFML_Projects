@@ -30,7 +30,7 @@ sf::Texture normalMapTex;
 sf::Sprite normalMapSprite;
 
 sf::Image layerImg;
-sf::Color layerCol(255, 127, 127, 100);
+sf::Color layerCol(200, 200, 230, 250);
 sf::Texture layerTex;
 sf::Sprite layerSpr;
 

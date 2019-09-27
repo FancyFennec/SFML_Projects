@@ -54,7 +54,23 @@ public:
 	}
 
 	float computeRelativeStepSize() {
-		return stepSize * maxSize * pressure;
+		return stepSize * (getMinSize() + getMaxSize());
+	}
+
+	float getMinSize() {
+		return useSizePress ? minSize : 0.0f;
+	}
+
+	float getMaxSize() {
+		return useSizePress ? pressure * (maxSize - minSize) : maxSize;
+	}
+
+	float getMinSizeScale() {
+		return getMinSize() / maxSize;
+	}
+
+	float getMaxSizeScale() {
+		return getMaxSize() / maxSize;
 	}
 
 	ImVec4 getCurrentImColorRGBA() {
