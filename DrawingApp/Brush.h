@@ -10,7 +10,6 @@ class Brush
 {
 public:
 	std::string brushName = "Brush";
-
 	sf::Texture tex;
 	sf::Sprite sprite;
 
@@ -48,7 +47,7 @@ public:
 	Brush(int brush_width, const char* filePath)
 	{
 		if (!tex.loadFromFile(filePath)) {
-			std::cout << "ERROR! unable to find path to file!" << std::endl;
+			std::cout << "ERROR! unable to find path to brush file!" << std::endl;
 		}
 		initialize();
 	}

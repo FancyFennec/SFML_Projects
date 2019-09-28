@@ -11,7 +11,7 @@ static const char* BRUSH_DIRECTORY = "./Brushes/";
 static const char* SCENES_DIRECTORY = "./Scenes/";
 
 static sf::Clock deltaClock; //For imgui
-static sf::Clock clickClock; //For click timing
+static sf::Clock clickClock; //For double click timing
 
 //Window initialisation
 static sf::RenderWindow mainWindow;

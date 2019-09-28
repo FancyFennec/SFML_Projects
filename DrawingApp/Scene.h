@@ -75,7 +75,7 @@ inline void Scene::initialize()
 {
 	drawingLayer.offset = sf::Vector2i(WINDOW_WIDTH / 2 - width / 2, WINDOW_HEIGHT / 2 - height / 2);
 	layers.reserve(MAX_LAYERS + 1); // Reserve space for 20 Layers
-	layers.push_back(Layer(width, height, sf::Color(127, 127, 255))); // Background Layer
+	layers.push_back(Layer(width, height, sf::Color::Red)); // Background Layer
 	for (int i = 0; i < MAX_LAYERS; i++) {
 		layers.push_back(Layer(width, height));
 		layers.back().clearLayer();

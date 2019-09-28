@@ -16,6 +16,7 @@ public:
 	sf::Texture tex;
 	sf::Sprite sprite;
 
+	static bool isOffsetSet;
 	bool useOffset = true;
 	static sf::Vector2i offset;
 
@@ -47,6 +48,7 @@ private:
 	static sf::RenderStates normalBlendingRState;
 
 	void initialize(sf::Color& color);
+	void loadShaders();
 	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2);
 	float getSScatter(std::vector<BrushPntr>::iterator& brush);
 	float getPScatter(std::vector<BrushPntr>::iterator& brush);
@@ -54,6 +56,7 @@ private:
 	sf::RenderStates getRenderState(std::vector<BrushPntr>::iterator & brush);
 };
 
+bool Layer::isOffsetSet = false;
 sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 sf::RenderTexture Layer::rTex;
 sf::Shader Layer::alphaBlendingShader;
@@ -64,16 +67,20 @@ sf::RenderStates Layer::normalBlendingRState(&normalBlendingShader);
 inline void Layer::initialize(sf::Color& color) {
 	sf::Image image;
 	image.create(width, height, color);
-	tex.create(width, height);
-	tex.update(image);
+	tex.loadFromImage(image);
 	sprite.setTexture(tex);
 
-	if (offset.x == 0 && offset.y == 0) { // Since the offset is static, we only need to set it o nthe first layer
+	if (!isOffsetSet) {
 		offset = sf::Vector2i(WINDOW_WIDTH / 2 - width / 2, WINDOW_HEIGHT / 2 - height / 2);
+		isOffsetSet = true;
 	}
-
 	rTex.create(width, height);
 
+	loadShaders();
+}
+
+inline void Layer::loadShaders()
+{
 	if (!ARE_SHADERS_LOADED) {
 		if (!alphaBlendingShader.loadFromFile(ALPHA_BLENDING_SHADER_PATH, sf::Shader::Fragment)) {
 			std::cout << "Could not load ALphaBlendingShader" << std::endl;
@@ -227,4 +234,3 @@ inline float Layer::getAScatter(std::vector<BrushPntr>::iterator & brush)
 		return 0.0f;
 	}
 }
-
