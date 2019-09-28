@@ -28,22 +28,28 @@ void brushGUI(Scene& scene)
 		ImGui::SetNextWindowPos(ImVec2(0, 18));
 
 		ImGui::Begin("Brush Settings", &SHOW_GUI, ImGuiWindowFlags_NoResize);
-		if (ImGui::CollapsingHeader("Colour Picker")) {
-			ImGui::PushItemWidth(235);
-			if (ImGui::ColorPicker3("##ColorPicker", (*scene.currentBrush)->guiBrushColor, colorEditFlags)) {
-				(*scene.currentBrush)->synchronizeBrushColor(); // Need to synchronize the color we get from the colorpicker with the brush color
+		switch (DRAWING_STATE) {
+		case(ALPHA): {
+			if (ImGui::CollapsingHeader("Colour Picker")) {
+				ImGui::PushItemWidth(235);
+				if (ImGui::ColorPicker3("##ColorPicker", (*scene.currentBrush)->guiBrushColor, colorEditFlags)) {
+					(*scene.currentBrush)->synchronizeBrushColor(); // Need to synchronize the color we get from the colorpicker with the brush color
+				}
+				ImGui::ColorButton("Current##CurrentColor", (**scene.currentBrush).getCurrentImColorRGB(), 0, ImVec2(30.0f, 20.0f));
+				ImGui::SameLine();
+				ImGui::ColorButton("Previous##PreviousColor", (**scene.currentBrush).getPreviousImColorRGB(), 0, ImVec2(30.0f, 20.0f));
 			}
-			ImGui::ColorButton("Current##CurrentColor", (**scene.currentBrush).getCurrentImColorRGB(), 0, ImVec2(30.0f, 20.0f));
-			ImGui::SameLine();
-			ImGui::ColorButton("Previous##PreviousColor", (**scene.currentBrush).getPreviousImColorRGB(), 0, ImVec2(30.0f, 20.0f));
+			break;
 		}
-		if (ImGui::CollapsingHeader("Normal Picker")) {
-			ImGui::PushItemWidth(235);
-
-
-			if (ImGui::ImageButton(normalTex, sf::Vector2f(200, 200), 1, sf::Color::Black, sf::Color::White)) {
-				pickNormalValue = true;
+		case(NORMAL): {
+			if (ImGui::CollapsingHeader("Normal Picker")) {
+				ImGui::PushItemWidth(235);
+				if (ImGui::ImageButton(normalTex, sf::Vector2f(200, 200), 1, sf::Color::Black, sf::Color::White)) {
+					pickNormalValue = true;
+				}
 			}
+			break;
+		}
 		}
 		if (ImGui::CollapsingHeader("Settings")) {
 			ImGui::Dummy(ImVec2(19, 0));

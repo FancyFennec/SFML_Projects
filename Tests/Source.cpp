@@ -89,6 +89,13 @@ int main() {
 	renderShader.setUniform("normalMap", normalMapTex);
 	renderShader.setUniform("layerTex", layerTex);
 
+	renderShader.setUniform("lightCol", sf::Vector3f(1,1,1));
+
+	renderShader.setUniform("shininess", 32.0f);
+	renderShader.setUniform("specInt", 0.3f);
+	renderShader.setUniform("ambInt", 0.3f);
+	renderShader.setUniform("difInt", 1.0f);
+
 	sf::Vector3f up(0, -30, 0);
 	sf::Vector3f right(30, 0, 0);
 

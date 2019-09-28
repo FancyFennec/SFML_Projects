@@ -113,6 +113,9 @@
     <ClInclude Include="CursorBuffer.h">
       <Filter>Header Files\utils</Filter>
     </ClInclude>
+    <ClInclude Include="Structs.h">
+      <Filter>Header Files\classes</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LSystems.rc">

@@ -15,6 +15,7 @@ public:
 
 	sf::Texture tex;
 	sf::Sprite sprite;
+	Material material;
 
 	static bool isOffsetSet;
 	bool useOffset = true;
@@ -35,7 +36,6 @@ public:
 
 	void clearLayer();
 	void blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush);
-	void blendNormalLayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush);
 	void drawLayerinWindow();
 	void lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>::iterator iter);
 	~Layer();
@@ -112,26 +112,23 @@ inline void Layer::blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iter
 	alphaBlendingShader.setUniform("texture2", drawingLayer.tex);
 	alphaBlendingShader.setUniform("alpha", (**brush).opacity / 255.0f);
 
-	rTex.draw(sprite, alphaBlendingRState);
+	switch (DRAWING_STATE) {
+	case(ALPHA): {
+		rTex.draw(sprite, alphaBlendingRState);
+		break;
+	}
+	case(NORMAL): {
+		rTex.draw(sprite, normalBlendingRState);
+		break;
+	}
+	}
+	
 	rTex.display();
 
 	tex = rTex.getTexture();
 	sprite.setTexture(tex);
 }
 
-inline void Layer::blendNormalLayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush) {
-	rTex.clear(sf::Color(255, 255, 255, 0));
-
-	alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
-	alphaBlendingShader.setUniform("texture2", drawingLayer.tex);
-	alphaBlendingShader.setUniform("alpha", (**brush).opacity / 255.0f);
-
-	rTex.draw(sprite, normalBlendingRState);
-	rTex.display();
-
-	tex = rTex.getTexture();
-	sprite.setTexture(tex);
-}
 
 inline void Layer::drawLayerinWindow() {
 	mainWindow.draw(sprite);

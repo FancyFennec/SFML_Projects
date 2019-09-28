@@ -4,21 +4,20 @@ uniform sampler2D normalMap;
 uniform sampler2D layerTex;
 
 uniform vec3 lightPos;
+uniform vec3 lightCol;
+uniform float shininess;
+uniform float specInt;
+uniform float ambInt;
+uniform float difInt;
 
 void main()
 {
-	vec3 lightCol = vec3(1.0f);
 	vec3 cameraPos = vec3(0.0f, 0.0f, 800.0f);
 
-	float shininess = 32.0f;
-	float specularIntensity = 0.3f;
-	float ambientIntensity = 0.3f;
-	float diffuseIntensity = 1.0f;
-
-	float total = specularIntensity + ambientIntensity + diffuseIntensity;
-	specularIntensity /= total;
-	ambientIntensity /= total;
-	diffuseIntensity /= total;
+	float total = specInt + ambInt + difInt;
+	float specularIntensity = specInt / total;
+	float ambientIntensity = ambInt / total;
+	float diffuseIntensity = difInt / total;
 
 	vec2 pixelPos = gl_TexCoord[0].xy;
     vec4 normalPixel = texture2D(normalMap, pixelPos);
@@ -36,5 +35,5 @@ void main()
 	
 	vec3 result = (diffuse + ambient + specular) * pixelCol;
 
-	gl_FragColor = vec4(result, normalPixel.a);
+	gl_FragColor = vec4(result, layerPixel.a);
 }

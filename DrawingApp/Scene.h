@@ -1,13 +1,13 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include <vector>
-#include <filesystem>
 #include <iostream>
+#include <SFML/Graphics.hpp>
+#include <filesystem>
 #include <fstream>
 
-#include "Layer.h"
 #include "Brush.h"
+#include "Layer.h"
 #include "json.hpp"
 using json = nlohmann::json;
 
@@ -26,6 +26,7 @@ public:
 	std::vector<Layer> layers = {};
 	std::vector<Layer>::iterator currentLayer;
 	std::vector<Layer>::iterator lastActiveLayer;
+	LightSource lightSource;
 	
 	//Auxilliary variables for the brush
 	float movedDistance = 0; // keeps track of how much the brush has moved since the last render cicle

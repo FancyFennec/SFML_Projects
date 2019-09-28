@@ -18,6 +18,7 @@ void saveCurrentLayerAsJPEG(Scene & scene, std::string &folderPath);
 void saveSceneAsPNG(Scene & scene, std::string &folderPath);
 void saveSceneAsJPEG(Scene & scene);
 
+bool useAlphaDrawingState = true;
 bool saveFilePopupIsOpen = false;
 bool openFilePopupIsOpen = false;
 std::string input;
@@ -99,6 +100,9 @@ void mainMenuGUI(Scene& scene)
 			CommandManager::moveForward();
 		}
 		if (ImGui::Checkbox("GUI", &SHOW_GUI)) {
+		}
+		if (ImGui::Checkbox("AlphaDrawing", &useAlphaDrawingState)) {
+			DRAWING_STATE = useAlphaDrawingState ? ALPHA : NORMAL;
 		}
 
 		ImGui::SameLine(WINDOW_WIDTH - 60);

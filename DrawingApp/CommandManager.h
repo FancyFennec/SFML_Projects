@@ -4,12 +4,7 @@
 #include <algorithm>
 #include "Scene.h"
 #include "Settings.h"
-
-enum COMMAND_TYPE {
-	CREATE_LAYER,
-	DELETE_LAYER,
-	UPDATE_LAYER
-};
+#include "Structs.h"
 
 struct command {
 	command(COMMAND_TYPE type, int layerPos, sf::Texture newTexure, sf::Texture oldTexure) :
@@ -125,7 +120,16 @@ inline void CommandManager::updateLayer(sf::Texture& oldTexture) {
 	if (actions.size() == MAX_ACTIONS) {
 		actions.erase(actions.begin());
 	}
-	actions.push_back(update_command(scene->getLayerDistance(), scene->currentLayer->tex, oldTexture));
+	switch (DRAWING_STATE) {
+	case(ALPHA): {
+		actions.push_back(update_command(scene->getLayerDistance(), scene->currentLayer->tex, oldTexture));
+		break;
+	}
+	case(NORMAL): {
+		actions.push_back(update_command(0, scene->layers.begin()->tex, oldTexture));
+		break;
+	}
+	}
 	actionIter = std::prev(actions.end());
 }
 

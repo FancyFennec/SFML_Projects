@@ -28,9 +28,20 @@ void mainWindowEventHandling(Scene& scene)
 	if (event.type == sf::Event::MouseButtonReleased) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (isMouseHeld()) {
-				sf::Texture oldTexture = scene.currentLayer->tex;
-				scene.currentLayer->blendlayers(scene.drawingLayer, scene.currentBrush);
-				CommandManager::updateLayer(oldTexture);
+				switch (DRAWING_STATE) {
+				case(ALPHA): {
+					sf::Texture oldTexture = scene.currentLayer->tex;
+					scene.currentLayer->blendlayers(scene.drawingLayer, scene.currentBrush);
+					CommandManager::updateLayer(oldTexture);
+					break;
+				}
+				case(NORMAL): {
+					sf::Texture oldTexture = scene.layers.begin()->tex;
+					scene.layers.begin()->blendlayers(scene.drawingLayer, scene.currentBrush);
+					CommandManager::updateLayer(oldTexture);
+				}
+				}
+				
 				setMouseNotHeld();
 			}
 		}

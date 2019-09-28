@@ -6,6 +6,7 @@
 #include "BrushGUI.h"
 #include "LayerGUI.h"
 #include "EventHandling.h"
+#include "GlobalVariables.h"
 
 void createMainWindow();
 void mainRenderLoop();
@@ -29,9 +30,14 @@ Scene scene(SCENE_WIDTH, SCENE_HEIGHT);
 sf::Thread positionSamplingLoop(&sampleMousePositions);
 
 int main() {
+	if (!mainRenderShader.loadFromFile(RENDER_SHADER_PATH, sf::Shader::Fragment)) {
+		std::cout << "Could not load RenderShader" << std::endl;
+		ARE_SHADERS_LOADED = false;
+	}
 	if (!ARE_SHADERS_LOADED) return -1;
 
 	createMainWindow();
+	mainRenderTex.create(SCENE_WIDTH, SCENE_HEIGHT);
 	CommandManager::initialize(scene);
 	ImGui::SFML::Init(mainWindow);
 
@@ -45,14 +51,37 @@ void mainRenderLoop()
 {
 	while (mainWindow.isOpen())
 	{
-		sf::RenderStates renderState;
-		renderState.transform.translate(sf::Vector2f(scene.currentLayer->offset));
+		sf::RenderStates renderState(&mainRenderShader);
+		sf::RenderStates mainRenderState;
+		mainRenderState.transform.translate(sf::Vector2f(scene.currentLayer->offset));
+		renderState.blendMode = sf::BlendNone;
 
 		mainWindow.clear(sf::Color(0, 0, 0, 0));
+		mainRenderTex.clear();
+		sf::Image image;
+		image.create(SCENE_WIDTH, SCENE_WIDTH, sf::Color::White);
+		sf::Texture tex;
+		tex.loadFromImage(image);
+		
 		ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
 		for (auto iter = scene.layers.begin(); iter <= scene.currentLayer; std::advance(iter, 1)) {
-			mainWindow.draw(iter->sprite, renderState);
+			mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
+			mainRenderShader.setUniform("layerTex", iter == scene.layers.begin() ? tex : iter->tex);
+
+			mainRenderShader.setUniform("lightPos", scene.lightSource.pos);
+			mainRenderShader.setUniform("lightCol", scene.lightSource.col);
+
+			mainRenderShader.setUniform("shininess", iter->material.shininess);
+			mainRenderShader.setUniform("specInt", iter->material.specInt);
+			mainRenderShader.setUniform("ambInt", iter->material.ambInt);
+			mainRenderShader.setUniform("difInt", iter->material.difInt);
+
+			mainRenderTex.draw(scene.layers.begin()->sprite, renderState);
+
+			mainRenderTex.display();
+			mainSprite.setTexture(mainRenderTex.getTexture());
+			mainWindow.draw(mainSprite, mainRenderState);
 		}
 		
 		dragLayers();
@@ -60,9 +89,26 @@ void mainRenderLoop()
 
 		if (scene.currentLayer != scene.lastActiveLayer) {
 			for (auto iter = std::next(scene.currentLayer); iter <= scene.lastActiveLayer; std::advance(iter, 1)) {
-				mainWindow.draw(iter->sprite, renderState);
+				mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
+				mainRenderShader.setUniform("layerTex", iter->tex);
+
+				mainRenderShader.setUniform("lightPos", scene.lightSource.pos);
+				mainRenderShader.setUniform("lightCol", scene.lightSource.col);
+
+				mainRenderShader.setUniform("shininess", iter->material.shininess);
+				mainRenderShader.setUniform("specInt", iter->material.specInt);
+				mainRenderShader.setUniform("ambInt", iter->material.ambInt);
+				mainRenderShader.setUniform("difInt", iter->material.difInt);
+
+				mainRenderTex.draw(scene.layers.begin()->sprite, renderState);
+
+				mainRenderTex.display();
+				mainSprite.setTexture(mainRenderTex.getTexture());
+				mainWindow.draw(mainSprite, mainRenderState);
 			}
 		}
+
+		
 
 		samplePenPressure(); //Needs to be done before processing the events
 		while (mainWindow.pollEvent(event))
