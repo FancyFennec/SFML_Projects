@@ -53,9 +53,10 @@ public:
 		saveBrushesToJSON();
 	}
 
-	unsigned int getDistance(std::vector<Layer>::iterator iter) { return (unsigned int)std::distance(layers.begin(), iter); }
-	unsigned int getDistance() { return getDistance(currentLayer); }
-	unsigned int getSize() { return getDistance(lastActiveLayer); }
+	void resetLayerSprites();
+	unsigned int getLayerDistance(std::vector<Layer>::iterator iter) { return (unsigned int)std::distance(layers.begin(), iter); }
+	unsigned int getLayerDistance() { return getLayerDistance(currentLayer); }
+	unsigned int getSize() { return getLayerDistance(lastActiveLayer); }
 	
 	void renderDrawingLayer();
 
@@ -80,14 +81,19 @@ inline void Scene::initialize()
 		layers.push_back(Layer(width, height));
 		layers.back().clearLayer();
 	}
-	for (auto layer = layers.begin(); layer < layers.end(); layer++) {
-		layer->sprite.setTexture(layer->tex);
-	}
+	resetLayerSprites();
 	currentLayer = std::next(layers.begin());
 	currentLayer->layerName = "Layer1";
 	lastActiveLayer = currentLayer;
 
 	loadBrushesFromJSON();
+}
+
+inline void Scene::resetLayerSprites()
+{
+	for (auto layer = layers.begin(); layer < layers.end(); layer++) {
+		layer->sprite.setTexture(layer->tex);
+	}
 }
 
 inline void Scene::loadBrushesFromJSON()

@@ -33,7 +33,6 @@ int main() {
 
 	createMainWindow();
 	CommandManager::initialize(scene);
-
 	ImGui::SFML::Init(mainWindow);
 
 	positionSamplingLoop.launch();

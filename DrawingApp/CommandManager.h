@@ -88,7 +88,7 @@ inline void CommandManager::deleteLayer(std::vector<Layer>::iterator iter) {
 	if (actions.size() == MAX_ACTIONS) {
 		actions.erase(actions.begin());
 	}
-	actions.push_back(delete_command(scene->getDistance(iter), iter->tex));
+	actions.push_back(delete_command(scene->getLayerDistance(iter), iter->tex));
 	actionIter = std::prev(actions.end());
 
 	delteLayerAt(iter);
@@ -118,16 +118,14 @@ inline void CommandManager::delteLayerAt(std::vector<Layer>::iterator iter)
 	}
 	if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 
-	for (auto layer = scene->layers.begin(); layer < scene->layers.end(); layer++) {
-		layer->sprite.setTexture(layer->tex);
-	}
+	scene->resetLayerSprites();
 }
 
 inline void CommandManager::updateLayer(sf::Texture& oldTexture) {
 	if (actions.size() == MAX_ACTIONS) {
 		actions.erase(actions.begin());
 	}
-	actions.push_back(update_command(scene->getDistance(), scene->currentLayer->tex, oldTexture));
+	actions.push_back(update_command(scene->getLayerDistance(), scene->currentLayer->tex, oldTexture));
 	actionIter = std::prev(actions.end());
 }
 
@@ -164,9 +162,7 @@ inline void CommandManager::moveForward()
 			}
 			if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 
-			for (auto layer = scene->layers.begin(); layer < scene->layers.end(); layer++) {
-				layer->sprite.setTexture(layer->tex);
-			}
+			scene->resetLayerSprites();
 			break;
 		}
 		case(UPDATE_LAYER): { //Set the layer texture to the new texture
@@ -212,9 +208,7 @@ inline void CommandManager::moveBackward()
 			}
 			if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 
-			for (auto layer = scene->layers.begin(); layer < scene->layers.end(); layer++) {
-				layer->sprite.setTexture(layer->tex);
-			}
+			scene->resetLayerSprites();
 			break;
 		}
 		case(UPDATE_LAYER): { //Set the layer texture to the old texture

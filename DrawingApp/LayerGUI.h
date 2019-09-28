@@ -67,7 +67,7 @@ void layerGUI(Scene& scene)
 				//Delete button
 				ImGui::SameLine();
 				std::string delButton = "Del##";
-				delButton.append(std::to_string(scene.getDistance(iter))); // If we don't append the layer name imgui is confused when we press the button
+				delButton.append(std::to_string(scene.getLayerDistance(iter))); // If we don't append the layer name imgui is confused when we press the button
 				if (ImGui::Button(delButton.data())) {
 					CommandManager::deleteLayer(iter);
 				}
