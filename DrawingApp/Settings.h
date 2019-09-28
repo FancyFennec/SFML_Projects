@@ -4,7 +4,7 @@ int BIT(int i) { return 1 << i; }
 
 static bool SHOW_GUI = true;
 static bool USE_FULLSCREEN = false;
-static unsigned int FPS = 40;
+static unsigned int FPS = 30;
 
 static int WINDOW_WIDTH = 1600;
 static int WINDOW_HEIGHT = 1000;

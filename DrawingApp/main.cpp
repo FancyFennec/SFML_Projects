@@ -33,8 +33,6 @@ int main() {
 
 	createMainWindow();
 	CommandManager::initialize(scene);
-	normalTex.loadFromFile("normalColorPicker.png");
-	samplingTexture.create(WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	ImGui::SFML::Init(mainWindow);
 
@@ -48,14 +46,14 @@ void mainRenderLoop()
 {
 	while (mainWindow.isOpen())
 	{
-		sf::RenderStates state;
-		state.transform.translate(sf::Vector2f(scene.currentLayer->offset));
+		sf::RenderStates renderState;
+		renderState.transform.translate(sf::Vector2f(scene.currentLayer->offset));
 
 		mainWindow.clear(sf::Color(0, 0, 0, 0));
 		ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
 		for (auto iter = scene.layers.begin(); iter <= scene.currentLayer; std::advance(iter, 1)) {
-			mainWindow.draw(iter->sprite, state);
+			mainWindow.draw(iter->sprite, renderState);
 		}
 		
 		dragLayers();
@@ -63,11 +61,11 @@ void mainRenderLoop()
 
 		if (scene.currentLayer != scene.lastActiveLayer) {
 			for (auto iter = std::next(scene.currentLayer); iter <= scene.lastActiveLayer; std::advance(iter, 1)) {
-				mainWindow.draw(iter->sprite, state);
+				mainWindow.draw(iter->sprite, renderState);
 			}
 		}
 
-		samplePenPressure(); //Needs to be done before we process all the events
+		samplePenPressure(); //Needs to be done before processing the events
 		while (mainWindow.pollEvent(event))
 		{
 			ImGui::SFML::ProcessEvent(event);
@@ -87,6 +85,7 @@ void mainRenderLoop()
 
 void sampleMousePositions()
 {
+	//TODO: There are still thing which can go wrong here :(
 	while (mainWindow.isOpen())
 	{
 		if (isMouseHeld()) CursorBuffer::update(scene.currentBrush);
