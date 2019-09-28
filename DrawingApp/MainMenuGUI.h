@@ -10,19 +10,12 @@
 #include "CommandManager.h"
 
 void mainMenuGUI(Scene& scene);
-
 void loadLayerFromFile(std::string &folderPath, std::string &fileName, Scene & scene);
-
 void loadScene(std::string &fileName, Scene & scene);
-
 void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath);
-
 void saveCurrentLayerAsPNG(Scene & scene, std::string &folderPath);
-
 void saveCurrentLayerAsJPEG(Scene & scene, std::string &folderPath);
-
 void saveSceneAsPNG(Scene & scene, std::string &folderPath);
-
 void saveSceneAsJPEG(Scene & scene);
 
 bool saveFilePopupIsOpen = false;

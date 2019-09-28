@@ -9,7 +9,6 @@
 #include "CommandManager.h"
 
 void brushGUI(Scene& scene);
-void createBrushWindow(Scene& scene);
 
 static const ImGuiColorEditFlags colorEditFlags =
 ImGuiColorEditFlags_NoSidePreview |
@@ -107,8 +106,7 @@ void brushGUI(Scene& scene)
 				std::cout << "ERROR! Maximum number of brushes reached." << std::endl;
 			}
 			else {
-				scene.brushLayer.clearLayer();
-				createBrushWindow(scene);
+				//TODO: Come up with a nice way to create new brushes
 			}
 		}
 
@@ -196,9 +194,4 @@ void brushGUI(Scene& scene)
 			}
 		}
 	}
-}
-
-void createBrushWindow(Scene& scene)
-{
-	//TODO: Implement something :3
 }

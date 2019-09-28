@@ -2,6 +2,7 @@
 
 uniform sampler2D texture1;
 uniform sampler2D texture2;
+uniform float alpha;
 
 void main()
 {
@@ -9,7 +10,7 @@ void main()
 	vec4 pixel2 = texture2D(texture2, gl_TexCoord[0].xy);
 
 	float alpha1 = pixel1.a;
-	float alpha2 = pixel2.a;
+	float alpha2 = pixel2.a * alpha;
 
 	float alpha = alpha2 + alpha1 * (1.0f - alpha2);
 

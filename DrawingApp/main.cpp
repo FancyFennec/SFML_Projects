@@ -29,8 +29,9 @@ Scene scene(SCENE_WIDTH, SCENE_HEIGHT);
 sf::Thread positionSamplingLoop(&sampleMousePositions);
 
 int main() {
+	if (!ARE_SHADERS_LOADED) return -1;
+
 	createMainWindow();
-	scene.initialize();
 	CommandManager::initialize(scene);
 	normalTex.loadFromFile("normalColorPicker.png");
 	samplingTexture.create(WINDOW_WIDTH, WINDOW_HEIGHT);

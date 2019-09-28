@@ -3,8 +3,9 @@
 #include <mutex>
 #include <SFML/Graphics.hpp>
 
+static bool ARE_SHADERS_LOADED = false;
 static const std::string ALPHA_BLENDING_SHADER_PATH = "./alpha_blending_shader.frag";
-static const std::string NORMAL_BLENDING_SHADER_PATH = "./normal_blending.frag";
+static const std::string NORMAL_BLENDING_SHADER_PATH = "./normal_blending_shader.frag";
 static const std::string RENDER_SHADER_PATH = "./render_shader.frag";
 static const char* BRUSH_DIRECTORY = "./Brushes/";
 static const char* SCENES_DIRECTORY = "./Scenes/";

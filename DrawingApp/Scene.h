@@ -36,7 +36,6 @@ public:
 	float stepsize = 2.0f;
 	int opacity = 100;
 
-	Layer brushLayer;
 	std::vector<BrushPntr> brushes;
 	std::vector<BrushPntr>::iterator currentBrush;
 
@@ -45,60 +44,28 @@ public:
 	Scene(unsigned int width, unsigned int height) :
 		width(width),
 		height(height),
-		drawingLayer(Layer(width, height)),
-		brushLayer(Layer(brushWidth, brushWidth)) {}
+		drawingLayer(Layer(width, height)) {
+		initialize();
+	}
 
-	void initialize();
+	~Scene() {
+		clearBrushDirectory();
+		saveBrushesToJSON();
+	}
 
 	unsigned int getDistance(std::vector<Layer>::iterator iter) { return (unsigned int)std::distance(layers.begin(), iter); }
 	unsigned int getDistance() { return getDistance(currentLayer); }
 	unsigned int getSize() { return getDistance(lastActiveLayer); }
 	
-	void saveBrush();
 	void renderDrawingLayer();
 
-	~Scene() {
-		json brushesJson;
-		brushesJson["Brushes"] = {};
-
-		for (auto p : fs::directory_iterator(BRUSH_DIRECTORY)) {
-			if (!fs::is_directory(p)) { // Only delete the pngs
-				if (p.path().string().substr(
-					p.path().string().length() - 3,
-					p.path().string().length())._Equal("png")
-					) {
-					fs::remove(p);
-				}
-			}
-		}
-
-		for (auto &brush : brushes) {
-			json brushJson;
-			brushJson["BrushName"] = brush->brushName;
-			brushJson["BrushSize"] = brush->maxSize;
-			brushJson["StepSize"] = brush->stepSize;
-			brushJson["Oppacity"] = brush->opacity;
-			brushJson["Flow"] = brush->maxFlow;
-
-			brushJson["UseSScatter"] = brush->useSScatter;
-			brushJson["UsePScatter"] = brush->usePScatter;
-			brushJson["UseAScatter"] = brush->useAScatter;
-
-			brushJson["ScatterScale"] = brush->scatterScale;
-			brushJson["ScatterPos"] = brush->scatterPos;
-			brushJson["ScatterAngle"] = brush->scatterAngle;
-
-			brushesJson["Brushes"].push_back(brushJson);
-
-			brush->tex.copyToImage().saveToFile(std::string(BRUSH_DIRECTORY).append(brush->brushName).append(".png"));
-		}
-		std::ofstream o(std::string(BRUSH_DIRECTORY).append("brushes.json"));
-		o << brushesJson << std::endl;
-	}
-
 private:
+	void initialize();
+	void loadBrushesFromJSON();
 	static sf::Shader renderShader;
 	static sf::RenderStates renderState;
+	void clearBrushDirectory(); 
+	void saveBrushesToJSON();
 };
 
 sf::Shader Scene::renderShader;
@@ -108,7 +75,7 @@ inline void Scene::initialize()
 {
 	drawingLayer.offset = sf::Vector2i(WINDOW_WIDTH / 2 - width / 2, WINDOW_HEIGHT / 2 - height / 2);
 	layers.reserve(MAX_LAYERS + 1); // Reserve space for 20 Layers
-	layers.push_back(Layer(width, height, sf::Color::White)); // Background Layer
+	layers.push_back(Layer(width, height, sf::Color(127, 127, 255))); // Background Layer
 	for (int i = 0; i < MAX_LAYERS; i++) {
 		layers.push_back(Layer(width, height));
 		layers.back().clearLayer();
@@ -117,7 +84,11 @@ inline void Scene::initialize()
 	currentLayer->layerName = "Layer1";
 	lastActiveLayer = currentLayer;
 
-	brushLayer.useOffset = false;
+	loadBrushesFromJSON();
+}
+
+inline void Scene::loadBrushesFromJSON()
+{
 	brushes.reserve(20);
 
 	std::ifstream inputStream(std::string(BRUSH_DIRECTORY).append("brushes.json"));
@@ -144,28 +115,53 @@ inline void Scene::initialize()
 		brushes.back()->scatterPos = brush["ScatterPos"].get<float>();
 		brushes.back()->scatterAngle = brush["ScatterAngle"].get<float>();
 	}
-	
+
 	currentBrush = brushes.begin();
 	(*currentBrush)->synchronizeBrushColor();
 	(*currentBrush)->setSpriteSize(brushSize);
 }
 
-inline void Scene::saveBrush() {
-	sf::RenderTexture renderTex;
-	renderTex.create(brushLayer.width, brushLayer.height);
-	renderTex.clear(sf::Color(255, 255, 255, 0));
+inline void Scene::clearBrushDirectory()
+{
+	for (auto p : fs::directory_iterator(BRUSH_DIRECTORY)) {
+		if (!fs::is_directory(p)) { // Only delete the pngs
+			if (p.path().string().substr(
+				p.path().string().length() - 3,
+				p.path().string().length())._Equal("png")
+				) {
+				fs::remove(p);
+			}
+		}
+	}
+}
 
-	renderTex.draw(brushLayer.sprite);
-	renderTex.display();
+inline void Scene::saveBrushesToJSON()
+{
+	json brushesJson;
+	brushesJson["Brushes"] = {};
 
-	renderTex.getTexture().copyToImage().saveToFile(std::string(BRUSH_DIRECTORY).append("NewBrush.png"));
+	for (auto &brush : brushes) {
+		json brushJson;
+		brushJson["BrushName"] = brush->brushName;
+		brushJson["BrushSize"] = brush->maxSize;
+		brushJson["StepSize"] = brush->stepSize;
+		brushJson["Oppacity"] = brush->opacity;
+		brushJson["Flow"] = brush->maxFlow;
 
-	brushes.push_back(std::make_unique<Brush>(
-		brushWidth,
-		std::string(BRUSH_DIRECTORY).append("NewBrush.png").data()
-		)
-	);
-	brushes.back()->brushName = "NewBrush";
+		brushJson["UseSScatter"] = brush->useSScatter;
+		brushJson["UsePScatter"] = brush->usePScatter;
+		brushJson["UseAScatter"] = brush->useAScatter;
+
+		brushJson["ScatterScale"] = brush->scatterScale;
+		brushJson["ScatterPos"] = brush->scatterPos;
+		brushJson["ScatterAngle"] = brush->scatterAngle;
+
+		brushesJson["Brushes"].push_back(brushJson);
+
+		brush->tex.copyToImage().saveToFile(std::string(BRUSH_DIRECTORY).append(brush->brushName).append(".png"));
+	}
+	std::ofstream o(std::string(BRUSH_DIRECTORY).append("brushes.json"));
+	o << brushesJson << std::endl;
 }
 
 inline void Scene::renderDrawingLayer() {

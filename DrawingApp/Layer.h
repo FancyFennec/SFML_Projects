@@ -9,18 +9,15 @@ typedef std::unique_ptr<Brush> BrushPntr;
 class Layer
 {
 public:
+	std::string layerName = "Layer";
 	unsigned int width;
 	unsigned int height;
-
-	std::string layerName = "Layer";
 
 	sf::Texture tex;
 	sf::Sprite sprite;
 
 	bool useOffset = true;
 	static sf::Vector2i offset;
-
-	Layer(){}
 
 	Layer(int width, int height) :
 		width(width),
@@ -36,7 +33,8 @@ public:
 	}
 
 	void clearLayer();
-	void blendlayers(Layer& newLayer, std::vector<BrushPntr>::iterator& brush);
+	void blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush);
+	void blendNormalLayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush);
 	void drawLayerinWindow();
 	void lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>::iterator iter);
 	~Layer();
@@ -56,12 +54,12 @@ private:
 	sf::RenderStates getRenderState(std::vector<BrushPntr>::iterator & brush);
 };
 
+sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 sf::RenderTexture Layer::rTex;
 sf::Shader Layer::alphaBlendingShader;
 sf::Shader Layer::normalBlendingShader;
 sf::RenderStates Layer::alphaBlendingRState(&alphaBlendingShader);
 sf::RenderStates Layer::normalBlendingRState(&normalBlendingShader);
-sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 
 inline void Layer::initialize(sf::Color& color) {
 	sf::Image image;
@@ -76,12 +74,21 @@ inline void Layer::initialize(sf::Color& color) {
 
 	rTex.create(width, height);
 
-	if (!alphaBlendingShader.loadFromFile(ALPHA_BLENDING_SHADER_PATH, sf::Shader::Fragment))
-		std::cout << "Could not load ALphaBlendingShader" << std::endl;
-	if (!normalBlendingShader.loadFromFile(NORMAL_BLENDING_SHADER_PATH, sf::Shader::Fragment))
-		std::cout << "Could not load NormalBlendingShader" << std::endl;
-
-	alphaBlendingRState.blendMode = sf::BlendNone;
+	if (!ARE_SHADERS_LOADED) {
+		if (!alphaBlendingShader.loadFromFile(ALPHA_BLENDING_SHADER_PATH, sf::Shader::Fragment)) {
+			std::cout << "Could not load ALphaBlendingShader" << std::endl;
+		}
+		else {
+			if (!normalBlendingShader.loadFromFile(NORMAL_BLENDING_SHADER_PATH, sf::Shader::Fragment)) {
+				std::cout << "Could not load NormalBlendingShader" << std::endl;
+			}
+			else {
+				ARE_SHADERS_LOADED = true;
+				alphaBlendingRState.blendMode = sf::BlendNone;
+				normalBlendingRState.blendMode = sf::BlendNone;
+			}
+		}
+	}
 }
 
 inline void Layer::clearLayer() {
@@ -91,15 +98,28 @@ inline void Layer::clearLayer() {
 	sprite.setTexture(tex);
 }
 
-inline void Layer::blendlayers(Layer& newLayer, std::vector<BrushPntr>::iterator& brush) {
-
+inline void Layer::blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush) {
 	rTex.clear(sf::Color(255, 255, 255, 0));
 
 	alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
-	alphaBlendingShader.setUniform("texture2", newLayer.tex);
+	alphaBlendingShader.setUniform("texture2", drawingLayer.tex);
 	alphaBlendingShader.setUniform("alpha", (**brush).opacity / 255.0f);
 
 	rTex.draw(sprite, alphaBlendingRState);
+	rTex.display();
+
+	tex = rTex.getTexture();
+	sprite.setTexture(tex);
+}
+
+inline void Layer::blendNormalLayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush) {
+	rTex.clear(sf::Color(255, 255, 255, 0));
+
+	alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
+	alphaBlendingShader.setUniform("texture2", drawingLayer.tex);
+	alphaBlendingShader.setUniform("alpha", (**brush).opacity / 255.0f);
+
+	rTex.draw(sprite, normalBlendingRState);
 	rTex.display();
 
 	tex = rTex.getTexture();
