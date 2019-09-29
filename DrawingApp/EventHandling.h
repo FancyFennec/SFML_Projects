@@ -10,6 +10,8 @@
 
 void mainWindowEventHandling(Scene& scene);
 void lmbPressed(Scene& scene);
+sf::Color getAltSampledColor(Scene& scene);
+sf::Color getAltSampledNormal(Scene& scene);
 
 void mainWindowEventHandling(Scene& scene)
 {
@@ -125,8 +127,18 @@ void lmbPressed(Scene& scene)
 		CommandManager::clearActions();
 
 		if (isAltHeld()) {
-			(*scene.currentBrush)->currentColor = getSampledColor();
-			(*scene.currentBrush)->synchronizeGuiBrushColor();
+			switch (DRAWING_STATE)
+			{
+			case ALPHA:
+				(*scene.currentBrush)->currentColor = getAltSampledColor(scene);
+				(*scene.currentBrush)->synchronizeGuiBrushColor();
+				break;
+			case NORMAL:
+				(*scene.currentBrush)->currentNormal = getAltSampledNormal(scene);
+				break;
+			default:
+				break;
+			}
 		}
 		else {
 			setMouseIsHeld();
@@ -136,4 +148,16 @@ void lmbPressed(Scene& scene)
 			CursorBuffer::isBufferBeingCleared = true;
 		}
 	}
+}
+
+sf::Color getAltSampledColor(Scene& scene) {
+	samplingTexture.update(mainWindow);
+	sampledPos = sf::Mouse::getPosition(mainWindow);
+	return samplingTexture.copyToImage().getPixel(sampledPos.x, sampledPos.y);
+}
+
+sf::Color getAltSampledNormal(Scene& scene) {
+	sampledPos = sf::Mouse::getPosition(mainWindow) - scene.currentLayer->offset;
+	sf::Image img = scene.normalLayer.tex.copyToImage();
+	return img.getPixel(sampledPos.x, sampledPos.y);
 }

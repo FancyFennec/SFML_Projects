@@ -43,15 +43,18 @@ void brushGUI(Scene& scene)
 		}
 		case(NORMAL): {
 			if (ImGui::CollapsingHeader("Normal Picker")) {
-				ImGui::PushItemWidth(235);
-				if (ImGui::ImageButton(normalTex, sf::Vector2f(200, 200), 1, sf::Color::Black, sf::Color::White)) {
+				if (ImGui::ImageButton(normalTex, sf::Vector2f(210, 210), 1, sf::Color::Black, sf::Color::White)) {
 					pickNormalValue = true;
 				}
+				ImGui::ColorButton("Current##CurrentNormal", (**scene.currentBrush).getCurrentImNormalRGB(), 0, ImVec2(30.0f, 20.0f));
 			}
 			break;
 		}
 		}
-		if (ImGui::CollapsingHeader("Settings")) {
+		
+		if (ImGui::CollapsingHeader("Brush Settings")) {
+			ImGui::PushItemWidth(170);
+
 			ImGui::Dummy(ImVec2(19, 0));
 			ImGui::SameLine();
 			ImGui::SliderFloat("Spac", &(*scene.currentBrush)->stepSize, 0, 500);
@@ -88,7 +91,8 @@ void brushGUI(Scene& scene)
 				
 			}
 		}
-		if (ImGui::CollapsingHeader("Scatter")) {
+		if (ImGui::CollapsingHeader("Scatter Settings")) {
+			ImGui::PushItemWidth(177);
 			ImGui::Checkbox("Size##Checkbox", &(*scene.currentBrush)->useSScatter);
 			if ((*scene.currentBrush)->useSScatter){
 				ImGui::SameLine(65);

@@ -48,33 +48,12 @@ void mainRenderLoop()
 		
 		ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
-		switch (DRAWING_STATE) {
-		case ALPHA: {
-			mainNormalSprite.setTexture(scene.normalLayer.tex);
-			break;
-		}
-		case NORMAL:{
-			sf::RenderTexture rTex;
-			rTex.create(SCENE_WIDTH, SCENE_HEIGHT);
-
-			normalBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
-			normalBlendingShader.setUniform("texture2", scene.drawingLayer.tex);
-			normalBlendingShader.setUniform("alpha", (**scene.currentBrush).opacity / 255.0f);
-
-			rTex.draw(scene.normalLayer.sprite, normalBlendingRState);
-			rTex.display();
-
-			mainNormalTex = rTex.getTexture();
-			mainNormalSprite.setTexture(mainNormalTex);
-			break;
-		}
-		}
-
+		scene.setGlobalNormalSprite();
 		scene.drawLowerLayers();
-		mainWindowDrawing();
 		scene.drawCurrentLayer();
 		scene.drawUpperLayers();
 
+		mainWindowDrawing();
 		dragLayers();
 
 		samplePenPressure(); //Needs to be done before processing the events
@@ -101,6 +80,7 @@ void sampleMousePositions()
 	while (mainWindow.isOpen())
 	{
 		if (isMouseHeld()) CursorBuffer::update(scene.currentBrush);
+		sf::sleep(sf::milliseconds(5));
 	}
 }
 
@@ -120,7 +100,7 @@ void samplePenPressure()
 void sampleNormals()
 {
 	if (pickNormalValue) {
-		sf::Color col = getSampledColor();
+		sf::Color col = getAltSampledColor(scene);
 
 		if (col != sf::Color::Black) {
 			(**scene.currentBrush).currentNormal = col;

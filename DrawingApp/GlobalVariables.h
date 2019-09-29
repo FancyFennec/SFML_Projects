@@ -58,9 +58,3 @@ inline bool loadShaders()
 
 	return returnValue;
 }
-
-sf::Color getSampledColor() {
-	samplingTexture.update(mainWindow);
-	sampledPos = sf::Mouse::getPosition(mainWindow);
-	return samplingTexture.copyToImage().getPixel(sampledPos.x, sampledPos.y);
-}

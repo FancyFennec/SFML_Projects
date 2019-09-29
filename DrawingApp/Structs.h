@@ -18,7 +18,7 @@ struct LightSource {
 	sf::Vector3f col;
 
 	LightSource() {
-		pos = sf::Vector3f(0.0f, 0.0f, 800.0f);
+		pos = sf::Vector3f(0.0f, 0.0f, 300.0f);
 		col = sf::Vector3f(1.0f, 1.0f, 1.0f);
 	}
 
@@ -32,19 +32,19 @@ struct LightSource {
 };
 
 struct Material {
-	int shininess;
+	float shininess;
 	float specInt;
 	float ambInt;
 	float difInt;
 
 	Material() {
-		shininess = 128;
-		specInt = 0.2f;
-		ambInt = 0.2f;
+		shininess = 32.0f;
+		specInt = 0.3f;
+		ambInt = 0.3f;
 		difInt = 1.0f;
 	}
 
-	Material(int shininess, float specInt, float ambInt, float difInt) :
+	Material(float shininess, float specInt, float ambInt, float difInt) :
 		shininess(shininess),
 		specInt(specInt),
 		ambInt(ambInt),

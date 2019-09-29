@@ -56,6 +56,7 @@ public:
 		saveBrushesToJSON();
 	}
 
+	void setGlobalNormalSprite();
 	void drawLowerLayers();
 	void drawCurrentLayer();
 	void drawUpperLayers();
@@ -97,6 +98,31 @@ inline void Scene::initialize()
 	lastActiveLayer = currentLayer;
 
 	loadBrushesFromJSON();
+}
+
+inline void Scene::setGlobalNormalSprite()
+{
+	switch (DRAWING_STATE) {
+	case ALPHA: {
+		mainNormalSprite.setTexture(normalLayer.tex);
+		break;
+	}
+	case NORMAL: {
+		sf::RenderTexture rTex;
+		rTex.create(width, height);
+
+		normalBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
+		normalBlendingShader.setUniform("texture2", drawingLayer.tex);
+		normalBlendingShader.setUniform("alpha", (**currentBrush).opacity / 255.0f);
+
+		rTex.draw(normalLayer.sprite, normalBlendingRState);
+		rTex.display();
+
+		mainNormalTex = rTex.getTexture();
+		mainNormalSprite.setTexture(mainNormalTex);
+		break;
+	}
+	}
 }
 
 inline void Scene::drawLowerLayers()

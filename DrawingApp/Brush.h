@@ -108,6 +108,15 @@ public:
 		);
 	}
 
+	ImVec4 getCurrentImNormalRGB() {
+		return ImVec4(
+			currentNormal.r / 255.0f,
+			currentNormal.g / 255.0f,
+			currentNormal.b / 255.0f,
+			1.0f
+		);
+	}
+
 	void synchronizeGuiBrushColor() {
 		guiBrushColor[0] = currentColor.r / 255.0f;
 		guiBrushColor[1] = currentColor.g / 255.0f;

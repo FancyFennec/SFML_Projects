@@ -12,16 +12,23 @@ void layerGUI(Scene& scene);
 
 bool layerNamePopupIsOpen = false;
 static char layerName[128] = "";
-
+const int WIDTH = 250;
 
 void layerGUI(Scene& scene)
 {
 	if (SHOW_GUI) {
-		ImGui::SetNextWindowSize(ImVec2(150, WINDOW_HEIGHT / 2));
-		ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH - 150, 18));
+		ImGui::SetNextWindowSize(ImVec2(WIDTH, WINDOW_HEIGHT / 2));
+		ImGui::SetNextWindowPos(ImVec2(WINDOW_WIDTH - WIDTH, 18));
 
 		ImGui::Begin("Layers", &SHOW_GUI, ImGuiWindowFlags_NoResize);
 		{
+			if (ImGui::CollapsingHeader("Material")) {
+				ImGui::SliderFloat("Shininess", &scene.currentLayer->material.shininess, 1.0f, 256.0f);
+				ImGui::SliderFloat("AmbInt", &scene.currentLayer->material.ambInt, 0.0f, 1.0f);
+				ImGui::SliderFloat("DifInt", &scene.currentLayer->material.difInt, 0.0f, 1.0f);
+				ImGui::SliderFloat("SpecInt", &scene.currentLayer->material.specInt, 0.0f, 1.0f);
+			}
+
 			//Button to create a new Layer
 			if (ImGui::Button("New Layer")) {
 				if (scene.lastActiveLayer < scene.layers.end()) {
