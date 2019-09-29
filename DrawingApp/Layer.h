@@ -138,7 +138,18 @@ inline void Layer::lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, s
 {
 	sf::RenderTexture renderTex;
 	renderTex.create(width, height);
-	renderTex.clear(sf::Color((**brush).currentColor.r, (**brush).currentColor.g, (**brush).currentColor.b, 0));
+
+	switch (DRAWING_STATE)
+	{
+	case ALPHA:
+		renderTex.clear(sf::Color((**brush).currentColor.r, (**brush).currentColor.g, (**brush).currentColor.b, 0));
+		break;
+	case NORMAL:
+		renderTex.clear(sf::Color((**brush).currentNormal.r, (**brush).currentNormal.g, (**brush).currentNormal.b, 0));
+		break;
+	default:
+		break;
+	}
 
 	(**brush).setSpriteColor();
 	sf::Vector2f offset2f;

@@ -50,7 +50,7 @@ void mainRenderLoop()
 
 		scene.drawLowerLayers();
 		mainWindowDrawing();
-		scene.renderDrawingLayer();
+		scene.drawCurrentLayer();
 		scene.drawUpperLayers();
 
 		dragLayers();

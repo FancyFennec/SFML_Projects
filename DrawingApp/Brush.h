@@ -128,11 +128,25 @@ public:
 	}
 
 	void setSpriteColor(){
-		sprite.setColor(sf::Color(
-			currentColor.r,
-			currentColor.g,
-			currentColor.b,
-			 useFlowPress? minFlow + pressure * (maxFlow - minFlow) : maxFlow));
+		switch (DRAWING_STATE)
+		{
+		case ALPHA:
+			sprite.setColor(sf::Color(
+				currentColor.r,
+				currentColor.g,
+				currentColor.b,
+				useFlowPress ? minFlow + pressure * (maxFlow - minFlow) : maxFlow));
+			break;
+		case NORMAL:
+			sprite.setColor(sf::Color(
+				currentNormal.r,
+				currentNormal.g,
+				currentNormal.b,
+				useFlowPress ? minFlow + pressure * (maxFlow - minFlow) : maxFlow));
+			break;
+		default:
+			break;
+		}
 	}
 
 	void resetSpriteColor() {

@@ -55,13 +55,12 @@ public:
 	}
 
 	void drawLowerLayers();
+	void drawCurrentLayer();
 	void drawUpperLayers();
 	void resetLayerSprites();
 	unsigned int getLayerDistance(std::vector<Layer>::iterator iter) { return (unsigned int)std::distance(layers.begin(), iter); }
 	unsigned int getLayerDistance() { return getLayerDistance(currentLayer); }
 	unsigned int getSize() { return getLayerDistance(lastActiveLayer); }
-	
-	void renderDrawingLayer();
 
 private:
 	sf::Image clearingImage;
@@ -117,6 +116,33 @@ inline void Scene::drawLowerLayers()
 		mainSprite.setTexture(mainRenderTex.getTexture());
 		mainWindow.draw(mainSprite, rs);
 	}
+}
+
+inline void Scene::drawCurrentLayer() {
+	sf::RenderTexture rTex;
+	sf::Texture newTex;
+	rTex.create(width, height);
+	rTex.clear(sf::Color(255, 255, 255, 0));
+
+
+	if (DRAWING_STATE == ALPHA) {
+		alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
+		alphaBlendingShader.setUniform("texture2", drawingLayer.tex);
+		alphaBlendingShader.setUniform("alpha", (**currentBrush).opacity / 255.0f);
+		rTex.draw(currentLayer->sprite, alphaBlendingRState);
+		rTex.display();
+		newTex = rTex.getTexture(); //If we don't do this step the texture is upside down
+	}
+
+	sf::RenderStates renderState;
+	renderState.transform.translate(sf::Vector2f(currentLayer->offset));
+
+	currentLayer->setRenderUnifroms(lightSource, DRAWING_STATE == ALPHA ? newTex : currentLayer->tex);
+	mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
+
+	mainRenderTex.display();
+	mainSprite.setTexture(mainRenderTex.getTexture());
+	mainWindow.draw(mainSprite, renderState);
 }
 
 inline void Scene::drawUpperLayers()
@@ -220,48 +246,3 @@ inline void Scene::saveBrushesToJSON()
 	o << brushesJson << std::endl;
 }
 
-inline void Scene::renderDrawingLayer() {
-	sf::RenderTexture rTex;
-	rTex.create(width, height);
-	rTex.clear(sf::Color(255, 255, 255, 0));
-
-	alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
-	alphaBlendingShader.setUniform("texture2", drawingLayer.tex);
-	alphaBlendingShader.setUniform("alpha", (**currentBrush).opacity / 255.0f);
-
-	switch (DRAWING_STATE) {
-	case(ALPHA): {
-		rTex.draw(currentLayer->sprite, alphaBlendingRState);
-		break;
-	}
-	case(NORMAL): {
-		rTex.draw(currentLayer->sprite, normalBlendingRState);
-		break;
-	}
-	}
-
-	rTex.display();
-
-	sf::Texture newTex = rTex.getTexture();
-
-
-	sf::RenderStates renderState;
-	renderState.transform.translate(sf::Vector2f(currentLayer->offset));
-
-	mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
-	mainRenderShader.setUniform("layerTex", newTex);
-
-	mainRenderShader.setUniform("lightPos", lightSource.pos);
-	mainRenderShader.setUniform("lightCol", lightSource.col);
-
-	mainRenderShader.setUniform("shininess", currentLayer->material.shininess);
-	mainRenderShader.setUniform("specInt", currentLayer->material.specInt);
-	mainRenderShader.setUniform("ambInt", currentLayer->material.ambInt);
-	mainRenderShader.setUniform("difInt", currentLayer->material.difInt);
-
-	mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
-
-	mainRenderTex.display();
-	mainSprite.setTexture(mainRenderTex.getTexture());
-	mainWindow.draw(mainSprite, renderState);
-}
