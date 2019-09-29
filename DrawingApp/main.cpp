@@ -49,62 +49,17 @@ void mainRenderLoop()
 {
 	while (mainWindow.isOpen())
 	{
-		sf::RenderStates renderState;
-		renderState.transform.translate(sf::Vector2f(scene.currentLayer->offset));
-
 		mainWindow.clear(sf::Color(0, 0, 0, 0));
 		mainRenderTex.clear();
-		sf::Image image;
-		image.create(SCENE_WIDTH, SCENE_WIDTH, sf::Color::White);
-		sf::Texture tex;
-		tex.loadFromImage(image);
 		
 		ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
-		for (auto iter = scene.layers.begin(); iter < scene.currentLayer; std::advance(iter, 1)) {
-			mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
-			mainRenderShader.setUniform("layerTex", iter == scene.layers.begin() ? tex : iter->tex);
-
-			mainRenderShader.setUniform("lightPos", scene.lightSource.pos);
-			mainRenderShader.setUniform("lightCol", scene.lightSource.col);
-
-			mainRenderShader.setUniform("shininess", iter->material.shininess);
-			mainRenderShader.setUniform("specInt", iter->material.specInt);
-			mainRenderShader.setUniform("ambInt", iter->material.ambInt);
-			mainRenderShader.setUniform("difInt", iter->material.difInt);
-
-			mainRenderTex.draw(scene.layers.begin()->sprite, mainRenderState);
-
-			mainRenderTex.display();
-			mainSprite.setTexture(mainRenderTex.getTexture());
-			mainWindow.draw(mainSprite, renderState);
-		}
-		
-		dragLayers();
+		scene.drawLowerLayers();
 		mainWindowDrawing();
+		scene.renderDrawingLayer();
+		scene.drawUpperLayers();
 
-		if (scene.currentLayer != scene.lastActiveLayer) {
-			for (auto iter = std::next(scene.currentLayer); iter <= scene.lastActiveLayer; std::advance(iter, 1)) {
-				mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
-				mainRenderShader.setUniform("layerTex", iter->tex);
-
-				mainRenderShader.setUniform("lightPos", scene.lightSource.pos);
-				mainRenderShader.setUniform("lightCol", scene.lightSource.col);
-
-				mainRenderShader.setUniform("shininess", iter->material.shininess);
-				mainRenderShader.setUniform("specInt", iter->material.specInt);
-				mainRenderShader.setUniform("ambInt", iter->material.ambInt);
-				mainRenderShader.setUniform("difInt", iter->material.difInt);
-
-				mainRenderTex.draw(scene.layers.begin()->sprite, mainRenderState);
-
-				mainRenderTex.display();
-				mainSprite.setTexture(mainRenderTex.getTexture());
-				mainWindow.draw(mainSprite, renderState);
-			}
-		}
-
-		
+		dragLayers();
 
 		samplePenPressure(); //Needs to be done before processing the events
 		while (mainWindow.pollEvent(event))
@@ -186,7 +141,6 @@ void mainWindowDrawing()
 			}
 		}
 	}
-	scene.renderDrawingLayer();
 }
 
 bool notDragingScene()

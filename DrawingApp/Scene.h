@@ -54,6 +54,8 @@ public:
 		saveBrushesToJSON();
 	}
 
+	void drawLowerLayers();
+	void drawUpperLayers();
 	void resetLayerSprites();
 	unsigned int getLayerDistance(std::vector<Layer>::iterator iter) { return (unsigned int)std::distance(layers.begin(), iter); }
 	unsigned int getLayerDistance() { return getLayerDistance(currentLayer); }
@@ -88,6 +90,63 @@ inline void Scene::initialize()
 	lastActiveLayer = currentLayer;
 
 	loadBrushesFromJSON();
+}
+
+inline void Scene::drawLowerLayers()
+{
+	sf::RenderStates rs;
+	rs.transform.translate(sf::Vector2f(currentLayer->offset));
+
+	sf::Image image;
+	image.create(width, height, sf::Color::White);
+	sf::Texture tex;
+	tex.loadFromImage(image);
+
+	for (auto iter = layers.begin(); iter < currentLayer; std::advance(iter, 1)) {
+		mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
+		mainRenderShader.setUniform("layerTex", iter == layers.begin() ? tex : iter->tex);
+
+		mainRenderShader.setUniform("lightPos", lightSource.pos);
+		mainRenderShader.setUniform("lightCol", lightSource.col);
+
+		mainRenderShader.setUniform("shininess", iter->material.shininess);
+		mainRenderShader.setUniform("specInt", iter->material.specInt);
+		mainRenderShader.setUniform("ambInt", iter->material.ambInt);
+		mainRenderShader.setUniform("difInt", iter->material.difInt);
+
+		mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
+
+		mainRenderTex.display();
+		mainSprite.setTexture(mainRenderTex.getTexture());
+		mainWindow.draw(mainSprite, rs);
+	}
+}
+
+inline void Scene::drawUpperLayers()
+{
+	sf::RenderStates rs;
+	rs.transform.translate(sf::Vector2f(currentLayer->offset));
+
+	if (currentLayer != lastActiveLayer) {
+		for (auto iter = std::next(currentLayer); iter <= lastActiveLayer; std::advance(iter, 1)) {
+			mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
+			mainRenderShader.setUniform("layerTex", iter->tex);
+
+			mainRenderShader.setUniform("lightPos", lightSource.pos);
+			mainRenderShader.setUniform("lightCol", lightSource.col);
+
+			mainRenderShader.setUniform("shininess", iter->material.shininess);
+			mainRenderShader.setUniform("specInt", iter->material.specInt);
+			mainRenderShader.setUniform("ambInt", iter->material.ambInt);
+			mainRenderShader.setUniform("difInt", iter->material.difInt);
+
+			mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
+
+			mainRenderTex.display();
+			mainSprite.setTexture(mainRenderTex.getTexture());
+			mainWindow.draw(mainSprite, rs);
+		}
+	}
 }
 
 inline void Scene::resetLayerSprites()
