@@ -34,6 +34,8 @@ public:
 		initialize(color);
 	}
 
+	void setRenderUnifroms(LightSource& lightSource);
+	void setRenderUnifroms(LightSource& lightSource, sf::Texture& texture);
 	void clearLayer();
 	void blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush);
 	void drawLayerinWindow();
@@ -66,6 +68,34 @@ inline void Layer::initialize(sf::Color& color) {
 		isOffsetSet = true;
 	}
 	rTex.create(width, height);
+}
+
+inline void Layer::setRenderUnifroms(LightSource& lightSource)
+{
+	mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
+	mainRenderShader.setUniform("layerTex", tex);
+
+	mainRenderShader.setUniform("lightPos", lightSource.pos);
+	mainRenderShader.setUniform("lightCol", lightSource.col);
+
+	mainRenderShader.setUniform("shininess", material.shininess);
+	mainRenderShader.setUniform("specInt", material.specInt);
+	mainRenderShader.setUniform("ambInt", material.ambInt);
+	mainRenderShader.setUniform("difInt", material.difInt);
+}
+
+inline void Layer::setRenderUnifroms(LightSource & lightSource, sf::Texture & texture)
+{
+	mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
+	mainRenderShader.setUniform("layerTex", texture);
+
+	mainRenderShader.setUniform("lightPos", lightSource.pos);
+	mainRenderShader.setUniform("lightCol", lightSource.col);
+
+	mainRenderShader.setUniform("shininess", material.shininess);
+	mainRenderShader.setUniform("specInt", material.specInt);
+	mainRenderShader.setUniform("ambInt", material.ambInt);
+	mainRenderShader.setUniform("difInt", material.difInt);
 }
 
 inline void Layer::clearLayer() {

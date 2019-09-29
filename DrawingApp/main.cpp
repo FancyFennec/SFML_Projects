@@ -8,7 +8,7 @@
 #include "EventHandling.h"
 #include "GlobalVariables.h"
 
-void createMainWindow();
+void initializeGlobalVariables();
 void mainRenderLoop();
 void sampleMousePositions();
 void samplePenPressure();
@@ -31,13 +31,7 @@ sf::Thread positionSamplingLoop(&sampleMousePositions);
 
 int main() {
 	if (!loadShaders()) return -1;
-	normalTex.loadFromFile("normalColorPicker.png");
-	samplingTexture.create(WINDOW_WIDTH, WINDOW_HEIGHT);
-
-	createMainWindow();
-	mainRenderTex.create(SCENE_WIDTH, SCENE_HEIGHT);
-	CommandManager::initialize(scene);
-	ImGui::SFML::Init(mainWindow);
+	initializeGlobalVariables();
 
 	positionSamplingLoop.launch();
 	mainRenderLoop();
@@ -153,8 +147,12 @@ bool isCursorHoveringLayer()
 	return mainWindow.hasFocus() && !ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive();
 }
 
-void createMainWindow()
+void initializeGlobalVariables()
 {
+	normalTex.loadFromFile("normalColorPicker.png");
+	samplingTexture.create(WINDOW_WIDTH, WINDOW_HEIGHT);
+	mainRenderTex.create(SCENE_WIDTH, SCENE_HEIGHT);
+
 	if (USE_FULLSCREEN) {
 		getDesktopResolution(WINDOW_WIDTH, WINDOW_HEIGHT);
 		mainWindow.create(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Drawing App", sf::Style::Fullscreen);
@@ -165,4 +163,7 @@ void createMainWindow()
 
 	mainWindow.setMouseCursorVisible(false);
 	mainWindow.setFramerateLimit(FPS);
+
+	CommandManager::initialize(scene);
+	ImGui::SFML::Init(mainWindow);
 }

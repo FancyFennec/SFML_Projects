@@ -64,6 +64,9 @@ public:
 	void renderDrawingLayer();
 
 private:
+	sf::Image clearingImage;
+	sf::Texture clearingTexture;
+
 	void initialize();
 	void loadBrushesFromJSON();
 	static sf::Shader renderShader;
@@ -77,6 +80,9 @@ sf::RenderStates Scene::renderState(&renderShader);
 
 inline void Scene::initialize()
 {
+	clearingImage.create(width, height, sf::Color::White);
+	clearingTexture.loadFromImage(clearingImage);
+
 	drawingLayer.offset = sf::Vector2i(WINDOW_WIDTH / 2 - width / 2, WINDOW_HEIGHT / 2 - height / 2);
 	layers.reserve(MAX_LAYERS + 1); // Reserve space for 20 Layers
 	layers.push_back(Layer(width, height, sf::Color(127, 127, 255))); // Background Layer
@@ -97,23 +103,14 @@ inline void Scene::drawLowerLayers()
 	sf::RenderStates rs;
 	rs.transform.translate(sf::Vector2f(currentLayer->offset));
 
-	sf::Image image;
-	image.create(width, height, sf::Color::White);
-	sf::Texture tex;
-	tex.loadFromImage(image);
-
 	for (auto iter = layers.begin(); iter < currentLayer; std::advance(iter, 1)) {
-		mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
-		mainRenderShader.setUniform("layerTex", iter == layers.begin() ? tex : iter->tex);
 
-		mainRenderShader.setUniform("lightPos", lightSource.pos);
-		mainRenderShader.setUniform("lightCol", lightSource.col);
-
-		mainRenderShader.setUniform("shininess", iter->material.shininess);
-		mainRenderShader.setUniform("specInt", iter->material.specInt);
-		mainRenderShader.setUniform("ambInt", iter->material.ambInt);
-		mainRenderShader.setUniform("difInt", iter->material.difInt);
-
+		if (iter == layers.begin()) {
+			iter->setRenderUnifroms(lightSource, clearingTexture); //The first layer's texture is the normal map
+		}
+		else {
+			iter->setRenderUnifroms(lightSource);
+		}
 		mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
 
 		mainRenderTex.display();
@@ -129,17 +126,7 @@ inline void Scene::drawUpperLayers()
 
 	if (currentLayer != lastActiveLayer) {
 		for (auto iter = std::next(currentLayer); iter <= lastActiveLayer; std::advance(iter, 1)) {
-			mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
-			mainRenderShader.setUniform("layerTex", iter->tex);
-
-			mainRenderShader.setUniform("lightPos", lightSource.pos);
-			mainRenderShader.setUniform("lightCol", lightSource.col);
-
-			mainRenderShader.setUniform("shininess", iter->material.shininess);
-			mainRenderShader.setUniform("specInt", iter->material.specInt);
-			mainRenderShader.setUniform("ambInt", iter->material.ambInt);
-			mainRenderShader.setUniform("difInt", iter->material.difInt);
-
+			iter->setRenderUnifroms(lightSource);
 			mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
 
 			mainRenderTex.display();
