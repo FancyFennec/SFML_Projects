@@ -30,8 +30,9 @@ Scene scene(SCENE_WIDTH, SCENE_HEIGHT);
 sf::Thread positionSamplingLoop(&sampleMousePositions);
 
 int main() {
-	
 	if (!loadShaders()) return -1;
+	normalTex.loadFromFile("normalColorPicker.png");
+	samplingTexture.create(WINDOW_WIDTH, WINDOW_HEIGHT);
 
 	createMainWindow();
 	mainRenderTex.create(SCENE_WIDTH, SCENE_HEIGHT);
