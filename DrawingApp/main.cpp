@@ -186,9 +186,9 @@ void mainWindowDrawing()
 					CursorBuffer::reset(positionsToBeRemoved);
 				}
 			}
-			scene.renderDrawingLayer();
 		}
 	}
+	scene.renderDrawingLayer();
 }
 
 bool notDragingScene()

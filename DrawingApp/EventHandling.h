@@ -42,6 +42,7 @@ void mainWindowEventHandling(Scene& scene)
 				}
 				}
 				
+				scene.drawingLayer.clearLayer();
 				setMouseNotHeld();
 			}
 		}
@@ -122,7 +123,6 @@ void lmbPressed(Scene& scene)
 {
 	if (!ImGui::IsMouseHoveringAnyWindow() && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive()) {
 		CommandManager::clearActions();
-		scene.drawingLayer.clearLayer();
 
 		if (isAltHeld()) {
 			(*scene.currentBrush)->currentColor = getSampledColor();
