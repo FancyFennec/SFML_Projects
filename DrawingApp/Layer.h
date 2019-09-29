@@ -13,9 +13,9 @@ public:
 	unsigned int width;
 	unsigned int height;
 
+	Material material;
 	sf::Texture tex;
 	sf::Sprite sprite;
-	Material material;
 
 	static bool isOffsetSet;
 	bool useOffset = true;
@@ -57,7 +57,8 @@ bool Layer::isOffsetSet = false;
 sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 sf::RenderTexture Layer::rTex;
 
-inline void Layer::initialize(sf::Color& color) {
+inline void Layer::initialize(sf::Color& color) 
+{
 	sf::Image image;
 	image.create(width, height, color);
 	tex.loadFromImage(image);
@@ -98,15 +99,16 @@ inline void Layer::setRenderUnifroms(LightSource & lightSource, sf::Texture & te
 	mainRenderShader.setUniform("difInt", material.difInt);
 }
 
-inline void Layer::clearLayer() {
+inline void Layer::clearLayer() 
+{
 	sf::Image image;
 	image.create(width, height, sf::Color(255, 255, 255, 0));
 	tex.update(image);
 	sprite.setTexture(tex);
 }
 
-inline void Layer::blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush) {
-
+inline void Layer::blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush) 
+{
 	switch (DRAWING_STATE) {
 	case(ALPHA): {
 		alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
@@ -133,7 +135,8 @@ inline void Layer::blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iter
 }
 
 
-inline void Layer::drawLayerinWindow() {
+inline void Layer::drawLayerinWindow() 
+{
 	mainWindow.draw(sprite);
 }
 

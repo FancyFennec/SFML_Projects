@@ -6,8 +6,8 @@ static bool SHOW_GUI = true;
 static bool USE_FULLSCREEN = false;
 static unsigned int FPS = 30;
 
-static int WINDOW_WIDTH = 1600;
-static int WINDOW_HEIGHT = 1000;
+static int WINDOW_WIDTH = 1200;
+static int WINDOW_HEIGHT = 800;
 
 const static int MAX_ACTIONS = 10;
 const static int MAX_LAYERS = 20;

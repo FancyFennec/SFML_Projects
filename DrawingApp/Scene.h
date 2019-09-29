@@ -22,22 +22,15 @@ public:
 	unsigned int width;
 	unsigned int height;
 
+	LightSource lightSource;
+
 	Layer normalLayer;
 	Layer drawingLayer;
+
 	std::vector<Layer> layers = {};
 	std::vector<Layer>::iterator currentLayer;
 	std::vector<Layer>::iterator lastActiveLayer;
-	LightSource lightSource;
 	
-	//Auxilliary variables for the brush
-	float movedDistance = 0; // keeps track of how much the brush has moved since the last render cicle
-	int brushWidth = 256; //Size of the brush image
-	
-	//Brush settings for the current brush
-	float brushSize = 0.3f;
-	float stepsize = 2.0f;
-	int opacity = 100;
-
 	std::vector<BrushPntr> brushes;
 	std::vector<BrushPntr>::iterator currentBrush;
 
@@ -66,19 +59,16 @@ public:
 	unsigned int getSize() { return getLayerDistance(lastActiveLayer); }
 
 private:
+	const int BRUSH_WIDTH = 256; //Size of the brush image
+
 	sf::Image clearingImage;
 	sf::Texture clearingTexture;
 
 	void initialize();
 	void loadBrushesFromJSON();
-	static sf::Shader renderShader;
-	static sf::RenderStates renderState;
 	void clearBrushDirectory(); 
 	void saveBrushesToJSON();
 };
-
-sf::Shader Scene::renderShader;
-sf::RenderStates Scene::renderState(&renderShader);
 
 inline void Scene::initialize()
 {
@@ -201,7 +191,7 @@ inline void Scene::loadBrushesFromJSON()
 	inputStream >> brushJson;
 	for (auto& brush : brushJson["Brushes"]) {
 		brushes.push_back(std::make_unique<Brush>(
-			brushWidth,
+			BRUSH_WIDTH,
 			std::string(BRUSH_DIRECTORY).append(brush["BrushName"].get<std::string>()).append(".png").data()
 			)
 		);
@@ -223,7 +213,7 @@ inline void Scene::loadBrushesFromJSON()
 
 	currentBrush = brushes.begin();
 	(*currentBrush)->synchronizeBrushColor();
-	(*currentBrush)->setSpriteSize(brushSize);
+	(*currentBrush)->setSpriteSize();
 }
 
 inline void Scene::clearBrushDirectory()

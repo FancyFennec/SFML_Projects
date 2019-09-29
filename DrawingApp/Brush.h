@@ -130,9 +130,8 @@ public:
 		currentColor.b = (sf::Uint8)(guiBrushColor[2] * 255);
 	}
 
-	void setSpriteSize(float brushSize) {
-		this->maxSize = brushSize;
-		sprite.setScale(sf::Vector2f(brushSize, brushSize));
+	void setSpriteSize() {
+		sprite.setScale(sf::Vector2f(this->maxSize, this->maxSize));
 		sprite.setOrigin(sprite.getLocalBounds().width / 2, sprite.getLocalBounds().height / 2);
 	}
 
