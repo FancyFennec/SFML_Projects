@@ -30,11 +30,8 @@ Scene scene(SCENE_WIDTH, SCENE_HEIGHT);
 sf::Thread positionSamplingLoop(&sampleMousePositions);
 
 int main() {
-	if (!mainRenderShader.loadFromFile(RENDER_SHADER_PATH, sf::Shader::Fragment)) {
-		std::cout << "Could not load RenderShader" << std::endl;
-		ARE_SHADERS_LOADED = false;
-	}
-	if (!ARE_SHADERS_LOADED) return -1;
+	
+	if (!loadShaders()) return -1;
 
 	createMainWindow();
 	mainRenderTex.create(SCENE_WIDTH, SCENE_HEIGHT);

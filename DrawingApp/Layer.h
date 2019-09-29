@@ -42,13 +42,8 @@ public:
 
 private:
 	static sf::RenderTexture rTex;
-	static sf::Shader alphaBlendingShader;
-	static sf::Shader normalBlendingShader;
-	static sf::RenderStates alphaBlendingRState;
-	static sf::RenderStates normalBlendingRState;
 
 	void initialize(sf::Color& color);
-	void loadShaders();
 	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2);
 	float getSScatter(std::vector<BrushPntr>::iterator& brush);
 	float getPScatter(std::vector<BrushPntr>::iterator& brush);
@@ -59,10 +54,6 @@ private:
 bool Layer::isOffsetSet = false;
 sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 sf::RenderTexture Layer::rTex;
-sf::Shader Layer::alphaBlendingShader;
-sf::Shader Layer::normalBlendingShader;
-sf::RenderStates Layer::alphaBlendingRState(&alphaBlendingShader);
-sf::RenderStates Layer::normalBlendingRState(&normalBlendingShader);
 
 inline void Layer::initialize(sf::Color& color) {
 	sf::Image image;
@@ -75,27 +66,6 @@ inline void Layer::initialize(sf::Color& color) {
 		isOffsetSet = true;
 	}
 	rTex.create(width, height);
-
-	loadShaders();
-}
-
-inline void Layer::loadShaders()
-{
-	if (!ARE_SHADERS_LOADED) {
-		if (!alphaBlendingShader.loadFromFile(ALPHA_BLENDING_SHADER_PATH, sf::Shader::Fragment)) {
-			std::cout << "Could not load ALphaBlendingShader" << std::endl;
-		}
-		else {
-			if (!normalBlendingShader.loadFromFile(NORMAL_BLENDING_SHADER_PATH, sf::Shader::Fragment)) {
-				std::cout << "Could not load NormalBlendingShader" << std::endl;
-			}
-			else {
-				ARE_SHADERS_LOADED = true;
-				alphaBlendingRState.blendMode = sf::BlendNone;
-				normalBlendingRState.blendMode = sf::BlendNone;
-			}
-		}
-	}
 }
 
 inline void Layer::clearLayer() {
