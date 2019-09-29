@@ -175,10 +175,47 @@ inline void Scene::saveBrushesToJSON()
 }
 
 inline void Scene::renderDrawingLayer() {
+	sf::RenderTexture rTex;
+	rTex.create(width, height);
+	rTex.clear(sf::Color(255, 255, 255, 0));
 
-	sf::RenderStates state;
-	state.transform.translate(sf::Vector2f(currentLayer->offset));
-	drawingLayer.sprite.setColor(sf::Color(255, 255, 255, (*currentBrush)->opacity));
-	mainWindow.draw(drawingLayer.sprite, state);
-	drawingLayer.sprite.setColor(sf::Color(255, 255, 255, 255));
+	alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
+	alphaBlendingShader.setUniform("texture2", drawingLayer.tex);
+	alphaBlendingShader.setUniform("alpha", (**currentBrush).opacity / 255.0f);
+
+	switch (DRAWING_STATE) {
+	case(ALPHA): {
+		rTex.draw(currentLayer->sprite, alphaBlendingRState);
+		break;
+	}
+	case(NORMAL): {
+		rTex.draw(currentLayer->sprite, normalBlendingRState);
+		break;
+	}
+	}
+
+	rTex.display();
+
+	sf::Texture newTex = rTex.getTexture();
+
+
+	sf::RenderStates renderState;
+	renderState.transform.translate(sf::Vector2f(currentLayer->offset));
+
+	mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
+	mainRenderShader.setUniform("layerTex", newTex);
+
+	mainRenderShader.setUniform("lightPos", lightSource.pos);
+	mainRenderShader.setUniform("lightCol", lightSource.col);
+
+	mainRenderShader.setUniform("shininess", currentLayer->material.shininess);
+	mainRenderShader.setUniform("specInt", currentLayer->material.specInt);
+	mainRenderShader.setUniform("ambInt", currentLayer->material.ambInt);
+	mainRenderShader.setUniform("difInt", currentLayer->material.difInt);
+
+	mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
+
+	mainRenderTex.display();
+	mainSprite.setTexture(mainRenderTex.getTexture());
+	mainWindow.draw(mainSprite, renderState);
 }

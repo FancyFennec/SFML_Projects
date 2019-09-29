@@ -49,10 +49,8 @@ void mainRenderLoop()
 {
 	while (mainWindow.isOpen())
 	{
-		sf::RenderStates renderState(&mainRenderShader);
-		sf::RenderStates mainRenderState;
-		mainRenderState.transform.translate(sf::Vector2f(scene.currentLayer->offset));
-		renderState.blendMode = sf::BlendNone;
+		sf::RenderStates renderState;
+		renderState.transform.translate(sf::Vector2f(scene.currentLayer->offset));
 
 		mainWindow.clear(sf::Color(0, 0, 0, 0));
 		mainRenderTex.clear();
@@ -63,7 +61,7 @@ void mainRenderLoop()
 		
 		ImGui::SFML::Update(mainWindow, deltaClock.restart());
 
-		for (auto iter = scene.layers.begin(); iter <= scene.currentLayer; std::advance(iter, 1)) {
+		for (auto iter = scene.layers.begin(); iter < scene.currentLayer; std::advance(iter, 1)) {
 			mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
 			mainRenderShader.setUniform("layerTex", iter == scene.layers.begin() ? tex : iter->tex);
 
@@ -75,11 +73,11 @@ void mainRenderLoop()
 			mainRenderShader.setUniform("ambInt", iter->material.ambInt);
 			mainRenderShader.setUniform("difInt", iter->material.difInt);
 
-			mainRenderTex.draw(scene.layers.begin()->sprite, renderState);
+			mainRenderTex.draw(scene.layers.begin()->sprite, mainRenderState);
 
 			mainRenderTex.display();
 			mainSprite.setTexture(mainRenderTex.getTexture());
-			mainWindow.draw(mainSprite, mainRenderState);
+			mainWindow.draw(mainSprite, renderState);
 		}
 		
 		dragLayers();
@@ -98,11 +96,11 @@ void mainRenderLoop()
 				mainRenderShader.setUniform("ambInt", iter->material.ambInt);
 				mainRenderShader.setUniform("difInt", iter->material.difInt);
 
-				mainRenderTex.draw(scene.layers.begin()->sprite, renderState);
+				mainRenderTex.draw(scene.layers.begin()->sprite, mainRenderState);
 
 				mainRenderTex.display();
 				mainSprite.setTexture(mainRenderTex.getTexture());
-				mainWindow.draw(mainSprite, mainRenderState);
+				mainWindow.draw(mainSprite, renderState);
 			}
 		}
 

@@ -6,8 +6,11 @@
 static DrawingState DRAWING_STATE = ALPHA;
 sf::Shader alphaBlendingShader;
 sf::Shader normalBlendingShader;
+sf::Shader mainRenderShader;
 sf::RenderStates alphaBlendingRState(&alphaBlendingShader);
 sf::RenderStates normalBlendingRState(&normalBlendingShader);
+sf::RenderStates mainRenderState(&mainRenderShader);
+
 static const std::string ALPHA_BLENDING_SHADER_PATH = "./alpha_blending_shader.frag";
 static const std::string NORMAL_BLENDING_SHADER_PATH = "./normal_blending_shader.frag";
 static const std::string RENDER_SHADER_PATH = "./render_shader.frag";
@@ -21,7 +24,6 @@ static sf::Clock clickClock; //For double click timing
 static sf::RenderWindow mainWindow;
 static sf::Event event;
 
-sf::Shader mainRenderShader;
 sf::RenderTexture mainRenderTex;
 sf::Sprite mainSprite;
 
@@ -50,6 +52,7 @@ inline bool loadShaders()
 
 	alphaBlendingRState.blendMode = sf::BlendNone;
 	normalBlendingRState.blendMode = sf::BlendNone;
+	mainRenderState.blendMode = sf::BlendNone;
 
 	return returnValue;
 }
