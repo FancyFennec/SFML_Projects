@@ -38,9 +38,9 @@ struct Material {
 	float difInt;
 
 	Material() {
-		shininess = 32;
-		specInt = 0.0f;
-		ambInt = 0.0f;
+		shininess = 128;
+		specInt = 0.2f;
+		ambInt = 0.2f;
 		difInt = 1.0f;
 	}
 

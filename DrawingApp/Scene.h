@@ -113,8 +113,8 @@ inline void Scene::drawLowerLayers()
 		mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
 
 		mainRenderTex.display();
-		mainSprite.setTexture(mainRenderTex.getTexture());
-		mainWindow.draw(mainSprite, rs);
+		mainRenderSprite.setTexture(mainRenderTex.getTexture());
+		mainWindow.draw(mainRenderSprite, rs);
 	}
 }
 
@@ -125,14 +125,15 @@ inline void Scene::drawCurrentLayer() {
 	rTex.clear(sf::Color(255, 255, 255, 0));
 
 
-	if (DRAWING_STATE == ALPHA) {
+	if (DRAWING_STATE == ALPHA) { //In alpha drawing state we first alpha blend the drawing layer with the current layer
 		alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
 		alphaBlendingShader.setUniform("texture2", drawingLayer.tex);
 		alphaBlendingShader.setUniform("alpha", (**currentBrush).opacity / 255.0f);
+
 		rTex.draw(currentLayer->sprite, alphaBlendingRState);
 		rTex.display();
 		newTex = rTex.getTexture(); //If we don't do this step the texture is upside down
-	}
+	} // else we just draw the current Layer
 
 	sf::RenderStates renderState;
 	renderState.transform.translate(sf::Vector2f(currentLayer->offset));
@@ -141,8 +142,8 @@ inline void Scene::drawCurrentLayer() {
 	mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
 
 	mainRenderTex.display();
-	mainSprite.setTexture(mainRenderTex.getTexture());
-	mainWindow.draw(mainSprite, renderState);
+	mainRenderSprite.setTexture(mainRenderTex.getTexture());
+	mainWindow.draw(mainRenderSprite, renderState);
 }
 
 inline void Scene::drawUpperLayers()
@@ -156,8 +157,8 @@ inline void Scene::drawUpperLayers()
 			mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
 
 			mainRenderTex.display();
-			mainSprite.setTexture(mainRenderTex.getTexture());
-			mainWindow.draw(mainSprite, rs);
+			mainRenderSprite.setTexture(mainRenderTex.getTexture());
+			mainWindow.draw(mainRenderSprite, rs);
 		}
 	}
 }

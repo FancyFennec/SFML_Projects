@@ -25,7 +25,7 @@ static sf::RenderWindow mainWindow;
 static sf::Event event;
 
 sf::RenderTexture mainRenderTex;
-sf::Sprite mainSprite;
+sf::Sprite mainRenderSprite;
 
 sf::Texture normalTex;
 sf::Texture samplingTexture;

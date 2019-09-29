@@ -80,19 +80,19 @@ void mainWindowEventHandling(Scene& scene)
 			break;
 		}
 		case(sf::Keyboard::Up): {
-			scene.currentLayer->offset += sf::Vector2i(0, -10);
+			scene.lightSource.movePos(sf::Vector2f(0,-30));
 			break;
 		}
 		case(sf::Keyboard::Down): {
-			scene.currentLayer->offset += sf::Vector2i(0, 10);
+			scene.lightSource.movePos(sf::Vector2f(0, 30));
 			break;
 		}
 		case(sf::Keyboard::Right): {
-			scene.currentLayer->offset += sf::Vector2i(10, 0);
+			scene.lightSource.movePos(sf::Vector2f(30, 0));
 			break;
 		}
 		case(sf::Keyboard::Left): {
-			scene.currentLayer->offset += sf::Vector2i(-10, 0);
+			scene.lightSource.movePos(sf::Vector2f(-30, 0));
 			break;
 		}
 		case(sf::Keyboard::Escape): {
