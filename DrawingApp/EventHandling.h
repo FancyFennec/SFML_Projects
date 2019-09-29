@@ -37,7 +37,7 @@ void mainWindowEventHandling(Scene& scene)
 				}
 				case(NORMAL): {
 					sf::Texture oldTexture = scene.layers.begin()->tex;
-					scene.layers.begin()->blendlayers(scene.drawingLayer, scene.currentBrush);
+					scene.normalLayer.blendlayers(scene.drawingLayer, scene.currentBrush);
 					CommandManager::updateLayer(oldTexture);
 				}
 				}

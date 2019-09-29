@@ -106,7 +106,6 @@ inline void Layer::clearLayer() {
 }
 
 inline void Layer::blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush) {
-	rTex.clear(sf::Color(255, 255, 255, 0));
 
 	switch (DRAWING_STATE) {
 	case(ALPHA): {

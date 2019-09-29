@@ -25,10 +25,12 @@ static sf::RenderWindow mainWindow;
 static sf::Event event;
 
 sf::RenderTexture mainRenderTex;
+sf::Texture mainNormalTex;
+sf::Sprite mainNormalSprite;
 sf::Sprite mainRenderSprite;
 
-sf::Texture normalTex;
-sf::Texture samplingTexture;
+sf::Texture normalTex; // texture for the normal color picker
+sf::Texture samplingTexture; //texture used for sampling the normal color
 sf::Vector2i sampledPos;
 
 bool pickNormalValue = false;

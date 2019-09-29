@@ -22,6 +22,7 @@ public:
 	unsigned int width;
 	unsigned int height;
 
+	Layer normalLayer;
 	Layer drawingLayer;
 	std::vector<Layer> layers = {};
 	std::vector<Layer>::iterator currentLayer;
@@ -45,6 +46,7 @@ public:
 	Scene(unsigned int width, unsigned int height) :
 		width(width),
 		height(height),
+		normalLayer(Layer(width, height, sf::Color(127, 127, 255))),
 		drawingLayer(Layer(width, height)) {
 		initialize();
 	}
@@ -84,7 +86,7 @@ inline void Scene::initialize()
 
 	drawingLayer.offset = sf::Vector2i(WINDOW_WIDTH / 2 - width / 2, WINDOW_HEIGHT / 2 - height / 2);
 	layers.reserve(MAX_LAYERS + 1); // Reserve space for 20 Layers
-	layers.push_back(Layer(width, height, sf::Color(127, 127, 255))); // Background Layer
+	layers.push_back(Layer(width, height, sf::Color::White)); // Background Layer
 	for (int i = 0; i < MAX_LAYERS; i++) {
 		layers.push_back(Layer(width, height));
 		layers.back().clearLayer();
@@ -104,13 +106,8 @@ inline void Scene::drawLowerLayers()
 
 	for (auto iter = layers.begin(); iter < currentLayer; std::advance(iter, 1)) {
 
-		if (iter == layers.begin()) {
-			iter->setRenderUnifroms(lightSource, clearingTexture); //The first layer's texture is the normal map
-		}
-		else {
-			iter->setRenderUnifroms(lightSource);
-		}
-		mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
+		iter->setRenderUnifroms(lightSource);
+		mainRenderTex.draw(mainNormalSprite, mainRenderState);
 
 		mainRenderTex.display();
 		mainRenderSprite.setTexture(mainRenderTex.getTexture());
@@ -122,7 +119,6 @@ inline void Scene::drawCurrentLayer() {
 	sf::RenderTexture rTex;
 	sf::Texture newTex;
 	rTex.create(width, height);
-	rTex.clear(sf::Color(255, 255, 255, 0));
 
 
 	if (DRAWING_STATE == ALPHA) { //In alpha drawing state we first alpha blend the drawing layer with the current layer
@@ -139,7 +135,7 @@ inline void Scene::drawCurrentLayer() {
 	renderState.transform.translate(sf::Vector2f(currentLayer->offset));
 
 	currentLayer->setRenderUnifroms(lightSource, DRAWING_STATE == ALPHA ? newTex : currentLayer->tex);
-	mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
+	mainRenderTex.draw(mainNormalSprite, mainRenderState);
 
 	mainRenderTex.display();
 	mainRenderSprite.setTexture(mainRenderTex.getTexture());
@@ -154,7 +150,7 @@ inline void Scene::drawUpperLayers()
 	if (currentLayer != lastActiveLayer) {
 		for (auto iter = std::next(currentLayer); iter <= lastActiveLayer; std::advance(iter, 1)) {
 			iter->setRenderUnifroms(lightSource);
-			mainRenderTex.draw(layers.begin()->sprite, mainRenderState);
+			mainRenderTex.draw(mainNormalSprite, mainRenderState);
 
 			mainRenderTex.display();
 			mainRenderSprite.setTexture(mainRenderTex.getTexture());
