@@ -50,7 +50,6 @@ void brushGUI(Scene& scene)
 
 		if (ImGui::SmallButton("New Brush")) CreateNewBrush(scene);
 
-		// Draw list of all brushes
 		DrawBrushList(scene);
 		ImGui::End();
 

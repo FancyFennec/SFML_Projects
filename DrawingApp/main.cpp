@@ -14,7 +14,7 @@ void sampleMousePositions();
 void samplePenPressure();
 void sampleNormals();
 void dragLayers();
-void mainWindowDrawing();
+void drawingLoop();
 bool notDragingScene();
 bool isCursorHoveringLayer();
 
@@ -53,7 +53,7 @@ void mainRenderLoop()
 		scene.drawCurrentLayer();
 		scene.drawUpperLayers();
 
-		mainWindowDrawing();
+		drawingLoop();
 		dragLayers();
 
 		samplePenPressure(); //Needs to be done before processing the events
@@ -118,7 +118,7 @@ void dragLayers()
 	}
 }
 
-void mainWindowDrawing()
+void drawingLoop()
 {
 	if (isCursorHoveringLayer()) {
 		if (notDragingScene()) {

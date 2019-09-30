@@ -21,6 +21,7 @@ static sf::Clock deltaClock; //For imgui
 static sf::Clock clickClock; //For double click timing
 
 //Window initialisation
+POINT p;
 static sf::RenderWindow mainWindow;
 static sf::Event event;
 

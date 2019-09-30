@@ -35,7 +35,6 @@ void layerGUI(Scene& scene)
 
 			if (ImGui::Button("New Layer")) CreateNewLayer(scene);
 
-			layerNumber = scene.layers.size();
 			DrawLayerList(scene);
 		}
 		ImGui::End();
@@ -75,7 +74,8 @@ void LayerNamePopup(Scene & scene)
 
 void DrawLayerList(Scene & scene)
 {
-	// Draw list of all the layers
+	layerNumber = scene.layers.size();
+
 	sf::Color borderColor;
 	for (auto iter = scene.lastActiveLayer; iter > scene.layers.begin(); std::advance(iter, -1)) { // Don't draw the first layer
 

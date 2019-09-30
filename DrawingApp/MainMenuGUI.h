@@ -55,8 +55,8 @@ void mainMenuGUI(Scene& scene)
 
 		if (ImGui::ArrowButton("##Back", ImGuiDir_Left)) CommandManager::moveBackward();
 		if (ImGui::ArrowButton("##Forward", ImGuiDir_Right)) CommandManager::moveForward();
-		if (ImGui::Checkbox("GUI", &SHOW_GUI))
-		if (ImGui::Checkbox("AlphaDrawing", &useAlphaDrawingState)) DRAWING_STATE = useAlphaDrawingState ? ALPHA : NORMAL;
+		if (ImGui::Checkbox("GUI##Checkbox", &SHOW_GUI));
+		if (ImGui::Checkbox("Alpha##Checkbox", &useAlphaDrawingState)) DRAWING_STATE = useAlphaDrawingState ? ALPHA : NORMAL;
 
 		ImGui::SameLine(WINDOW_WIDTH - 60);
 		if (ImGui::Button("Close")) mainWindow.close();
