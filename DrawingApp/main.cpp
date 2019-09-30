@@ -122,17 +122,28 @@ void drawingLoop()
 {
 	if (isCursorHoveringLayer()) {
 		if (notDragingScene()) {
-			if (CursorBuffer::isFirstStamp && !CursorBuffer::isBufferBeingCleared) {
-				scene.drawingLayer.lerpDrawingOnLayer(scene.currentBrush, CursorBuffer::positions.begin());
+			if (CursorBuffer::isFirstStamp && CursorBuffer::useBuffer1) {
+				scene.drawingLayer.lerpDrawingOnLayer(scene.currentBrush, CursorBuffer::buffer1.begin());
+				CursorBuffer::isFirstStamp = false;
 			}
 			else {
-				if (CursorBuffer::positions.size() > 1) {
-					int positionsToBeRemoved = CursorBuffer::positions.size();
-					auto iter = CursorBuffer::positions.begin();
-					for (int i = 0; i < positionsToBeRemoved - 1 ; i++) {
-						scene.drawingLayer.lerpDrawingOnLayer(scene.currentBrush, iter + i);
+				if (CursorBuffer::useBuffer1 && CursorBuffer::buffer1.size() > 1) {
+					CursorBuffer::useBuffer1 = false;
+					CursorBuffer::useBuffer2 = true;
+					
+					for (auto iter = CursorBuffer::buffer1.begin(); iter < CursorBuffer::buffer1.end() - 1 ; iter++) {
+						scene.drawingLayer.lerpDrawingOnLayer(scene.currentBrush, iter);
 					}
-					CursorBuffer::reset(positionsToBeRemoved);
+					CursorBuffer::resetBuffer1 = true;
+				}
+				if (CursorBuffer::useBuffer2 && CursorBuffer::buffer2.size() > 1) {
+					CursorBuffer::useBuffer2 = false;
+					CursorBuffer::useBuffer1 = true;
+
+					for (auto iter = CursorBuffer::buffer2.begin(); iter < CursorBuffer::buffer2.end() - 1; iter++) {
+						scene.drawingLayer.lerpDrawingOnLayer(scene.currentBrush, iter);
+					}
+					CursorBuffer::resetBuffer2 = true;
 				}
 			}
 		}

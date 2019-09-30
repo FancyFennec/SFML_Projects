@@ -145,7 +145,8 @@ void lmbPressed(Scene& scene)
 			scene.cursorPositions[1] = sf::Mouse::getPosition(mainWindow);
 			scene.cursorPositions[0] = scene.cursorPositions[1];
 			CursorBuffer::isFirstStamp = true;
-			CursorBuffer::isBufferBeingCleared = true;
+			CursorBuffer::useBuffer1 = false;
+			CursorBuffer::useBuffer2 = false;
 		}
 	}
 }
