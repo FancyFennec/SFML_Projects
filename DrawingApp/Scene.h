@@ -16,6 +16,7 @@ namespace fs = std::experimental::filesystem;
 typedef std::unique_ptr<Layer> LayerPntr;
 typedef std::unique_ptr<Brush> BrushPntr;
 
+//TODO: move saving and loading to a seperate class
 class Scene
 {
 public:
