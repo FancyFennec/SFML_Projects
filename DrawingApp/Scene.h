@@ -54,7 +54,8 @@ public:
 	void drawLowerLayers();
 	void drawCurrentLayer();
 	void drawUpperLayers();
-	void resetLayerSprites();
+	void resetScene(int newWidth, int newHeight);
+	void reloadLayerSprites();
 	unsigned int getLayerDistance(std::vector<Layer>::iterator iter) { return (unsigned int)std::distance(layers.begin(), iter); }
 	unsigned int getLayerDistance() { return getLayerDistance(currentLayer); }
 	unsigned int getSize() { return getLayerDistance(lastActiveLayer); }
@@ -83,9 +84,9 @@ inline void Scene::initialize()
 		layers.push_back(Layer(width, height));
 		layers.back().clearLayer();
 	}
-	resetLayerSprites();
+	reloadLayerSprites();
 	currentLayer = std::next(layers.begin());
-	currentLayer->layerName = "Layer1";
+	currentLayer->name = "Layer1";
 	lastActiveLayer = currentLayer;
 
 	loadBrushesFromJSON();
@@ -176,7 +177,24 @@ inline void Scene::drawUpperLayers()
 	}
 }
 
-inline void Scene::resetLayerSprites()
+inline void Scene::resetScene(int newWidth, int newHeight)
+{
+	this->width = newWidth;
+	this->height = newHeight;
+	
+	int counter = 0;
+	for (auto layer : layers) {
+		layer.name = "Layer";
+		layer.name.append(std::to_string(counter));
+		counter++;
+
+		layer.width = width;
+		layer.height = height;
+		layer.clearLayer();
+	}
+}
+
+inline void Scene::reloadLayerSprites()
 {
 	for (auto layer = layers.begin(); layer < layers.end(); layer++) {
 		layer->sprite.setTexture(layer->tex);

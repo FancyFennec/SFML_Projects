@@ -50,8 +50,13 @@ public:
 
 	static void initialize(Scene& scn) {
 		scene = &scn;
-		actions.reserve(MAX_ACTIONS); // Reserve memory for 20 actions
+		actions.reserve(MAX_ACTIONS);
 		actionIter = std::prev(actions.end());
+	}
+
+	static void reset() {
+		actionIter = actions.begin();
+		clearActions();
 	}
 
 	~CommandManager();
@@ -113,7 +118,7 @@ inline void CommandManager::delteLayerAt(std::vector<Layer>::iterator iter)
 	}
 	if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 
-	scene->resetLayerSprites();
+	scene->reloadLayerSprites();
 }
 
 inline void CommandManager::updateLayer(sf::Texture& oldTexture) {
@@ -166,7 +171,7 @@ inline void CommandManager::moveForward()
 			}
 			if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 
-			scene->resetLayerSprites();
+			scene->reloadLayerSprites();
 			break;
 		}
 		case(UPDATE_LAYER): { //Set the layer texture to the new texture
@@ -212,7 +217,7 @@ inline void CommandManager::moveBackward()
 			}
 			if (scene->currentLayer == scene->layers.begin()) std::advance(scene->currentLayer, 1);
 
-			scene->resetLayerSprites();
+			scene->reloadLayerSprites();
 			break;
 		}
 		case(UPDATE_LAYER): { //Set the layer texture to the old texture

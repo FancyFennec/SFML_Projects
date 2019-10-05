@@ -16,7 +16,16 @@ void SaveFilePopup(Scene & scene);
 void DrawFileMenu();
 void loadLayerFromFile(std::string &folderPath, std::string &fileName, Scene & scene);
 void loadScene(std::string &fileName, Scene & scene);
+sf::Texture extractTextureFromBuffer(int width, int height, std::vector<char> &buffer, int layerCount);
+void loadDataIntoScene(int layerCount, sf::Texture &tex, Scene & scene, std::vector<std::string> &layerNames);
+void extractMetaData(std::ifstream &newistrm, int &layerCount, int &width, int &height);
+std::vector<char> extractImageData(std::ifstream &newistrm);
+std::vector<std::string> extractLayerNames(int layerCount, std::ifstream &newistrm);
 void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath);
+void saveTemporaryTextureDataToFile(std::ifstream &istrm, std::ofstream &ostrm);
+void saveLayerNames(Scene & scene, std::ofstream &ostrm);
+void saveMetaData(Scene & scene, std::ofstream &ostrm);
+void saveTemporaryTextureData(Scene & scene, std::string & tmpPath);
 void saveCurrentLayerAsPNG(Scene & scene, std::string &folderPath);
 void saveCurrentLayerAsJPEG(Scene & scene, std::string &folderPath);
 void saveSceneAsPNG(Scene & scene, std::string &folderPath);
@@ -93,7 +102,7 @@ void OpenFilePopup(Scene & scene)
 					if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
 						std::string path = folderPath;
 						loadScene(path.append("/").append(fileName), scene);
-						//TODO: reset the commands
+						CommandManager::reset();
 						openFilePopupIsOpen = false;
 					}
 				}
@@ -255,72 +264,41 @@ void loadLayerFromFile(std::string &folderPath, std::string &fileName, Scene & s
 
 void loadScene(std::string &fileName, Scene & scene)
 {
-	//reading the file back into an image
 	std::ifstream newistrm(fileName, std::ios::out | std::ios::binary);
-	std::vector<std::string> layerNames;
 
 	int layerCount;
 	int width;
 	int height;
-	newistrm.read((char*)&layerCount, sizeof(int));
-	newistrm.read((char*)&width, sizeof(int));
-	newistrm.read((char*)&height, sizeof(int));
 
-	scene.width = width;
-	scene.height = height;
-
-	//Load Layer Names
-	for (int i = 0; i < layerCount; i++) {
-		std::string layerName;
-		char newChar;
-		newistrm.read((char*)&newChar, sizeof(char));
-		while (newChar != '#') {
-			layerName.push_back(newChar);
-			newistrm.read((char*)&newChar, sizeof(char));
-		}
-		layerNames.push_back(layerName);
-	}
-
-	scene.lastActiveLayer = scene.layers.begin() + layerCount;
-
-	//reset all Layers
-	int counter = 0;
-	for (auto layer : scene.layers) {
-		layer.name = "Layer";
-		layer.name.append(std::to_string(counter));
-		counter++;
-
-		layer.width = width;
-		layer.height = height;
-		layer.clearLayer();
-	}
-
-	std::streampos begin = newistrm.tellg();
-	newistrm.seekg(0, std::ios::end);
-	std::streampos end = newistrm.tellg();
-	newistrm.seekg(begin);
-
-	std::vector<char> buffer;
-	buffer.resize((end - begin) / sizeof(char));
-	newistrm.read((char*)buffer.data(), (end - begin) / sizeof(char));
-
+	extractMetaData(newistrm, layerCount, width, height);
+	std::vector<std::string> layerNames = extractLayerNames(layerCount, newistrm);
+	std::vector<char> buffer = extractImageData(newistrm);
 	newistrm.close();
 
-	//Load the data into a texture
+	scene.resetScene(width, height);
+	sf::Texture tex = extractTextureFromBuffer(width, height, buffer, layerCount);
+	loadDataIntoScene(layerCount, tex, scene, layerNames);
+}
+
+sf::Texture extractTextureFromBuffer(int width, int height, std::vector<char> &buffer, int layerCount)
+{
 	sf::Texture tex;
 	tex.create(width, height);
 	tex.loadFromMemory(buffer.data(), width * height * (layerCount + 1));
+	return tex;
+}
 
-	//create a render texture with the right size and draw portions of the texture to it
+void loadDataIntoScene(int layerCount, sf::Texture &tex, Scene & scene, std::vector<std::string> &layerNames)
+{
 	sf::RenderTexture rtex;
 	sf::RenderStates rState;
 	rState.blendMode = sf::BlendNone;
-	rtex.create(width, height);
-	sf::IntRect rect(0, 0, width, height);
+	rtex.create(scene.width, scene.height);
+	sf::IntRect rect(0, 0, scene.width, scene.height);
 	sf::Sprite sprite;
 
 	for (int i = 0; i < layerCount + 1; i++) {
-		rect.left = i * width;
+		rect.left = i * scene.width;
 		sprite.setTexture(tex);
 		sprite.setTextureRect(rect);
 		rtex.draw(sprite, rState);
@@ -336,12 +314,95 @@ void loadScene(std::string &fileName, Scene & scene)
 			scene.layers[i].sprite.setTexture(scene.layers[i].tex);
 		}
 	}
+
+	scene.lastActiveLayer = scene.layers.begin() + layerCount - 1;
+}
+
+void extractMetaData(std::ifstream &newistrm, int &layerCount, int &width, int &height)
+{
+	newistrm.read((char*)&layerCount, sizeof(int));
+	newistrm.read((char*)&width, sizeof(int));
+	newistrm.read((char*)&height, sizeof(int));
+}
+
+std::vector<char> extractImageData(std::ifstream &newistrm)
+{
+	std::vector<char> buffer;
+
+	std::streampos begin = newistrm.tellg();
+	newistrm.seekg(0, std::ios::end);
+	std::streampos end = newistrm.tellg();
+	newistrm.seekg(begin);
+
+	buffer.resize((end - begin) / sizeof(char));
+	newistrm.read((char*)buffer.data(), (end - begin) / sizeof(char));
+
+	return buffer;
+}
+
+std::vector<std::string> extractLayerNames(int layerCount, std::ifstream &newistrm)
+{
+	std::vector<std::string> layerNames;
+	for (int i = 0; i < layerCount; i++) {
+		std::string layerName;
+		char newChar;
+		newistrm.read((char*)&newChar, sizeof(char));
+		while (newChar != '#') {
+			layerName.push_back(newChar);
+			newistrm.read((char*)&newChar, sizeof(char));
+		}
+		layerNames.push_back(layerName);
+	}
+	return layerNames;
 }
 
 void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath)
 {
-	//TODO: I think this could be done in one go
-	//Draw all layers to a big PNG
+	saveTemporaryTextureData(scene, tmpPath);
+
+	std::ifstream istrm(tmpPath.data(), std::ios::in | std::ios::binary);
+	std::ofstream ostrm(folderPath.data(), std::ios::out | std::ios::binary);
+
+	saveMetaData(scene, ostrm);
+	saveLayerNames(scene, ostrm);
+	saveTemporaryTextureDataToFile(istrm, ostrm);
+
+	istrm.close();
+	ostrm.close();
+}
+
+void saveTemporaryTextureDataToFile(std::ifstream &istrm, std::ofstream &ostrm)
+{
+	std::vector<char> buffer;
+
+	istrm.seekg(0, std::ios::end);
+	std::streampos end = istrm.tellg();
+	istrm.seekg(0, std::ios::beg);
+
+	buffer.resize(end / sizeof(char));
+
+	istrm.read((char*)buffer.data(), end / sizeof(char));
+	ostrm.write((char*)buffer.data(), end / sizeof(char));
+}
+
+void saveLayerNames(Scene & scene, std::ofstream &ostrm)
+{
+	for (int i = 0; i < scene.getSize() + 1; i++) {
+		ostrm.write((char*)scene.layers[i + 1].name.data(), sizeof(char) * scene.layers[i + 1].name.size());
+		ostrm.write((char*)"#", sizeof(char));
+	}
+}
+
+void saveMetaData(Scene & scene, std::ofstream &ostrm)
+{
+	unsigned int layerCount = scene.getSize() + 1;
+	ostrm.write((char*)&layerCount, sizeof(int));
+	ostrm.write((char*)&scene.width, sizeof(int));
+	ostrm.write((char*)&scene.height, sizeof(int));
+}
+
+void saveTemporaryTextureData(Scene & scene, std::string & tmpPath)
+{
 	unsigned int layerCount = scene.getSize() + 1;
 
 	sf::Vector2f offset(scene.width, 0);
@@ -362,34 +423,6 @@ void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath)
 
 	rTex.display();
 	rTex.getTexture().copyToImage().saveToFile(tmpPath);
-
-	//Create input stream for the png and output stream for the file we want to write to
-	std::ifstream istrm(tmpPath.data(), std::ios::in | std::ios::binary);
-	std::ofstream ostrm(folderPath.data(), std::ios::out | std::ios::binary);
-
-	ostrm.write((char*)&layerCount, sizeof(int));
-	ostrm.write((char*)&scene.width, sizeof(int));
-	ostrm.write((char*)&scene.height, sizeof(int));
-
-	for (int i = 0; i < layerCount; i++) {
-		ostrm.write((char*)scene.layers[i + 1].name.data(), sizeof(char) * scene.layers[i + 1].name.size());
-		ostrm.write((char*)"#" , sizeof(char));
-	}
-
-	//Make buffer with the right size
-	istrm.seekg(0, std::ios::end);
-	std::streampos end = istrm.tellg();
-	istrm.seekg(0, std::ios::beg);
-	
-	std::vector<char> buffer;
-	buffer.resize(end / sizeof(char));
-
-	//read data into the buffer and write it to the file again
-	istrm.read((char*)buffer.data(), end / sizeof(char));
-	ostrm.write((char*)buffer.data(), end / sizeof(char));
-
-	istrm.close();
-	ostrm.close();
 }
 
 void saveCurrentLayerAsPNG(Scene & scene, std::string &folderPath)
