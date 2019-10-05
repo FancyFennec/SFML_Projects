@@ -9,7 +9,7 @@ typedef std::unique_ptr<Brush> BrushPntr;
 class Layer
 {
 public:
-	std::string layerName = "Layer";
+	std::string name = "Layer";
 	unsigned int width;
 	unsigned int height;
 

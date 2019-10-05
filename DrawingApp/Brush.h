@@ -9,7 +9,7 @@
 class Brush
 {
 public:
-	std::string brushName = "Brush";
+	std::string name = "Brush";
 	sf::Texture tex;
 	sf::Sprite sprite;
 

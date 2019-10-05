@@ -196,7 +196,7 @@ inline void Scene::loadBrushesFromJSON()
 			std::string(BRUSH_DIRECTORY).append(brush["BrushName"].get<std::string>()).append(".png").data()
 			)
 		);
-		brushes.back()->brushName = brush["BrushName"].get<std::string>();
+		brushes.back()->name = brush["BrushName"].get<std::string>();
 
 		brushes.back()->maxSize = brush["BrushSize"].get<float>();
 		brushes.back()->stepSize = brush["StepSize"].get<float>();
@@ -238,7 +238,7 @@ inline void Scene::saveBrushesToJSON()
 
 	for (auto &brush : brushes) {
 		json brushJson;
-		brushJson["BrushName"] = brush->brushName;
+		brushJson["BrushName"] = brush->name;
 		brushJson["BrushSize"] = brush->maxSize;
 		brushJson["StepSize"] = brush->stepSize;
 		brushJson["Oppacity"] = brush->opacity;
@@ -254,7 +254,7 @@ inline void Scene::saveBrushesToJSON()
 
 		brushesJson["Brushes"].push_back(brushJson);
 
-		brush->tex.copyToImage().saveToFile(std::string(BRUSH_DIRECTORY).append(brush->brushName).append(".png"));
+		brush->tex.copyToImage().saveToFile(std::string(BRUSH_DIRECTORY).append(brush->name).append(".png"));
 	}
 	std::ofstream o(std::string(BRUSH_DIRECTORY).append("brushes.json"));
 	o << brushesJson << std::endl;

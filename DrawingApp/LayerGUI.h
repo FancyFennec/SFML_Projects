@@ -51,8 +51,8 @@ void CreateNewLayer(Scene & scene)
 	else {
 		std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
 	}
-	scene.lastActiveLayer->layerName = "Layer";
-	scene.lastActiveLayer->layerName.append(std::to_string(scene.getSize()));
+	scene.lastActiveLayer->name = "Layer";
+	scene.lastActiveLayer->name.append(std::to_string(scene.getSize()));
 }
 
 void LayerNamePopup(Scene & scene)
@@ -62,7 +62,7 @@ void LayerNamePopup(Scene & scene)
 	if (ImGui::BeginPopupModal("Chose Layer Name", &layerNamePopupIsOpen)) {
 
 		if (ImGui::InputText("Press Enter", layerName, sizeof(layerName), ImGuiInputTextFlags_EnterReturnsTrue)) {
-			scene.currentLayer->layerName = std::string(layerName);
+			scene.currentLayer->name = std::string(layerName);
 			layerNamePopupIsOpen = false;
 		}
 		ImGui::Dummy(ImVec2(0, 30));
@@ -91,7 +91,7 @@ void DrawLayerList(Scene & scene)
 		// Button that sets the current Layer to the current iterator
 		// Double clicking lets one chose a layer name
 		ImGui::SameLine();
-		std::string buttonName = iter->layerName;
+		std::string buttonName = iter->name;
 		buttonName.append("##");
 		buttonName.append(std::to_string(layerNumber));
 

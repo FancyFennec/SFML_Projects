@@ -74,7 +74,7 @@ void BrushNamePopup(Scene & scene)
 	if (ImGui::BeginPopupModal("Chose Brush Name", &brushNamePopupIsOpen)) {
 
 		if (ImGui::InputText("Press Enter", brushName, sizeof(brushName), ImGuiInputTextFlags_EnterReturnsTrue)) {
-			(*scene.currentBrush)->brushName = std::string(brushName);
+			(*scene.currentBrush)->name = std::string(brushName);
 			brushNamePopupIsOpen = false;
 		}
 		ImGui::Dummy(ImVec2(0, 30));
@@ -180,7 +180,7 @@ void DrawBrushList(Scene & scene)
 		ImGui::Image((*iter)->sprite, sf::Vector2f(30, 30), sf::Color::White, borderColor);
 
 		ImGui::SameLine();
-		std::string buttonName = (*iter)->brushName;
+		std::string buttonName = (*iter)->name;
 		buttonName.append("##");
 		buttonName.append(std::to_string(brushNumber));
 

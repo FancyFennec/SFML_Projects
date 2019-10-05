@@ -9,127 +9,33 @@
 
 namespace fs = std::experimental::filesystem;
 
-unsigned int width = 800;
-
-sf::RenderWindow window;
-sf::Event event;
-
-sf::Vector3f lightPos(800, 0, 800);
-
-sf::Image bgNormalImg;
-sf::Color bgNormalCol(127, 127, 255, 255);
-sf::Texture bgNomalTex;
-sf::Sprite bgNormalSprite;
-
-sf::Image fgNormalImg;
-sf::Color fgNormalCol(255, 127, 127, 100);
-sf::Texture fgNormalTex;
-sf::Sprite fgNormalSpr;
-
-sf::Texture normalMapTex;
-sf::Sprite normalMapSprite;
-
-sf::Image layerImg;
-sf::Color layerCol(200, 200, 230, 250);
-sf::Texture layerTex;
-sf::Sprite layerSpr;
-
-sf::RenderTexture rTex;
-sf::Shader normalBlendingShader;
-sf::Shader renderShader;
-sf::RenderStates state(&normalBlendingShader);
-sf::RenderStates windowRState(&renderShader);
 
 int main() {
 
-	bgNormalImg.create(width, width, bgNormalCol);
-	bgNomalTex.create(width, width);
-	bgNomalTex.loadFromImage(bgNormalImg);
-	bgNormalSprite.setTexture(bgNomalTex);
+	std::string test = "HalloEcho";
+	std::ifstream istrm("test", std::ios::in | std::ios::binary);
+	std::ofstream ostrm("test" , std::ios::out | std::ios::binary);
 
-	fgNormalImg.create(width, width, fgNormalCol);
-	fgNormalTex.create(width, width);
-	fgNormalTex.loadFromImage(fgNormalImg);
-	fgNormalSpr.setTexture(fgNormalTex);
 
-	layerImg.create(width, width, layerCol);
-	layerTex.create(width, width);
-	layerTex.loadFromImage(layerImg);
+	int testInt = 2;
+	ostrm.write((char*)test.data(), sizeof(char) * test.length());
+	ostrm.write((char*)"#", sizeof(char));
+	ostrm.write((char*)&testInt, sizeof(int));
+	ostrm.close();
 
-	rTex.create(width, width);
-	
-	if (normalBlendingShader.loadFromFile("./normal_blending.frag", sf::Shader::Fragment)) {
-		std::cout << "Shader loaded" << std::endl;
+	std::string result;
+	int resultIn;
+	char newChar;
+	istrm.read((char*)&newChar, sizeof(char));
+	while (newChar != '#') {
+		result.push_back(newChar);
+		istrm.read((char*)&newChar, sizeof(char));
 	}
-	else {
-		std::cout << "!!!Shader loading failed" << std::endl;
-		return -1;
-	}
-	if (renderShader.loadFromFile("./render_shader.frag", sf::Shader::Fragment)) {
-		std::cout << "Shader loaded" << std::endl;
-	}
-	else {
-		std::cout << "!!!Shader loading failed" << std::endl;
-		return -1;
-	}
+	istrm.read((char*)&resultIn, sizeof(int));
 
-	normalBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
-	normalBlendingShader.setUniform("texture2", fgNormalTex);
-
-	rTex.draw(bgNormalSprite, state);
-	rTex.display();
-	sf::Color col = rTex.getTexture().copyToImage().getPixel(0, 0);
-
-
-	window.create(sf::VideoMode(width, width), "TestWindow");
-
-	normalMapTex.loadFromFile("./test2.jpg");
-	normalMapSprite.setTexture(normalMapTex);
-
-	renderShader.setUniform("normalMap", normalMapTex);
-	renderShader.setUniform("layerTex", layerTex);
-
-	renderShader.setUniform("lightCol", sf::Vector3f(1,1,1));
-
-	renderShader.setUniform("shininess", 32.0f);
-	renderShader.setUniform("specInt", 0.3f);
-	renderShader.setUniform("ambInt", 0.3f);
-	renderShader.setUniform("difInt", 1.0f);
-
-	sf::Vector3f up(0, -30, 0);
-	sf::Vector3f right(30, 0, 0);
-
-	while (window.isOpen()) {
-		while (window.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed) window.close();
-
-			if (event.type == sf::Event::KeyPressed) {
-				if (event.key.code == sf::Keyboard::Up)
-				{
-					lightPos += up;
-				} 
-				if (event.key.code == sf::Keyboard::Down)
-				{
-					lightPos -= up;
-				}
-				if (event.key.code == sf::Keyboard::Right)
-				{
-					lightPos += right;
-				}
-				if (event.key.code == sf::Keyboard::Left)
-				{
-					lightPos -= right;
-				}
-			}
-		}
-
-		renderShader.setUniform("lightPos", lightPos);
-
-		window.clear(sf::Color::Black);
-		window.draw(normalMapSprite, windowRState);
-		window.display();
-	}
+	istrm.close();
+	std::cout << result << std::endl;
+	std::cout << resultIn << std::endl;
 
 	return 0;
 }
