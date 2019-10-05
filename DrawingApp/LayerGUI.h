@@ -9,13 +9,9 @@
 #include "CommandManager.h"
 
 void layerGUI(Scene& scene);
-
 void CreateNewLayer(Scene & scene);
-
 void LayerNamePopup(Scene & scene);
-
 void DrawLayerList(Scene & scene);
-
 void MaterialSettings(Scene & scene);
 
 int layerNumber;

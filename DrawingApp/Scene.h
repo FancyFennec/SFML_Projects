@@ -209,11 +209,7 @@ inline void Scene::loadBrushesFromJSON()
 	json brushJson;
 	inputStream >> brushJson;
 	for (auto& brush : brushJson["Brushes"]) {
-		brushes.push_back(std::make_unique<Brush>(
-			BRUSH_WIDTH,
-			std::string(BRUSH_DIRECTORY).append(brush["BrushName"].get<std::string>()).append(".png").data()
-			)
-		);
+		brushes.push_back(std::make_unique<Brush>(std::string(BRUSH_DIRECTORY).append(brush["BrushName"].get<std::string>()).append(".png").data()));
 		brushes.back()->name = brush["BrushName"].get<std::string>();
 
 		brushes.back()->maxSize = brush["BrushSize"].get<float>();

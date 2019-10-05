@@ -9,17 +9,12 @@
 #include "CommandManager.h"
 
 void brushGUI(Scene& scene);
-
 void CreateNewBrush(Scene & scene);
-
+void NewBrushPopup(Scene & scene);
 void BrushNamePopup(Scene & scene);
-
 void ColorPickers(Scene & scene);
-
 void BrushSettings(Scene & scene);
-
 void DrawBrushList(Scene & scene);
-
 void ScatterSettings(Scene & scene);
 
 static const ImGuiColorEditFlags colorEditFlags =
@@ -31,6 +26,7 @@ ImGuiColorEditFlags_NoInputs;
 
 
 bool brushNamePopupIsOpen = false;
+bool newBrushPopupIsOpen = false;
 static char brushName[128] = "";
 
 void brushGUI(Scene& scene)
@@ -54,6 +50,7 @@ void brushGUI(Scene& scene)
 		ImGui::End();
 
 		if (brushNamePopupIsOpen) BrushNamePopup(scene);
+		if (newBrushPopupIsOpen) NewBrushPopup(scene);
 	}
 }
 
@@ -63,7 +60,37 @@ void CreateNewBrush(Scene & scene)
 		std::cout << "ERROR! Maximum number of brushes reached." << std::endl;
 	}
 	else {
-		//TODO: Load Image from folder into the brushes
+		newBrushPopupIsOpen = true;
+	}
+}
+
+inline void NewBrushPopup(Scene & scene)
+{
+	ImGui::SetNextWindowSize(ImVec2(300, 80));
+	ImGui::OpenPopup("New Brush");
+	if (ImGui::BeginPopupModal("New Brush", &newBrushPopupIsOpen)) {
+		std::string folderPath("./SavedFiles");
+
+		for (auto p : fs::directory_iterator(folderPath)) {
+			std::string fileName = p.path().string().substr(folderPath.size() + 1); //Remove folder name
+
+			if (!fs::is_directory(p) && fileName.substr(fileName.size() - 4) == ".png") {
+				if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
+					
+					std::string brushPath = folderPath;
+					brushPath.append("/");
+					brushPath.append(fileName);
+					scene.brushes.push_back(std::make_unique<Brush>(brushPath.data()));
+					scene.brushes.back()->name = "NewBrush";
+					newBrushPopupIsOpen = false;
+				}
+			}
+		}
+
+		ImGui::Dummy(ImVec2(0, 30));
+		ImGui::SameLine(ImGui::GetWindowSize().x - 60);
+		if (ImGui::Button("Close", ImVec2(50, 20))) newBrushPopupIsOpen = false;
+		ImGui::EndPopup();
 	}
 }
 

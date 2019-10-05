@@ -22,6 +22,12 @@ void mainWindowEventHandling(Scene& scene)
 		setAltNotHeld();
 		setCtrlNotHeld();
 	}
+	if (event.type == sf::Event::Resized) {
+		sf::Vector2u newSize = mainWindow.getSize();
+		WINDOW_WIDTH = newSize.x;
+		WINDOW_HEIGHT = newSize.y;
+		//TODO: offset has to be adjusted too
+	}
 	if (event.type == sf::Event::MouseButtonPressed) {
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (!isMouseHeld()) lmbPressed(scene);

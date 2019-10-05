@@ -44,7 +44,7 @@ public:
 	float scatterPos = 0.0f;
 	float scatterAngle = 0.0f;
 
-	Brush(int brush_width, const char* filePath)
+	Brush(const char* filePath)
 	{
 		if (!tex.loadFromFile(filePath)) {
 			std::cout << "ERROR! unable to find path to brush file!" << std::endl;
