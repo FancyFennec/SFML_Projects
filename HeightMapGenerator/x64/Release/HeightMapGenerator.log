@@ -1,9 +1,9 @@
 ﻿  HeightMapGenerator.cpp
-c:\users\jonasallemann\desktop\learnings\cpp\sfml_projects\heightmapgenerator\heightmapgenerator.cpp(26): warning C4305: 'initializing': truncation from 'double' to 'float'
-c:\users\jonasallemann\desktop\learnings\cpp\sfml_projects\heightmapgenerator\heightmapgenerator.cpp(67): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-c:\users\jonasallemann\desktop\learnings\cpp\sfml_projects\heightmapgenerator\heightmapgenerator.cpp(151): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
+c:\users\home\desktop\learnings\cpp\sfml_projects\heightmapgenerator\heightmapgenerator.cpp(26): warning C4305: 'initializing': truncation from 'double' to 'float'
+c:\users\home\desktop\learnings\cpp\sfml_projects\heightmapgenerator\heightmapgenerator.cpp(67): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
+c:\users\home\desktop\learnings\cpp\sfml_projects\heightmapgenerator\heightmapgenerator.cpp(151): warning C4244: 'return': conversion from 'double' to 'float', possible loss of data
   Generating code
-c:\users\jonasallemann\desktop\learnings\cpp\sfml_projects\heightmapgenerator\heightmapgenerator.cpp(459): warning C4715: 'isPowerOf2Plus1': not all control paths return a value
+c:\users\home\desktop\learnings\cpp\sfml_projects\heightmapgenerator\heightmapgenerator.cpp(459): warning C4715: 'isPowerOf2Plus1': not all control paths return a value
   All 117 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
-  HeightMapGenerator.vcxproj -> C:\Users\JonasAllemann\Desktop\Learnings\CPP\SFML_Projects\x64\Release\HeightMapGenerator.exe
+  HeightMapGenerator.vcxproj -> C:\Users\Home\Desktop\Learnings\CPP\SFML_Projects\x64\Release\HeightMapGenerator.exe

@@ -63,7 +63,7 @@ void CreateNewBrush(Scene & scene)
 		std::cout << "ERROR! Maximum number of brushes reached." << std::endl;
 	}
 	else {
-		//Load Image from folder into the brushes
+		//TODO: Load Image from folder into the brushes
 	}
 }
 
