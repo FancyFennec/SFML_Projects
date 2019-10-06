@@ -23,8 +23,8 @@ MSG msg;
 UINT32 pointerId;
 POINTER_PEN_INFO penInfo;
 
-const int SCENE_WIDTH = 800;
-const int SCENE_HEIGHT = 1200;
+const unsigned int SCENE_WIDTH = 800;
+const unsigned int SCENE_HEIGHT = 1200;
 Scene scene(SCENE_WIDTH, SCENE_HEIGHT);
 
 sf::Thread positionSamplingLoop(&sampleMousePositions);

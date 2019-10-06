@@ -69,7 +69,7 @@ inline void NewBrushPopup(Scene & scene)
 	ImGui::SetNextWindowSize(ImVec2(300, 80));
 	ImGui::OpenPopup("New Brush");
 	if (ImGui::BeginPopupModal("New Brush", &newBrushPopupIsOpen)) {
-		std::string folderPath("./SavedFiles");
+		std::string folderPath = SAVED_FILES_DIRECTORY;
 
 		for (auto p : fs::directory_iterator(folderPath)) {
 			std::string fileName = p.path().string().substr(folderPath.size() + 1); //Remove folder name

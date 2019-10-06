@@ -54,7 +54,7 @@ public:
 	void drawLowerLayers();
 	void drawCurrentLayer();
 	void drawUpperLayers();
-	void resetScene(int newWidth, int newHeight);
+	void resetScene(unsigned int newWidth, unsigned  int newHeight);
 	void reloadLayerSprites();
 	unsigned int getLayerDistance(std::vector<Layer>::iterator iter) { return (unsigned int)std::distance(layers.begin(), iter); }
 	unsigned int getLayerDistance() { return getLayerDistance(currentLayer); }
@@ -146,7 +146,7 @@ inline void Scene::drawCurrentLayer() {
 
 		rTex.draw(currentLayer->sprite, alphaBlendingRState);
 		rTex.display();
-		newTex = rTex.getTexture(); //If we don't do this step the texture is upside down
+		newTex = rTex.getTexture(); //If we don't assign the rendertexture to a new texture is upside down
 	} // else we just draw the current Layer
 
 	sf::RenderStates renderState;
@@ -177,7 +177,7 @@ inline void Scene::drawUpperLayers()
 	}
 }
 
-inline void Scene::resetScene(int newWidth, int newHeight)
+inline void Scene::resetScene(unsigned int newWidth, unsigned  int newHeight)
 {
 	this->width = newWidth;
 	this->height = newHeight;

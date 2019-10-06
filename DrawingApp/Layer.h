@@ -21,14 +21,14 @@ public:
 	bool useOffset = true;
 	static sf::Vector2i offset;
 
-	Layer(int width, int height) :
+	Layer(unsigned int width, unsigned int height) :
 		width(width),
 		height(height) {
 		sf::Color color(255, 255, 255, 0);
 		initialize(color);
 	}
 
-	Layer(int width, int height, sf::Color color) :
+	Layer(unsigned int width, unsigned int height, sf::Color color) :
 		width(width),
 		height(height) {
 		initialize(color);

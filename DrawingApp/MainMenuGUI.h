@@ -90,8 +90,8 @@ void OpenFilePopup(Scene & scene)
 	ImGui::SetNextWindowSize(ImVec2(600, 500));
 	ImGui::OpenPopup("Open File");
 	if (ImGui::BeginPopupModal("Open File", &openFilePopupIsOpen)) {
-		std::string folderPath("./SavedFiles");
-		std::string tmpPath("./SavedFiles/tmp");
+		std::string folderPath = SAVED_FILES_DIRECTORY;
+		std::string tmpPath = TMP_DIRECTORY;
 
 		for (auto p : fs::directory_iterator(folderPath)) {
 			std::string fileName = p.path().string().substr(folderPath.size() + 1); //Remove folder name
@@ -132,8 +132,8 @@ void SaveFilePopup(Scene & scene)
 	ImGui::SetNextWindowSize(ImVec2(600, 500));
 	ImGui::OpenPopup("Save File");
 	if (ImGui::BeginPopupModal("Save File", &saveFilePopupIsOpen)) {
-		std::string folderPath("./SavedFiles");
-		std::string tmpPath("./SavedFiles/tmp");
+		std::string folderPath = SAVED_FILES_DIRECTORY;
+		std::string tmpPath = TMP_DIRECTORY;
 
 		for (auto p : fs::directory_iterator(folderPath)) {
 			std::string fileName = p.path().string().substr(folderPath.size() + 1); //Remove folder name

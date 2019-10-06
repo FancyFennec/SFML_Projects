@@ -14,8 +14,10 @@ sf::RenderStates mainRenderState(&mainRenderShader);
 static const std::string ALPHA_BLENDING_SHADER_PATH = "./alpha_blending_shader.frag";
 static const std::string NORMAL_BLENDING_SHADER_PATH = "./normal_blending_shader.frag";
 static const std::string RENDER_SHADER_PATH = "./render_shader.frag";
-static const char* BRUSH_DIRECTORY = "./Brushes/";
-static const char* SCENES_DIRECTORY = "./Scenes/";
+static const std::string BRUSH_DIRECTORY = "./Brushes/";
+static const std::string SCENES_DIRECTORY = "./Scenes/";
+static const std::string SAVED_FILES_DIRECTORY = "./SavedFiles";
+static const std::string TMP_DIRECTORY = "./SavedFiles/tmp";
 
 static sf::Clock deltaClock; //For imgui
 static sf::Clock clickClock; //For double click timing
