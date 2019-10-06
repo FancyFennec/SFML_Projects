@@ -9,6 +9,7 @@
 #include "GlobalVariables.h"
 
 void initializeGlobalVariables();
+bool loadShaders();
 void mainRenderLoop();
 void sampleMousePositions();
 void samplePenPressure();
@@ -18,7 +19,6 @@ void drawingLoop();
 bool notDragingScene();
 bool isCursorHoveringLayer();
 
-//Needed to get the pen pressure
 MSG msg;
 UINT32 pointerId;
 POINTER_PEN_INFO penInfo;
@@ -76,11 +76,10 @@ void mainRenderLoop()
 
 void sampleMousePositions()
 {
-	//TODO: There are still thing which can go wrong here :(
 	while (mainWindow.isOpen())
 	{
 		if (isMouseHeld()) CursorBuffer::update(scene.currentBrush);
-		sf::sleep(sf::milliseconds(5));
+		sf::sleep(sf::milliseconds(3));
 	}
 }
 
@@ -127,12 +126,12 @@ void drawingLoop()
 			}
 			else {
 				if (CursorBuffer::positions.size() > 1) {
-					int positionsToBeRemoved = CursorBuffer::positions.size();
+					size_t positionsToBeRemoved = CursorBuffer::positions.size();
 					auto iter = CursorBuffer::positions.begin();
-					for (int i = 0; i < positionsToBeRemoved - 1 ; i++) {
+					for (size_t i = 0; i < positionsToBeRemoved - 1 ; i++) {
 						scene.drawingLayer.lerpDrawingOnLayer(scene.currentBrush, iter + i);
 					}
-					CursorBuffer::reset(positionsToBeRemoved);
+					CursorBuffer::reset(int(positionsToBeRemoved));
 				}
 			}
 		}
@@ -168,4 +167,28 @@ void initializeGlobalVariables()
 
 	CommandManager::initialize(scene);
 	ImGui::SFML::Init(mainWindow);
+}
+
+bool loadShaders()
+{
+	bool returnValue = true;
+
+	if (!alphaBlendingShader.loadFromFile(ALPHA_BLENDING_SHADER_PATH, sf::Shader::Fragment)) {
+		std::cout << "Could not load ALphaBlendingShader" << std::endl;
+		returnValue = false;
+	}
+	if (!normalBlendingShader.loadFromFile(NORMAL_BLENDING_SHADER_PATH, sf::Shader::Fragment)) {
+		std::cout << "Could not load NormalBlendingShader" << std::endl;
+		returnValue = false;
+	}
+	if (!mainRenderShader.loadFromFile(RENDER_SHADER_PATH, sf::Shader::Fragment)) {
+		std::cout << "Could not load RenderShader" << std::endl;
+		returnValue = false;
+	}
+
+	alphaBlendingRState.blendMode = sf::BlendNone;
+	normalBlendingRState.blendMode = sf::BlendNone;
+	mainRenderState.blendMode = sf::BlendNone;
+
+	return returnValue;
 }

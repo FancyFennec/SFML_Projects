@@ -1,6 +1,8 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <iostream>
+#include <Windows.h>
 #include "Structs.h"
 
 static DrawingState DRAWING_STATE = ALPHA;
@@ -22,8 +24,6 @@ static const std::string TMP_DIRECTORY = "./SavedFiles/tmp";
 static sf::Clock deltaClock; //For imgui
 static sf::Clock clickClock; //For double click timing
 
-//Window initialisation
-POINT p;
 static sf::RenderWindow mainWindow;
 static sf::Event event;
 
@@ -37,27 +37,3 @@ sf::Texture samplingTexture; //texture used for sampling the normal color
 sf::Vector2i sampledPos;
 
 bool pickNormalValue = false;
-
-inline bool loadShaders()
-{
-	bool returnValue = true;
-
-	if (!alphaBlendingShader.loadFromFile(ALPHA_BLENDING_SHADER_PATH, sf::Shader::Fragment)) {
-		std::cout << "Could not load ALphaBlendingShader" << std::endl;
-		returnValue = false;
-	}
-	if (!normalBlendingShader.loadFromFile(NORMAL_BLENDING_SHADER_PATH, sf::Shader::Fragment)) {
-		std::cout << "Could not load NormalBlendingShader" << std::endl;
-		returnValue = false;
-	}
-	if (!mainRenderShader.loadFromFile(RENDER_SHADER_PATH, sf::Shader::Fragment)) {
-		std::cout << "Could not load RenderShader" << std::endl;
-		returnValue = false;
-	}
-
-	alphaBlendingRState.blendMode = sf::BlendNone;
-	normalBlendingRState.blendMode = sf::BlendNone;
-	mainRenderState.blendMode = sf::BlendNone;
-
-	return returnValue;
-}

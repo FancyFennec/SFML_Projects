@@ -14,7 +14,7 @@ void LayerNamePopup(Scene & scene);
 void DrawLayerList(Scene & scene);
 void MaterialSettings(Scene & scene);
 
-int layerNumber;
+size_t layerNumber;
 bool layerNamePopupIsOpen = false;
 static char layerName[128] = "";
 const int WIDTH = 250;

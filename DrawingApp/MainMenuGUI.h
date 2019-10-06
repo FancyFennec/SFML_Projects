@@ -36,7 +36,7 @@ bool saveFilePopupIsOpen = false;
 bool openFilePopupIsOpen = false;
 std::string input;
 
-static enum FILE_TYPE {
+enum FILE_TYPE {
 	PNG,
 	JPEG,
 	SINGLE_PNG,
@@ -403,7 +403,7 @@ void saveMetaData(Scene & scene, std::ofstream &ostrm)
 
 void saveTemporaryTextureData(Scene & scene, std::string & tmpPath)
 {
-	unsigned int layerCount = scene.getSize() + 1;
+	size_t layerCount = scene.getSize() + 1;
 
 	sf::Vector2f offset(scene.width, 0);
 	sf::RenderStates rState;
@@ -416,7 +416,7 @@ void saveTemporaryTextureData(Scene & scene, std::string & tmpPath)
 	rTex.draw(scene.normalLayer.sprite, rState);
 	rState.transform.translate(offset);
 
-	for (int i = 0; i < layerCount; i++) {
+	for (size_t i = 0; i < layerCount; i++) {
 		rTex.draw(scene.layers[i + 1].sprite, rState);
 		rState.transform.translate(offset);
 	}
