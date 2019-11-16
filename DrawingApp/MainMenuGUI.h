@@ -254,6 +254,7 @@ void loadLayerFromFile(const std::string& folderPath, const std::string &fileNam
 	}
 	else {
 		std::cout << "ERROR! Maxing number of Layers reached!!!" << std::endl;
+		return;
 	}
 	scene.lastActiveLayer->name = "Layer";
 	scene.lastActiveLayer->name.append(std::to_string(scene.getSize()));

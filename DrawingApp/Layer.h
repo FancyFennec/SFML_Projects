@@ -192,7 +192,7 @@ void Layer::lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, std::vec
 
 float Layer::distance(const sf::Vector2i & vec1, const sf::Vector2i & vec2)
 {
-	return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
+	return std::sqrt(std::pow((vec1.x - vec2.x), 2.0f) + std::pow(vec1.y - vec2.y, 2.0f));
 }
 
 sf::RenderStates Layer::getRenderState(std::vector<BrushPntr>::iterator & brush)
