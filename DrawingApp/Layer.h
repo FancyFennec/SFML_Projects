@@ -4,7 +4,7 @@
 #include "Settings.h"
 #include "CursorBuffer.h"
 
-typedef std::unique_ptr<Brush> BrushPntr;
+using BrushPntr = std::unique_ptr<Brush>;
 
 class Layer
 {
@@ -21,32 +21,25 @@ public:
 	bool useOffset = true;
 	static sf::Vector2i offset;
 
-	Layer(unsigned int width, unsigned int height) :
+	Layer(unsigned int width, unsigned int height, sf::Color color = sf::Color(255, 255, 255, 0)) :
 		width(width),
-		height(height) {
-		sf::Color color(255, 255, 255, 0);
+		height(height)
+    {
 		initialize(color);
 	}
 
-	Layer(unsigned int width, unsigned int height, sf::Color color) :
-		width(width),
-		height(height) {
-		initialize(color);
-	}
-
-	void setRenderUnifroms(LightSource& lightSource);
-	void setRenderUnifroms(LightSource& lightSource, sf::Texture& texture);
+	void setRenderUnifroms(const LightSource& lightSource);
+	void setRenderUnifroms(const LightSource& lightSource, const sf::Texture& texture);
 	void clearLayer();
-	void blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush);
+	void blendlayers(const Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush);
 	void drawLayerinWindow();
 	void lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>::iterator iter);
-	~Layer();
 
 private:
 	static sf::RenderTexture rTex;
 
-	void initialize(sf::Color& color);
-	float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2);
+	void initialize(const sf::Color& color);
+	static float distance(const sf::Vector2i& vec1, const sf::Vector2i& vec2);
 	float getSScatter(std::vector<BrushPntr>::iterator& brush);
 	float getPScatter(std::vector<BrushPntr>::iterator& brush);
 	float getAScatter(std::vector<BrushPntr>::iterator& brush);
@@ -57,7 +50,7 @@ bool Layer::isOffsetSet = false;
 sf::Vector2i Layer::offset = sf::Vector2i(0, 0);
 sf::RenderTexture Layer::rTex;
 
-inline void Layer::initialize(sf::Color& color) 
+void Layer::initialize(const sf::Color& color) 
 {
 	sf::Image image;
 	image.create(width, height, color);
@@ -71,7 +64,7 @@ inline void Layer::initialize(sf::Color& color)
 	rTex.create(width, height);
 }
 
-inline void Layer::setRenderUnifroms(LightSource& lightSource)
+void Layer::setRenderUnifroms(const LightSource& lightSource)
 {
 	mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
 	mainRenderShader.setUniform("layerTex", tex);
@@ -85,7 +78,7 @@ inline void Layer::setRenderUnifroms(LightSource& lightSource)
 	mainRenderShader.setUniform("difInt", material.difInt);
 }
 
-inline void Layer::setRenderUnifroms(LightSource & lightSource, sf::Texture & texture)
+void Layer::setRenderUnifroms(const LightSource& lightSource, const sf::Texture& texture)
 {
 	mainRenderShader.setUniform("normalMap", sf::Shader::CurrentTexture);
 	mainRenderShader.setUniform("layerTex", texture);
@@ -99,7 +92,7 @@ inline void Layer::setRenderUnifroms(LightSource & lightSource, sf::Texture & te
 	mainRenderShader.setUniform("difInt", material.difInt);
 }
 
-inline void Layer::clearLayer() 
+void Layer::clearLayer() 
 {
 	sf::Image image;
 	image.create(width, height, sf::Color(255, 255, 255, 0));
@@ -107,10 +100,10 @@ inline void Layer::clearLayer()
 	sprite.setTexture(tex);
 }
 
-inline void Layer::blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush) 
+void Layer::blendlayers(const Layer& drawingLayer, std::vector<BrushPntr>::iterator& brush) 
 {
 	switch (DRAWING_STATE) {
-	case(ALPHA): {
+	case(DrawingState::ALPHA): {
 		alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
 		alphaBlendingShader.setUniform("texture2", drawingLayer.tex);
 		alphaBlendingShader.setUniform("alpha", (**brush).opacity / 255.0f);
@@ -118,7 +111,7 @@ inline void Layer::blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iter
 		rTex.draw(sprite, alphaBlendingRState);
 		break;
 	}
-	case(NORMAL): {
+	case(DrawingState::NORMAL): {
 		normalBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
 		normalBlendingShader.setUniform("texture2", drawingLayer.tex);
 		normalBlendingShader.setUniform("alpha", (**brush).opacity / 255.0f);
@@ -135,22 +128,22 @@ inline void Layer::blendlayers(Layer& drawingLayer, std::vector<BrushPntr>::iter
 }
 
 
-inline void Layer::drawLayerinWindow() 
+void Layer::drawLayerinWindow() 
 {
 	mainWindow.draw(sprite);
 }
 
-inline void Layer::lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>::iterator iter)
+void Layer::lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, std::vector<sf::Vector2i>::iterator iter)
 {
 	sf::RenderTexture renderTex;
 	renderTex.create(width, height);
 
 	switch (DRAWING_STATE)
 	{
-	case ALPHA:
+	case DrawingState::ALPHA:
 		renderTex.clear(sf::Color((**brush).currentColor.r, (**brush).currentColor.g, (**brush).currentColor.b, 0));
 		break;
-	case NORMAL:
+	case DrawingState::NORMAL:
 		renderTex.clear(sf::Color((**brush).currentNormal.r, (**brush).currentNormal.g, (**brush).currentNormal.b, 0));
 		break;
 	default:
@@ -197,11 +190,8 @@ inline void Layer::lerpDrawingOnLayer(std::vector<BrushPntr>::iterator& brush, s
 	(**brush).resetSpriteColor();
 }
 
-Layer::~Layer()
+float Layer::distance(const sf::Vector2i & vec1, const sf::Vector2i & vec2)
 {
-}
-
-inline float Layer::distance(const sf::Vector2i & vec1, const sf::Vector2i & vec2) {
 	return sqrtf(powf((vec1.x - vec2.x), 2.0f) + powf(vec1.y - vec2.y, 2.0f));
 }
 
@@ -216,7 +206,7 @@ sf::RenderStates Layer::getRenderState(std::vector<BrushPntr>::iterator & brush)
 	return state;
 }
 
-inline float Layer::getSScatter(std::vector<BrushPntr>::iterator & brush)
+float Layer::getSScatter(std::vector<BrushPntr>::iterator & brush)
 {
 	float minScale = (**brush).getMinSizeScale();
 	float maxScale = (**brush).getMaxSizeScale();

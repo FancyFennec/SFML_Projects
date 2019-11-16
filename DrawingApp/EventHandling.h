@@ -37,13 +37,13 @@ void mainWindowEventHandling(Scene& scene)
 		if (event.mouseButton.button == sf::Mouse::Left) {
 			if (isMouseHeld()) {
 				switch (DRAWING_STATE) {
-				case(ALPHA): {
+				case(DrawingState::ALPHA): {
 					sf::Texture oldTexture = scene.currentLayer->tex;
 					scene.currentLayer->blendlayers(scene.drawingLayer, scene.currentBrush);
 					CommandManager::updateLayer(oldTexture);
 					break;
 				}
-				case(NORMAL): {
+				case(DrawingState::NORMAL): {
 					sf::Texture oldTexture = scene.layers.begin()->tex;
 					scene.normalLayer.blendlayers(scene.drawingLayer, scene.currentBrush);
 					CommandManager::updateLayer(oldTexture);
@@ -135,11 +135,11 @@ void lmbPressed(Scene& scene)
 		if (isAltHeld()) {
 			switch (DRAWING_STATE)
 			{
-			case ALPHA:
+			case DrawingState::ALPHA:
 				(*scene.currentBrush)->currentColor = getAltSampledColor(scene);
 				(*scene.currentBrush)->synchronizeGuiBrushColor();
 				break;
-			case NORMAL:
+			case DrawingState::NORMAL:
 				(*scene.currentBrush)->currentNormal = getAltSampledNormal(scene);
 				break;
 			default:

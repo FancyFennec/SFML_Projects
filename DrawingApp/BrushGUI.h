@@ -114,7 +114,7 @@ void BrushNamePopup(Scene & scene)
 void ColorPickers(Scene & scene)
 {
 	switch (DRAWING_STATE) {
-	case(ALPHA): {
+	case(DrawingState::ALPHA): {
 		if (ImGui::CollapsingHeader("Colour Picker")) {
 			ImGui::PushItemWidth(235);
 			if (ImGui::ColorPicker3("##ColorPicker", (*scene.currentBrush)->guiBrushColor, colorEditFlags)) {
@@ -126,7 +126,7 @@ void ColorPickers(Scene & scene)
 		}
 		break;
 	}
-	case(NORMAL): {
+	case(DrawingState::NORMAL): {
 		if (ImGui::CollapsingHeader("Normal Picker")) {
 			if (ImGui::ImageButton(normalTex, sf::Vector2f(210, 210), 1, sf::Color::Black, sf::Color::White)) {
 				pickNormalValue = true;

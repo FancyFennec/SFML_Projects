@@ -52,27 +52,33 @@ public:
 		initialize();
 	}
 
-	float computeRelativeStepSize() {
+	float computeRelativeStepSize() const
+    {
 		return stepSize * (getMinSize() + getMaxSize());
 	}
 
-	float getMinSize() {
+	float getMinSize() const
+    {
 		return useSizePress ? minSize : 0.0f;
 	}
 
-	float getMaxSize() {
+	float getMaxSize() const
+    {
 		return useSizePress ? pressure * (maxSize - minSize) : maxSize;
 	}
 
-	float getMinSizeScale() {
+	float getMinSizeScale() const
+    {
 		return getMinSize() / maxSize;
 	}
 
-	float getMaxSizeScale() {
+	float getMaxSizeScale() const
+    {
 		return getMaxSize() / maxSize;
 	}
 
-	ImVec4 getCurrentImColorRGBA() {
+	ImVec4 getCurrentImColorRGBA() const
+    {
 		return ImVec4(
 			currentColor.r / 255.0f,
 			currentColor.g / 255.0f,
@@ -81,7 +87,8 @@ public:
 		);
 	}
 
-	ImVec4 getCurrentImColorRGB() {
+	ImVec4 getCurrentImColorRGB() const
+    {
 		return ImVec4(
 			currentColor.r / 255.0f,
 			currentColor.g / 255.0f,
@@ -90,7 +97,8 @@ public:
 		);
 	}
 
-	ImVec4 getPreviousImColorRGBA() {
+	ImVec4 getPreviousImColorRGBA() const
+    {
 		return ImVec4(
 			previousColor.r / 255.0f,
 			previousColor.g / 255.0f,
@@ -99,7 +107,8 @@ public:
 		);
 	}
 
-	ImVec4 getPreviousImColorRGB() {
+	ImVec4 getPreviousImColorRGB() const
+    {
 		return ImVec4(
 			previousColor.r / 255.0f,
 			previousColor.g / 255.0f,
@@ -108,7 +117,8 @@ public:
 		);
 	}
 
-	ImVec4 getCurrentImNormalRGB() {
+	ImVec4 getCurrentImNormalRGB() const
+    {
 		return ImVec4(
 			currentNormal.r / 255.0f,
 			currentNormal.g / 255.0f,
@@ -125,9 +135,9 @@ public:
 
 	//TODO: Not the nicest way we are doingt his now, maybe there is a better way of doing things
 	void synchronizeBrushColor() {
-		currentColor.r = (sf::Uint8)(guiBrushColor[0] * 255);
-		currentColor.g = (sf::Uint8)(guiBrushColor[1] * 255);
-		currentColor.b = (sf::Uint8)(guiBrushColor[2] * 255);
+		currentColor.r = sf::Uint8(guiBrushColor[0] * 255);
+		currentColor.g = sf::Uint8(guiBrushColor[1] * 255);
+		currentColor.b = sf::Uint8(guiBrushColor[2] * 255);
 	}
 
 	void setSpriteSize() {
@@ -138,14 +148,14 @@ public:
 	void setSpriteColor(){
 		switch (DRAWING_STATE)
 		{
-		case ALPHA:
+		case DrawingState::ALPHA:
 			sprite.setColor(sf::Color(
 				currentColor.r,
 				currentColor.g,
 				currentColor.b,
 				useFlowPress ? minFlow + pressure * (maxFlow - minFlow) : maxFlow));
 			break;
-		case NORMAL:
+		case DrawingState::NORMAL:
 			sprite.setColor(sf::Color(
 				currentNormal.r,
 				currentNormal.g,
@@ -160,8 +170,6 @@ public:
 	void resetSpriteColor() {
 		sprite.setColor(currentColor);
 	}
-
-	~Brush() {};
 
 private:
 	void initialize();

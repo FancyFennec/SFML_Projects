@@ -9,12 +9,11 @@
 #include "Brush.h"
 #include "Layer.h"
 #include "json.hpp"
-using json = nlohmann::json;
+using nlohmann::json;
 
 namespace fs = std::experimental::filesystem;
 
-typedef std::unique_ptr<Layer> LayerPntr;
-typedef std::unique_ptr<Brush> BrushPntr;
+using BrushPntr = std::unique_ptr<Brush>;
 
 //TODO: move saving and loading to a seperate class
 class Scene
@@ -41,7 +40,8 @@ public:
 		width(width),
 		height(height),
 		normalLayer(Layer(width, height, sf::Color(127, 127, 255))),
-		drawingLayer(Layer(width, height)) {
+		drawingLayer(Layer(width, height)) 
+    {
 		initialize();
 	}
 
@@ -56,9 +56,9 @@ public:
 	void drawUpperLayers();
 	void resetScene(unsigned int newWidth, unsigned  int newHeight);
 	void reloadLayerSprites();
-	unsigned int getLayerDistance(std::vector<Layer>::iterator iter) { return (unsigned int)std::distance(layers.begin(), iter); }
-	unsigned int getLayerDistance() { return getLayerDistance(currentLayer); }
-	unsigned int getSize() { return getLayerDistance(lastActiveLayer); }
+	unsigned int getLayerDistance(std::vector<Layer>::const_iterator iter) const { return (unsigned int)std::distance(layers.begin(), iter); }
+	unsigned int getLayerDistance() const { return getLayerDistance(currentLayer); }
+	unsigned int getSize() const { return getLayerDistance(lastActiveLayer); }
 
 private:
 	const int BRUSH_WIDTH = 256; //Size of the brush image
@@ -68,8 +68,8 @@ private:
 
 	void initialize();
 	void loadBrushesFromJSON();
-	void clearBrushDirectory(); 
-	void saveBrushesToJSON();
+    void clearBrushDirectory() const;
+	void saveBrushesToJSON() const;
 };
 
 inline void Scene::initialize()
@@ -95,11 +95,11 @@ inline void Scene::initialize()
 inline void Scene::setGlobalNormalSprite()
 {
 	switch (DRAWING_STATE) {
-	case ALPHA: {
+	case DrawingState::ALPHA: {
 		mainNormalSprite.setTexture(normalLayer.tex);
 		break;
 	}
-	case NORMAL: {
+	case DrawingState::NORMAL: {
 		sf::RenderTexture rTex;
 		rTex.create(width, height);
 
@@ -139,7 +139,7 @@ inline void Scene::drawCurrentLayer() {
 	rTex.create(width, height);
 
 
-	if (DRAWING_STATE == ALPHA) { //In alpha drawing state we first alpha blend the drawing layer with the current layer
+	if (DRAWING_STATE == DrawingState::ALPHA) { //In alpha drawing state we first alpha blend the drawing layer with the current layer
 		alphaBlendingShader.setUniform("texture1", sf::Shader::CurrentTexture);
 		alphaBlendingShader.setUniform("texture2", drawingLayer.tex);
 		alphaBlendingShader.setUniform("alpha", (**currentBrush).opacity / 255.0f);
@@ -152,7 +152,7 @@ inline void Scene::drawCurrentLayer() {
 	sf::RenderStates renderState;
 	renderState.transform.translate(sf::Vector2f(currentLayer->offset));
 
-	currentLayer->setRenderUnifroms(lightSource, DRAWING_STATE == ALPHA ? newTex : currentLayer->tex);
+	currentLayer->setRenderUnifroms(lightSource, DRAWING_STATE == DrawingState::ALPHA ? newTex : currentLayer->tex);
 	mainRenderTex.draw(mainNormalSprite, mainRenderState);
 
 	mainRenderTex.display();
@@ -231,7 +231,7 @@ inline void Scene::loadBrushesFromJSON()
 	(*currentBrush)->setSpriteSize();
 }
 
-inline void Scene::clearBrushDirectory()
+inline void Scene::clearBrushDirectory() const
 {
 	for (auto p : fs::directory_iterator(BRUSH_DIRECTORY)) {
 		if (!fs::is_directory(p)) { // Only delete the pngs
@@ -245,7 +245,7 @@ inline void Scene::clearBrushDirectory()
 	}
 }
 
-inline void Scene::saveBrushesToJSON()
+inline void Scene::saveBrushesToJSON() const
 {
 	json brushesJson;
 	brushesJson["Brushes"] = {};

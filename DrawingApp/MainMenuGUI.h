@@ -12,31 +12,31 @@
 void mainMenuGUI(Scene& scene);
 void DrawEditMenu();
 void OpenFilePopup(Scene & scene);
-void SaveFilePopup(Scene & scene);
+void SaveFilePopup(const Scene& scene);
 void DrawFileMenu();
-void loadLayerFromFile(std::string &folderPath, std::string &fileName, Scene & scene);
-void loadScene(std::string &fileName, Scene & scene);
-sf::Texture extractTextureFromBuffer(int width, int height, std::vector<char> &buffer, int layerCount);
-void loadDataIntoScene(int layerCount, sf::Texture &tex, Scene & scene, std::vector<std::string> &layerNames);
+void loadLayerFromFile(const std::string& folderPath, const std::string& fileName, Scene & scene);
+void loadScene(const std::string& fileName, Scene & scene);
+sf::Texture extractTextureFromBuffer(int width, int height, const std::vector<char>& buffer, int layerCount);
+void loadDataIntoScene(int layerCount, const sf::Texture &tex, Scene & scene, const std::vector<std::string> &layerNames);
 void extractMetaData(std::ifstream &newistrm, int &layerCount, int &width, int &height);
 std::vector<char> extractImageData(std::ifstream &newistrm);
 std::vector<std::string> extractLayerNames(int layerCount, std::ifstream &newistrm);
-void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath);
+void saveScene(const Scene& scene, const std::string& tmpPath, const std::string& folderPath);
 void saveTemporaryTextureDataToFile(std::ifstream &istrm, std::ofstream &ostrm);
-void saveLayerNames(Scene & scene, std::ofstream &ostrm);
-void saveMetaData(Scene & scene, std::ofstream &ostrm);
-void saveTemporaryTextureData(Scene & scene, std::string & tmpPath);
-void saveCurrentLayerAsPNG(Scene & scene, std::string &folderPath);
-void saveCurrentLayerAsJPEG(Scene & scene, std::string &folderPath);
-void saveSceneAsPNG(Scene & scene, std::string &folderPath);
-void saveSceneAsJPEG(Scene & scene);
+void saveLayerNames(const Scene& scene, std::ofstream &ostrm);
+void saveMetaData(const Scene& scene, std::ofstream &ostrm);
+void saveTemporaryTextureData(const Scene& scene, const std::string& tmpPath);
+void saveCurrentLayerAsPNG(const Scene& scene, const std::string& folderPath);
+void saveCurrentLayerAsJPEG(const Scene& scene, const std::string& folderPath);
+void saveSceneAsPNG(const Scene& scene, const std::string& folderPath);
+void saveSceneAsJPEG(const Scene& scene);
 
 bool useAlphaDrawingState = true;
 bool saveFilePopupIsOpen = false;
 bool openFilePopupIsOpen = false;
 std::string input;
 
-enum FILE_TYPE {
+enum class FILE_TYPE {
 	PNG,
 	JPEG,
 	SINGLE_PNG,
@@ -65,7 +65,7 @@ void mainMenuGUI(Scene& scene)
 		if (ImGui::ArrowButton("##Back", ImGuiDir_Left)) CommandManager::moveBackward();
 		if (ImGui::ArrowButton("##Forward", ImGuiDir_Right)) CommandManager::moveForward();
 		if (ImGui::Checkbox("GUI##Checkbox", &SHOW_GUI));
-		if (ImGui::Checkbox("Alpha##Checkbox", &useAlphaDrawingState)) DRAWING_STATE = useAlphaDrawingState ? ALPHA : NORMAL;
+		if (ImGui::Checkbox("Alpha##Checkbox", &useAlphaDrawingState)) DRAWING_STATE = useAlphaDrawingState ? DrawingState::ALPHA : DrawingState::NORMAL;
 
 		ImGui::SameLine(WINDOW_WIDTH - 60);
 		if (ImGui::Button("Close")) mainWindow.close();
@@ -97,7 +97,7 @@ void OpenFilePopup(Scene & scene)
 			std::string fileName = p.path().string().substr(folderPath.size() + 1); //Remove folder name
 
 			switch (file_type) {
-			case(SCN): {
+            case(FILE_TYPE::SCN): {
 				if (!fs::is_directory(p) && fileName.substr(fileName.size() - 4) == ".scn") {
 					if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
 						std::string path = folderPath;
@@ -108,7 +108,7 @@ void OpenFilePopup(Scene & scene)
 				}
 				break;
 			}
-			case(PNG): {
+            case(FILE_TYPE::PNG): {
 				if (!fs::is_directory(p) && fileName.substr(fileName.size() - 4) != ".scn") {
 					if (ImGui::Button(fileName.data(), ImVec2(200, 20))) {
 						loadLayerFromFile(folderPath, fileName, scene);
@@ -127,7 +127,7 @@ void OpenFilePopup(Scene & scene)
 	}
 }
 
-void SaveFilePopup(Scene & scene)
+void SaveFilePopup(const Scene& scene)
 {
 	ImGui::SetNextWindowSize(ImVec2(600, 500));
 	ImGui::OpenPopup("Save File");
@@ -152,38 +152,38 @@ void SaveFilePopup(Scene & scene)
 		if (ImGui::InputText("Press Enter", inputChar, 30, ImGuiInputTextFlags_EnterReturnsTrue)) {
 			folderPath.append("/").append(inputChar);
 			switch (file_type) {
-			case(JPEG):
-			case(SINGLE_JPEG):
+            case(FILE_TYPE::JPEG):
+			case(FILE_TYPE::SINGLE_JPEG):
 				folderPath.append(".jpg");
 				break;
-			case(PNG):
-			case(SINGLE_PNG):
+			case(FILE_TYPE::PNG):
+			case(FILE_TYPE::SINGLE_PNG):
 				folderPath.append(".png");
 				break;
-			case(SCN):
+			case(FILE_TYPE::SCN):
 				tmpPath.append("/").append("tmp").append(".png");
 				folderPath.append(".scn");
 				break;
 			}
 
 			switch (file_type) {
-			case(JPEG): {
+			case(FILE_TYPE::JPEG): {
 				saveSceneAsJPEG(scene);
 				break;
 			}
-			case(PNG): {
+			case(FILE_TYPE::PNG): {
 				saveSceneAsPNG(scene, folderPath);
 				break;
 			}
-			case(SINGLE_JPEG): {
+			case(FILE_TYPE::SINGLE_JPEG): {
 				saveCurrentLayerAsJPEG(scene, folderPath);
 				break;
 			}
-			case(SINGLE_PNG): {
+			case(FILE_TYPE::SINGLE_PNG): {
 				saveCurrentLayerAsPNG(scene, folderPath);
 				break;
 			}
-			case(SCN): {
+			case(FILE_TYPE::SCN): {
 				saveScene(scene, tmpPath, folderPath);
 			}
 			}
@@ -201,47 +201,47 @@ void DrawFileMenu()
 {
 	if (ImGui::MenuItem("Saving Scene"))
 	{
-		file_type = SCN;
+		file_type = FILE_TYPE::SCN;
 		saveFilePopupIsOpen = true;
 		input = "Input FileName and";
 	}
 	if (ImGui::MenuItem("Open Scene"))
 	{
-		file_type = SCN;
+		file_type = FILE_TYPE::SCN;
 		openFilePopupIsOpen = true;
 	}
 	if (ImGui::MenuItem("Open Layer from File"))
 	{
-		file_type = PNG;
+		file_type = FILE_TYPE::PNG;
 		openFilePopupIsOpen = true;
 	}
 	if (ImGui::MenuItem("Save Scene as JPEG"))
 	{
-		file_type = JPEG;
+		file_type = FILE_TYPE::JPEG;
 		saveFilePopupIsOpen = true;
 		input = "Input FileName and";
 	}
 	if (ImGui::MenuItem("Save Scene as PNG"))
 	{
-		file_type = PNG;
+		file_type = FILE_TYPE::PNG;
 		saveFilePopupIsOpen = true;
 		input = "Input FileName and";
 	}
 	if (ImGui::MenuItem("Save Layer as JPEG"))
 	{
-		file_type = SINGLE_JPEG;
+		file_type = FILE_TYPE::SINGLE_JPEG;
 		saveFilePopupIsOpen = true;
 		input = "Input FileName and";
 	}
 	if (ImGui::MenuItem("Save Layer as PNG"))
 	{
-		file_type = SINGLE_PNG;
+		file_type = FILE_TYPE::SINGLE_PNG;
 		saveFilePopupIsOpen = true;
 		input = "Input FileName and";
 	}
 }
 
-void loadLayerFromFile(std::string &folderPath, std::string &fileName, Scene & scene)
+void loadLayerFromFile(const std::string& folderPath, const std::string &fileName, Scene& scene)
 {
 	std::string path = folderPath;
 	path.append("/").append(fileName);
@@ -262,7 +262,7 @@ void loadLayerFromFile(std::string &folderPath, std::string &fileName, Scene & s
 	scene.lastActiveLayer->sprite.setTexture(scene.lastActiveLayer->tex);
 }
 
-void loadScene(std::string &fileName, Scene & scene)
+void loadScene(const std::string& fileName, Scene & scene)
 {
 	std::ifstream newistrm(fileName, std::ios::out | std::ios::binary);
 
@@ -280,7 +280,7 @@ void loadScene(std::string &fileName, Scene & scene)
 	loadDataIntoScene(layerCount, tex, scene, layerNames);
 }
 
-sf::Texture extractTextureFromBuffer(int width, int height, std::vector<char> &buffer, int layerCount)
+sf::Texture extractTextureFromBuffer(int width, int height, const std::vector<char>& buffer, int layerCount)
 {
 	sf::Texture tex;
 	tex.create(width, height);
@@ -288,7 +288,7 @@ sf::Texture extractTextureFromBuffer(int width, int height, std::vector<char> &b
 	return tex;
 }
 
-void loadDataIntoScene(int layerCount, sf::Texture &tex, Scene & scene, std::vector<std::string> &layerNames)
+void loadDataIntoScene(int layerCount, const sf::Texture& tex, Scene & scene, const std::vector<std::string>& layerNames)
 {
 	sf::RenderTexture rtex;
 	sf::RenderStates rState;
@@ -356,12 +356,12 @@ std::vector<std::string> extractLayerNames(int layerCount, std::ifstream &newist
 	return layerNames;
 }
 
-void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath)
+void saveScene(const Scene& scene, const std::string& tmpPath, const std::string& folderPath)
 {
 	saveTemporaryTextureData(scene, tmpPath);
 
-	std::ifstream istrm(tmpPath.data(), std::ios::in | std::ios::binary);
-	std::ofstream ostrm(folderPath.data(), std::ios::out | std::ios::binary);
+	std::ifstream istrm(tmpPath, std::ios::in | std::ios::binary);
+	std::ofstream ostrm(folderPath, std::ios::out | std::ios::binary);
 
 	saveMetaData(scene, ostrm);
 	saveLayerNames(scene, ostrm);
@@ -373,35 +373,32 @@ void saveScene(Scene & scene, std::string &tmpPath, std::string &folderPath)
 
 void saveTemporaryTextureDataToFile(std::ifstream &istrm, std::ofstream &ostrm)
 {
-	std::vector<char> buffer;
-
 	istrm.seekg(0, std::ios::end);
 	std::streampos end = istrm.tellg();
 	istrm.seekg(0, std::ios::beg);
 
-	buffer.resize(end / sizeof(char));
-
-	istrm.read((char*)buffer.data(), end / sizeof(char));
-	ostrm.write((char*)buffer.data(), end / sizeof(char));
+    std::vector<char> buffer(end);
+	istrm.read(buffer.data(), end);
+	ostrm.write(buffer.data(), end);
 }
 
-void saveLayerNames(Scene & scene, std::ofstream &ostrm)
+void saveLayerNames(const Scene& scene, std::ofstream &ostrm)
 {
 	for (int i = 0; i < scene.getSize() + 1; i++) {
-		ostrm.write((char*)scene.layers[i + 1].name.data(), sizeof(char) * scene.layers[i + 1].name.size());
-		ostrm.write((char*)"#", sizeof(char));
+		ostrm.write(scene.layers[i + 1].name.data(), scene.layers[i + 1].name.size());
+		ostrm.put('#');
 	}
 }
 
-void saveMetaData(Scene & scene, std::ofstream &ostrm)
+void saveMetaData(const Scene& scene, std::ofstream &ostrm)
 {
 	unsigned int layerCount = scene.getSize() + 1;
-	ostrm.write((char*)&layerCount, sizeof(int));
-	ostrm.write((char*)&scene.width, sizeof(int));
-	ostrm.write((char*)&scene.height, sizeof(int));
+	ostrm.write(reinterpret_cast<const char*>(&layerCount), sizeof(int));
+	ostrm.write(reinterpret_cast<const char*>(&scene.width), sizeof(int));
+	ostrm.write(reinterpret_cast<const char*>(&scene.height), sizeof(int));
 }
 
-void saveTemporaryTextureData(Scene & scene, std::string & tmpPath)
+void saveTemporaryTextureData(const Scene& scene, const std::string& tmpPath)
 {
 	size_t layerCount = scene.getSize() + 1;
 
@@ -425,12 +422,12 @@ void saveTemporaryTextureData(Scene & scene, std::string & tmpPath)
 	rTex.getTexture().copyToImage().saveToFile(tmpPath);
 }
 
-void saveCurrentLayerAsPNG(Scene & scene, std::string &folderPath)
+void saveCurrentLayerAsPNG(const Scene& scene, const std::string& folderPath)
 {
-	scene.currentLayer->tex.copyToImage().saveToFile(folderPath.data());
+	scene.currentLayer->tex.copyToImage().saveToFile(folderPath);
 }
 
-void saveCurrentLayerAsJPEG(Scene & scene, std::string &folderPath)
+void saveCurrentLayerAsJPEG(const Scene& scene, const std::string& folderPath)
 {
 	sf::RenderTexture rTex;
 	rTex.create(scene.width, scene.height);
@@ -438,10 +435,10 @@ void saveCurrentLayerAsJPEG(Scene & scene, std::string &folderPath)
 	rTex.draw(scene.layers.begin()->sprite);
 	rTex.draw(scene.currentLayer->sprite);
 	rTex.display();
-	rTex.getTexture().copyToImage().saveToFile(folderPath.data());
+	rTex.getTexture().copyToImage().saveToFile(folderPath);
 }
 
-void saveSceneAsPNG(Scene & scene, std::string &folderPath)
+void saveSceneAsPNG(const Scene& scene, const std::string& folderPath)
 {
 	sf::RenderTexture rTex;
 	rTex.create(scene.width, scene.height);
@@ -450,10 +447,10 @@ void saveSceneAsPNG(Scene & scene, std::string &folderPath)
 		rTex.draw(layer->sprite);
 	}
 	rTex.display();
-	rTex.getTexture().copyToImage().saveToFile(folderPath.data());
+	rTex.getTexture().copyToImage().saveToFile(folderPath);
 }
 
-void saveSceneAsJPEG(Scene & scene)
+void saveSceneAsJPEG(const Scene& scene)
 {
 	sf::RenderTexture rTex;
 	rTex.create(scene.width, scene.height);

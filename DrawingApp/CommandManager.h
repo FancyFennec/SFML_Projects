@@ -21,24 +21,22 @@ struct command {
 
 struct create_command : command{
 	create_command() :
-		command(CREATE_LAYER, 0, sf::Texture(), sf::Texture()) {}
+		command(COMMAND_TYPE::CREATE_LAYER, 0, sf::Texture(), sf::Texture()) {}
 };
 
 struct update_command : command {
 	update_command(int layerPos, sf::Texture newTexure, sf::Texture oldTexure) :
-		command(UPDATE_LAYER, layerPos, newTexure, oldTexure) {}
+		command(COMMAND_TYPE::UPDATE_LAYER, layerPos, newTexure, oldTexure) {}
 };
 
 struct delete_command : command {
 	delete_command(int layerPos, sf::Texture texture) :
-		command(DELETE_LAYER, layerPos, sf::Texture(), texture) {}
+		command(COMMAND_TYPE::DELETE_LAYER, layerPos, sf::Texture(), texture) {}
 };
 
 class CommandManager
 {
 public:
-	CommandManager() {
-	};
 
 	static void createLayer();
 	static void deleteLayer(std::vector<Layer>::iterator iter);
@@ -58,8 +56,6 @@ public:
 		actionIter = actions.begin();
 		clearActions();
 	}
-
-	~CommandManager();
 
 private:
 	static Scene* scene;
@@ -126,11 +122,11 @@ inline void CommandManager::updateLayer(sf::Texture& oldTexture) {
 		actions.erase(actions.begin());
 	}
 	switch (DRAWING_STATE) {
-	case(ALPHA): {
+	case(DrawingState::ALPHA): {
 		actions.push_back(update_command(scene->getLayerDistance(), scene->currentLayer->tex, oldTexture));
 		break;
 	}
-	case(NORMAL): {
+	case(DrawingState::NORMAL): {
 		actions.push_back(update_command(0, scene->layers.begin()->tex, oldTexture));
 		break;
 	}
@@ -143,12 +139,12 @@ inline void CommandManager::moveForward()
 	if (std::next(actionIter) != actions.end()) {
 		std::advance(actionIter, 1);
 		switch (actionIter->type) {
-		case(CREATE_LAYER): { //Increment the lastActiveLayer iterator
+		case(COMMAND_TYPE::CREATE_LAYER): { //Increment the lastActiveLayer iterator
 			std::advance(scene->lastActiveLayer, 1);
 			scene->lastActiveLayer->clearLayer();
 			break;
 		}
-		case(DELETE_LAYER): { // Delete the layer at the position of the iterator
+		case(COMMAND_TYPE::DELETE_LAYER): { // Delete the layer at the position of the iterator
 			if (std::prev(scene->lastActiveLayer) == scene->layers.begin()) { // Create a new Layer if There are none left
 				scene->lastActiveLayer->clearLayer();
 			}
@@ -174,7 +170,7 @@ inline void CommandManager::moveForward()
 			scene->reloadLayerSprites();
 			break;
 		}
-		case(UPDATE_LAYER): { //Set the layer texture to the new texture
+		case(COMMAND_TYPE::UPDATE_LAYER): { //Set the layer texture to the new texture
 			auto iter = (scene->layers.begin() + actionIter->layerPos);
 			iter->tex.update(actionIter->newTexure);
 			iter->sprite.setTexture(iter->tex);
@@ -188,11 +184,11 @@ inline void CommandManager::moveBackward()
 {
 	if (actionIter != actions.begin()) {
 		switch (actionIter->type) {
-		case(CREATE_LAYER): { //Decrement the lastActiveLayer iterator
+		case(COMMAND_TYPE::CREATE_LAYER): { //Decrement the lastActiveLayer iterator
 			std::advance(scene->lastActiveLayer, -1);
 			break;
 		}
-		case(DELETE_LAYER): { // Create a new layer at the position of the iterator
+		case(COMMAND_TYPE::DELETE_LAYER): { // Create a new layer at the position of the iterator
 			auto iter = scene->layers.begin() + actionIter->layerPos;
 			auto currentLayerOffset = std::distance(scene->layers.begin(), scene->currentLayer);
 			scene->currentLayer = scene->layers.begin();
@@ -220,7 +216,7 @@ inline void CommandManager::moveBackward()
 			scene->reloadLayerSprites();
 			break;
 		}
-		case(UPDATE_LAYER): { //Set the layer texture to the old texture
+		case(COMMAND_TYPE::UPDATE_LAYER): { //Set the layer texture to the old texture
 			auto iter = (scene->layers.begin() + actionIter->layerPos);
 			iter->tex.update(actionIter->oldTexure);
 			iter->sprite.setTexture(iter->tex);
@@ -242,8 +238,4 @@ inline void CommandManager::clearActions()
 	}
 	
 	actionIter = std::prev(actions.end());
-}
-
-CommandManager::~CommandManager()
-{
 }

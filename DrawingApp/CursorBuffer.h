@@ -48,9 +48,6 @@ public:
 		}
 		isBufferBeingReset = false;
 	}
-	
-	CursorBuffer();
-	~CursorBuffer();
 
 private:
 	static float currentCursorDistance() {
@@ -64,12 +61,3 @@ bool CursorBuffer::isFirstStamp = true;
 bool CursorBuffer::isBufferBeingCleared = true;
 bool CursorBuffer::isBufferBeingReset = false;
 std::vector<sf::Vector2i> CursorBuffer::positions = {};
-
-CursorBuffer::CursorBuffer()
-{
-}
-
-
-CursorBuffer::~CursorBuffer()
-{
-}

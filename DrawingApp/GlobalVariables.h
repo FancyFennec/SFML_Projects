@@ -5,7 +5,7 @@
 #include <Windows.h>
 #include "Structs.h"
 
-static DrawingState DRAWING_STATE = ALPHA;
+static DrawingState DRAWING_STATE = DrawingState::ALPHA;
 sf::Shader alphaBlendingShader;
 sf::Shader normalBlendingShader;
 sf::Shader mainRenderShader;
