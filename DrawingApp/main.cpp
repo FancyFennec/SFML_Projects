@@ -79,7 +79,7 @@ void sampleMousePositions()
 	while (mainWindow.isOpen())
 	{
 		if (isMouseHeld()) CursorBuffer::update(scene.currentBrush);
-		sf::sleep(sf::milliseconds(3));
+		sf::sleep(sf::milliseconds(3)); // TODO: Maybe comment this and use as global constant
 	}
 }
 

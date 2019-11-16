@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include "Scene.h"
 #include "GlobalVariables.h"
 
@@ -9,7 +10,7 @@ class CursorBuffer
 {
 public:
 	static bool isFirstStamp;
-	static bool isBufferBeingCleared;
+	static std::atomic<bool> isBufferBeingCleared;
 	static bool isBufferBeingReset;
 
 	static std::vector<sf::Vector2i> positions;
@@ -58,6 +59,6 @@ private:
 
 int CursorBuffer::MAX_POSITIONS = 50;
 bool CursorBuffer::isFirstStamp = true;
-bool CursorBuffer::isBufferBeingCleared = true;
 bool CursorBuffer::isBufferBeingReset = false;
+std::atomic<bool> CursorBuffer::isBufferBeingCleared = true;
 std::vector<sf::Vector2i> CursorBuffer::positions = {};
